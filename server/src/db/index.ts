@@ -3,7 +3,7 @@ import path from 'path';
 
 // Создаем подключение к БД
 const db = new Database(path.join(__dirname, '../../data/suggestions.db'), {
-  verbose: console.log // добавим логирование для отладки
+  verbose: console.log
 });
 
 // Создаем таблицу, если её нет
@@ -37,6 +37,16 @@ export const queries = {
     )
   `),
 
+  getAll: db.prepare(`
+    SELECT * FROM suggestions 
+    ORDER BY created_at DESC
+  `),
+
+  getById: db.prepare(`
+    SELECT * FROM suggestions 
+    WHERE id = @id
+  `),
+
   getApproved: db.prepare(`
     SELECT * FROM suggestions 
     WHERE status = 'approved' 
@@ -53,12 +63,6 @@ export const queries = {
     UPDATE suggestions 
     SET status = @status 
     WHERE id = @id
-  `),
-
-  // Добавляем новый запрос для получения всех записей
-  getAll: db.prepare(`
-    SELECT * FROM suggestions 
-    ORDER BY created_at DESC
   `)
 };
 

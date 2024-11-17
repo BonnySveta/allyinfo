@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { LinkPreview } from '../LinkPreview/LinkPreview';
+import { Toast } from '../Toast/Toast';
 
 interface Suggestion {
   id: number;
@@ -107,6 +108,11 @@ export function SuggestionsList() {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [toast, setToast] = useState<{
+    show: boolean;
+    message: string;
+    type: 'success' | 'error';
+  }>({ show: false, message: '', type: 'success' });
 
   useEffect(() => {
     fetchSuggestions();
@@ -142,15 +148,29 @@ export function SuggestionsList() {
         throw new Error('Failed to update status');
       }
 
-      // Обновляем список локально
+      const updatedSuggestion = await response.json();
+
       setSuggestions(prev =>
         prev.map(suggestion =>
           suggestion.id === id ? { ...suggestion, status } : suggestion
         )
       );
+
+      setToast({
+        show: true,
+        message: status === 'approved' 
+          ? 'Материал успешно одобрен!' 
+          : 'Материал отклонен',
+        type: 'success'
+      });
+
     } catch (err) {
       console.error('Error updating status:', err);
-      // Можно добавить toast уведомление об ошибке
+      setToast({
+        show: true,
+        message: 'Не удалось обновить статус материала',
+        type: 'error'
+      });
     }
   };
 
@@ -210,6 +230,14 @@ export function SuggestionsList() {
           </DateText>
         </SuggestionCard>
       ))}
+
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(prev => ({ ...prev, show: false }))}
+        />
+      )}
     </Container>
   );
 } 

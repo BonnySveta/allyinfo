@@ -25,7 +25,7 @@ const port = 3001;
 
 app.use(cors({
   origin: 'http://localhost:3000',
-  methods: ['POST', 'GET', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'OPTIONS'],
   credentials: true
 }));
 
@@ -222,6 +222,55 @@ app.get('/api/suggestions/all', (_req, res) => {
     console.error('Error fetching suggestions:', error);
     res.status(500).json({ 
       error: 'Failed to fetch suggestions',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Эндпоинт для обновления статуса предложения
+app.put('/api/suggestions/:id/status', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Проверяем валидность статуса
+    if (!['approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ 
+        error: 'Invalid status. Must be either "approved" or "rejected"' 
+      });
+    }
+
+    // Обновляем статус
+    const result = queries.updateStatus.run({
+      id: Number(id),
+      status
+    });
+
+    // Проверяем, была ли обновлена запись
+    if (result.changes === 0) {
+      return res.status(404).json({ 
+        error: 'Suggestion not found' 
+      });
+    }
+
+    // Получаем все записи и находим обновленную
+    const suggestions = queries.getAll.all();
+    const updatedSuggestion = suggestions.find(
+      (s: any) => s.id === Number(id)
+    );
+
+    if (!updatedSuggestion) {
+      return res.status(404).json({ 
+        error: 'Updated suggestion not found' 
+      });
+    }
+
+    res.json(updatedSuggestion);
+
+  } catch (error) {
+    console.error('Error updating suggestion status:', error);
+    res.status(500).json({ 
+      error: 'Failed to update suggestion status',
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
