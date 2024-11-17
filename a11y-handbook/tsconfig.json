@@ -22,5 +22,5 @@
   },
   "include": [
     "src"
-, "src/context"  ]
+, "src/context", "../server/src/index.ts"  ]
 }

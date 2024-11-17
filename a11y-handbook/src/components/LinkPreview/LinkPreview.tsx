@@ -1,148 +1,22 @@
 import { useState, useEffect } from 'react';
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
 import { fetchPreview } from '../../api/preview';
-import { FaExclamationTriangle } from 'react-icons/fa';
+import { PreviewData } from '../../types/preview';
+import { usePreviewCache } from '../../hooks/usePreviewCache';
 
-const fadeIn = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
-
-const PreviewContainer = styled.div`
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 1rem;
-  margin-top: 0.5rem;
-  background: var(--card-background);
-  display: flex;
-  gap: 1rem;
-  align-items: start;
-  transition: all 0.3s ease;
-  animation: ${fadeIn} 0.3s ease;
-
-  &:hover {
-    border-color: var(--accent-color);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-`;
-
-const PreviewImage = styled.img`
-  width: 48px;
-  height: 48px;
-  border-radius: 4px;
-  object-fit: cover;
-  background-color: var(--nav-background);
-`;
-
-const PreviewContent = styled.div`
-  flex: 1;
-`;
-
-const PreviewTitle = styled.h3`
-  margin: 0 0 0.5rem 0;
-  font-size: 1rem;
-  color: var(--text-color);
-  font-weight: 500;
-`;
-
-const PreviewDescription = styled.p`
-  margin: 0;
-  font-size: 0.875rem;
-  color: var(--text-secondary-color);
-  line-height: 1.4;
-`;
-
-const LoadingPreview = styled.div`
-  padding: 1rem;
-  text-align: center;
-  color: var(--text-secondary-color);
-`;
-
-const LoadingContainer = styled.div`
-  padding: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  color: var(--text-secondary-color);
-  animation: ${fadeIn} 0.3s ease;
-`;
-
-const LoadingDot = styled.span`
-  width: 8px;
-  height: 8px;
-  background-color: var(--accent-color);
-  border-radius: 50%;
-  animation: pulse 1s infinite;
-  opacity: 0.6;
-
-  &:nth-child(2) {
-    animation-delay: 0.2s;
-  }
-
-  &:nth-child(3) {
-    animation-delay: 0.4s;
-  }
-
-  @keyframes pulse {
-    0%, 100% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.2);
-    }
-  }
-`;
-
-const ErrorContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--error-color);
-  padding: 0.5rem;
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-`;
-
-const ErrorIcon = styled(FaExclamationTriangle)`
-  font-size: 1rem;
-`;
-
-const PreviewUrl = styled.a`
-  display: block;
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--text-secondary-color);
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
-interface PreviewData {
-  title: string;
-  description: string;
-  image: string;
-  favicon?: string;
+interface LinkPreviewProps {
+  url: string;
 }
 
-export function LinkPreview({ url }: { url: string }) {
+export function LinkPreview({ url }: LinkPreviewProps) {
   const [loading, setLoading] = useState(false);
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [error, setError] = useState('');
+  const previewCache = usePreviewCache();
 
   useEffect(() => {
     if (!url) return;
 
-    console.log('LinkPreview: Starting preview fetch for URL:', url);
-    
     let timeoutId: NodeJS.Timeout;
     let isMounted = true;
 
@@ -151,14 +25,25 @@ export function LinkPreview({ url }: { url: string }) {
       setError('');
       
       try {
-        console.log('LinkPreview: Calling fetchPreview...');
+        // Сначала проверяем кэш
+        const cachedData = previewCache.get(url);
+        if (cachedData) {
+          console.log('Using cached preview data for:', url);
+          setPreviewData(cachedData);
+          setLoading(false);
+          return;
+        }
+
+        console.log('Fetching fresh preview data for:', url);
         const data = await fetchPreview(url);
-        console.log('LinkPreview: Preview data received:', data);
+        
         if (isMounted) {
           setPreviewData(data);
+          // Сохраняем в кэш
+          previewCache.set(url, data);
         }
       } catch (err) {
-        console.error('LinkPreview: Error fetching preview:', err);
+        console.error('Preview error:', err);
         if (isMounted) {
           setError('Не удалось загрузить предпросмотр');
         }
@@ -169,34 +54,28 @@ export function LinkPreview({ url }: { url: string }) {
       }
     };
 
-    console.log('LinkPreview: Setting up timeout...');
+    // Добавляем небольшую задержку перед запросом
     timeoutId = setTimeout(getPreview, 500);
 
     return () => {
-      console.log('LinkPreview: Cleanup effect...');
       isMounted = false;
       clearTimeout(timeoutId);
     };
   }, [url]);
 
-  if (!url) return null;
-  
   if (loading) {
     return (
-      <LoadingContainer>
-        <LoadingDot />
-        <LoadingDot />
-        <LoadingDot />
-      </LoadingContainer>
+      <PreviewContainer>
+        <LoadingSpinner>Загрузка...</LoadingSpinner>
+      </PreviewContainer>
     );
   }
 
   if (error) {
     return (
-      <ErrorContainer>
-        <ErrorIcon />
-        {error}
-      </ErrorContainer>
+      <PreviewContainer>
+        <ErrorMessage>{error}</ErrorMessage>
+      </PreviewContainer>
     );
   }
 
@@ -207,18 +86,98 @@ export function LinkPreview({ url }: { url: string }) {
       {previewData.image && (
         <PreviewImage 
           src={previewData.image} 
-          alt="" 
+          alt=""
           onError={(e) => {
-            // Если изображение не загрузилось, скрываем его
-            (e.target as HTMLImageElement).style.display = 'none';
+            e.currentTarget.style.display = 'none';
           }}
         />
       )}
       <PreviewContent>
         <PreviewTitle>{previewData.title}</PreviewTitle>
-        <PreviewDescription>{previewData.description}</PreviewDescription>
-        <PreviewUrl>{new URL(url).hostname}</PreviewUrl>
+        {previewData.description && (
+          <PreviewDescription>{previewData.description}</PreviewDescription>
+        )}
+        <PreviewMeta>
+          {previewData.favicon && (
+            <SiteFavicon 
+              src={previewData.favicon} 
+              alt=""
+              onError={(e) => e.currentTarget.style.display = 'none'}
+            />
+          )}
+          <SiteDomain>{previewData.domain}</SiteDomain>
+        </PreviewMeta>
       </PreviewContent>
     </PreviewContainer>
   );
-} 
+}
+
+// Стили
+const PreviewContainer = styled.div`
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 8px;
+  background: var(--background-color);
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+`;
+
+const PreviewImage = styled.img`
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-bottom: 1px solid var(--border-color);
+`;
+
+const PreviewContent = styled.div`
+  padding: 16px;
+`;
+
+const PreviewTitle = styled.h3`
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: var(--text-color);
+`;
+
+const PreviewDescription = styled.p`
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--text-secondary-color);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+`;
+
+const PreviewMeta = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const SiteFavicon = styled.img`
+  width: 16px;
+  height: 16px;
+`;
+
+const SiteDomain = styled.span`
+  font-size: 14px;
+  color: var(--text-secondary-color);
+`;
+
+const LoadingSpinner = styled.div`
+  padding: 16px;
+  text-align: center;
+  color: var(--text-secondary-color);
+`;
+
+const ErrorMessage = styled.div`
+  padding: 16px;
+  color: var(--error-color);
+  text-align: center;
+`;
