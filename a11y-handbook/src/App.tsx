@@ -22,6 +22,7 @@ import { GlobalStyle } from '../src/styles/GlobalStyle';
 import { Card } from './components/Card/Card';
 import { CardsGrid } from './components/CardsGrid/CardsGrid';
 import { LoadingSpinner } from './components/LoadingSpinner/LoadingSpinner';
+import { Suggestions } from './pages/Admin/Suggestions';
 
 const Container = styled.div`
   padding: 20px;
@@ -71,6 +72,7 @@ function App() {
                 <Route path="/books" element={<Books />} />
                 <Route path="/feedback" element={<Feedback />} />
                 <Route path="/suggest" element={<Suggest />} />
+                <Route path="/admin/suggestions" element={<Suggestions />} />
               </Routes>
             </main>
           </Container>
