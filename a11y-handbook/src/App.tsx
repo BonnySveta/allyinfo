@@ -13,7 +13,8 @@ import {
   Courses,
   YouTube,
   Books,
-  Feedback
+  Feedback,
+  Suggest
 } from './pages/pages';
 import { Header } from './components/Header/Header';
 import { ThemeProvider } from './context/ThemeContext';
@@ -41,23 +42,24 @@ function App() {
         <Suspense fallback={<LoadingSpinner />}>
           <Container>
             <Header />
-            <Title>Справочник по цифровой доступности</Title>
-            <CardsGrid>
-              {navigationConfig.map((item) => (
-                <Card
-                  key={item.path}
-                  title={item.title}
-                  path={item.path}
-                  children={item.children}
-                  tags={item.tags}
-                  isNew={item.isNew}
-                />
-              ))}
-            </CardsGrid>
             <main>
               <Routes>
-                <Route path="/" element={<Articles />} />
-                <Route path="/feedback" element={<Feedback />} />
+                <Route path="/" element={
+                  <>
+                    <Title>Справочник по цифровой доступности</Title>
+                    <CardsGrid>
+                      {navigationConfig.map((item) => (
+                        <Card
+                          key={item.path}
+                          title={item.title}
+                          path={item.path}
+                          children={item.children}
+                          isNew={item.isNew}
+                        />
+                      ))}
+                    </CardsGrid>
+                  </>
+                } />
                 <Route path="/articles/dev" element={<ArticlesDev />} />
                 <Route path="/articles/design" element={<ArticlesDesign />} />
                 <Route path="/articles/management" element={<ArticlesManagement />} />
@@ -67,6 +69,8 @@ function App() {
                 <Route path="/courses" element={<Courses />} />
                 <Route path="/youtube" element={<YouTube />} />
                 <Route path="/books" element={<Books />} />
+                <Route path="/feedback" element={<Feedback />} />
+                <Route path="/suggest" element={<Suggest />} />
               </Routes>
             </main>
           </Container>

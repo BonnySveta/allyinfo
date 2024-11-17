@@ -53,6 +53,7 @@ export function Header() {
       <Nav>
         <NavLink to="/" end>Главная</NavLink>
         <NavLink to="/feedback">Обратная связь</NavLink>
+        <NavLink to="/suggest">Предложить материал</NavLink>
       </Nav>
       <ThemeToggle />
     </HeaderContainer>

@@ -2,8 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { FaCode, FaPalette, FaUserTie, FaCheckSquare, FaTelegram, FaPodcast, FaGraduationCap, FaYoutube, FaBook, FaNewspaper, FaCalendarAlt } from 'react-icons/fa';
-import { Tag } from '../Tag/Tag';
-import { TagType, TAGS } from '../../types/tags';
+import { podcastsList } from '../../config/podcasts';
 
 const CardWrapper = styled.div`
   background: var(--card-background, var(--nav-background));
@@ -11,6 +10,9 @@ const CardWrapper = styled.div`
   padding: 1.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 
   &:hover {
     transform: translateY(-2px);
@@ -34,7 +36,7 @@ const CardListItem = styled.li`
   margin-bottom: 0.5rem;
 `;
 
-const CardLink = styled(Link)`
+const ExternalCardLink = styled.a`
   color: var(--text-color);
   text-decoration: none;
   padding: 0.5rem;
@@ -63,7 +65,8 @@ const CardMeta = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-top: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
   font-size: 0.875rem;
 `;
 
@@ -83,17 +86,14 @@ const NewBadge = styled.span`
   font-weight: 500;
 `;
 
-const TagsContainer = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-top: 0.5rem;
-`;
-
 const AnimatedCardWrapper = styled(CardWrapper)<{ $delay: number }>`
   animation: fadeInUp 0.5s ease forwards;
   animation-delay: ${({ $delay }) => $delay}ms;
   opacity: 0;
+`;
+
+const CardContent = styled.div`
+  flex: 1;
 `;
 
 interface CardProps {
@@ -102,7 +102,6 @@ interface CardProps {
   children?: { title: string; path: string; isNew?: boolean; }[];
   icon?: string;
   isNew?: boolean;
-  tags?: TagType[];
 }
 
 const getIcon = (path: string) => {
@@ -123,46 +122,64 @@ const getIcon = (path: string) => {
   }
 };
 
-export const Card: React.FC<CardProps> = ({ title, path, children, isNew, tags }) => {
+export const Card: React.FC<CardProps> = ({ title, path, children, isNew }) => {
   const icon = getIcon(path);
   const itemCount = children?.length || 0;
 
+  const renderContent = () => {
+    if (path === '/podcasts') {
+      const recentPodcasts = podcastsList.slice(0, 4);
+      return (
+        <CardList>
+          {recentPodcasts.map((podcast) => (
+            <CardListItem key={podcast.url}>
+              <ExternalCardLink 
+                href={podcast.url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                {podcast.title}
+              </ExternalCardLink>
+            </CardListItem>
+          ))}
+        </CardList>
+      );
+    }
+
+    return children && children.length > 0 && (
+      <CardList>
+        {children.map((child) => (
+          <CardListItem key={child.path}>
+            <Link to={child.path}>
+              {child.title}
+              {child.isNew && <NewBadge>New</NewBadge>}
+            </Link>
+          </CardListItem>
+        ))}
+      </CardList>
+    );
+  };
+
   return (
     <AnimatedCardWrapper $delay={Math.random() * 300}>
-      <CardHeader>
-        {icon && <IconWrapper>{icon}</IconWrapper>}
-        <CardTitle>
-          <CardLink to={path}>
-            {title}
-            {isNew && <NewBadge>New</NewBadge>}
-          </CardLink>
-        </CardTitle>
-      </CardHeader>
-      {tags && tags.length > 0 && (
-        <TagsContainer>
-          {tags.map(tagId => (
-            <Tag key={tagId} tag={TAGS[tagId]} />
-          ))}
-        </TagsContainer>
-      )}
-      {children && children.length > 0 && (
-        <>
-          <CardList>
-            {children.map((child) => (
-              <CardListItem key={child.path}>
-                <CardLink to={child.path}>
-                  {child.title}
-                  {child.isNew && <NewBadge>New</NewBadge>}
-                </CardLink>
-              </CardListItem>
-            ))}
-          </CardList>
-          <CardMeta>
-            <Counter>
-              <FaBook /> {itemCount} {itemCount === 1 ? 'материал' : 'материалов'}
-            </Counter>
-          </CardMeta>
-        </>
+      <CardContent>
+        <CardHeader>
+          {icon && <IconWrapper>{icon}</IconWrapper>}
+          <CardTitle>
+            <Link to={path}>
+              {title}
+              {isNew && <NewBadge>New</NewBadge>}
+            </Link>
+          </CardTitle>
+        </CardHeader>
+        {renderContent()}
+      </CardContent>
+      {(children || path === '/podcasts') && (
+        <CardMeta>
+          <Counter>
+            <FaBook /> {path === '/podcasts' ? podcastsList.length : itemCount} {itemCount === 1 ? 'материал' : 'материалов'}
+          </Counter>
+        </CardMeta>
       )}
     </AnimatedCardWrapper>
   );

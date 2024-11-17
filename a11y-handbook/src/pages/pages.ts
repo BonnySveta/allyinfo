@@ -8,4 +8,5 @@ export { Courses } from './Courses/Courses';
 export { Podcasts } from './Podcasts/Podcasts';
 export { Telegram } from './Telegram/Telegram';
 export { YouTube } from './YouTube/YouTube';
-export { Feedback } from './Feedback/Feedback'; 
+export { Feedback } from './Feedback/Feedback';
+export { Suggest } from './Suggest/Suggest'; 

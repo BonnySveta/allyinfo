@@ -13,6 +13,8 @@ export const GlobalStyle = createGlobalStyle`
     --focus-ring-color: rgba(0, 123, 255, 0.5);
     --interactive-element-hover: #f0f0f0;
     --text-secondary-color: #666;
+    --success-color: #4caf50;
+    --error-color: #f44336;
   }
 
   :root[data-theme="dark"] {
@@ -27,6 +29,8 @@ export const GlobalStyle = createGlobalStyle`
     --focus-ring-color: rgba(77, 171, 247, 0.5);
     --interactive-element-hover: #3d3d3d;
     --text-secondary-color: #999;
+    --success-color: #4caf50;
+    --error-color: #f44336;
   }
 
   body {

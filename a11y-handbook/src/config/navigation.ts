@@ -1,10 +1,7 @@
-import { TagType } from '../types/tags';
-
 interface NavigationItem {
   title: string;
   path: string;
   isNew?: boolean;
-  tags?: TagType[];
   children?: NavigationItem[];
 }
 
@@ -12,77 +9,63 @@ export const navigationConfig: NavigationItem[] = [
   {
     title: 'Статьи',
     path: '/articles',
-    tags: ['general'],
     children: [
       {
         title: 'Для разработчиков',
-        path: '/articles/dev',
-        tags: ['dev']
+        path: '/articles/dev'
       },
       {
         title: 'Для тестировщиков',
-        path: '/articles/qa',
-        tags: ['qa']
+        path: '/articles/qa'
       },
       {
         title: 'Для дизайнеров',
-        path: '/articles/design',
-        tags: ['design']
+        path: '/articles/design'
       },
       {
         title: 'Для менеджеров',
-        path: '/articles/management',
-        tags: ['management']
+        path: '/articles/management'
       }
     ]
   },
   {
     title: 'События',
     path: '/events',
-    tags: ['general'],
     isNew: true,
     children: [
       {
         title: 'Конференции',
-        path: '/events/conferences',
-        tags: ['general']
+        path: '/events/conferences'
       },
       {
         title: 'Митапы',
-        path: '/events/meetups',
-        tags: ['general']
+        path: '/events/meetups'
       },
       {
         title: 'Вебинары',
-        path: '/events/webinars',
-        tags: ['general']
+        path: '/events/webinars'
       }
     ]
   },
   {
     title: 'Курсы',
     path: '/courses',
-    tags: ['general'],
     isNew: true
   },
   {
     title: 'Подкасты',
-    path: '/podcasts',
-    tags: ['general']
+    path: '/podcasts'
   },
   {
     title: 'YouTube',
-    path: '/youtube',
-    tags: ['general']
+    path: '/youtube'
   },
   {
     title: 'Telegram-каналы',
-    path: '/telegram',
-    tags: ['general']
+    path: '/telegram'
   },
   {
     title: 'Книги',
-    path: '/books',
-    tags: ['general']
+    path: '/books'
   }
 ]; 
