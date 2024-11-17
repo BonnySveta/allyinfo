@@ -141,6 +141,8 @@ export function LinkPreview({ url }: { url: string }) {
   useEffect(() => {
     if (!url) return;
 
+    console.log('LinkPreview: Starting preview fetch for URL:', url);
+    
     let timeoutId: NodeJS.Timeout;
     let isMounted = true;
 
@@ -149,11 +151,14 @@ export function LinkPreview({ url }: { url: string }) {
       setError('');
       
       try {
+        console.log('LinkPreview: Calling fetchPreview...');
         const data = await fetchPreview(url);
+        console.log('LinkPreview: Preview data received:', data);
         if (isMounted) {
           setPreviewData(data);
         }
       } catch (err) {
+        console.error('LinkPreview: Error fetching preview:', err);
         if (isMounted) {
           setError('Не удалось загрузить предпросмотр');
         }
@@ -164,10 +169,11 @@ export function LinkPreview({ url }: { url: string }) {
       }
     };
 
-    // Добавляем задержку перед запросом
+    console.log('LinkPreview: Setting up timeout...');
     timeoutId = setTimeout(getPreview, 500);
 
     return () => {
+      console.log('LinkPreview: Cleanup effect...');
       isMounted = false;
       clearTimeout(timeoutId);
     };

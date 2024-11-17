@@ -205,8 +205,12 @@ export function Suggest() {
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    console.log('URL input changed:', value);
     setUrl(value);
-    if (value) validateUrl(value);
+    if (value) {
+      console.log('Validating URL:', value);
+      validateUrl(value);
+    }
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
