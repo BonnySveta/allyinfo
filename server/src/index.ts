@@ -4,16 +4,25 @@ import * as cheerio from 'cheerio';
 import fetch from 'node-fetch';
 
 const app = express();
-const port = 5000;
+const port = 3001;
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  methods: ['POST', 'GET', 'OPTIONS'],
+  credentials: true
+}));
+
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  res.json({ message: 'Server is working!' });
+});
+
 app.post('/api/preview', async (req, res) => {
-  const { url } = req.body;
-  console.log('Received request for URL:', url); // Для отладки
-  
   try {
+    const { url } = req.body;
+    console.log('Received request for URL:', url);
+    
     const response = await fetch(url);
     const html = await response.text();
     const $ = cheerio.load(html);
@@ -22,24 +31,18 @@ app.post('/api/preview', async (req, res) => {
       title: $('meta[property="og:title"]').attr('content') || 
              $('title').text() || 
              '',
-      
       description: $('meta[property="og:description"]').attr('content') || 
                   $('meta[name="description"]').attr('content') || 
                   '',
-      
       image: $('meta[property="og:image"]').attr('content') || 
              $('link[rel="image_src"]').attr('href') || 
-             '',
-             
-      favicon: $('link[rel="icon"]').attr('href') || 
-              $('link[rel="shortcut icon"]').attr('href') || 
-              '/favicon.ico'
+             ''
     };
 
-    console.log('Preview data:', preview); // Для отладки
+    console.log('Sending preview:', preview);
     res.json(preview);
   } catch (error) {
-    console.error('Error details:', error);
+    console.error('Error:', error);
     res.status(500).json({ 
       error: 'Failed to fetch preview',
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -48,5 +51,5 @@ app.post('/api/preview', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(`Preview server running on port ${port}`);
 }); 
