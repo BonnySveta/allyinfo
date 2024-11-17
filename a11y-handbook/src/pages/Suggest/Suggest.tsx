@@ -66,17 +66,33 @@ const Input = styled.input`
 `;
 
 const SubmitButton = styled.button`
-  padding: 0.75rem 1.5rem;
-  background-color: var(--accent-color);
+  width: 100%;
+  padding: 12px;
+  background-color: var(--primary-color, #0066cc);
   color: white;
   border: none;
-  border-radius: 4px;
-  font-size: 1rem;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
 
   &:hover {
-    background-color: var(--accent-color-hover);
+    background-color: var(--primary-hover-color, #0052a3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 102, 204, 0.2);
+  }
+
+  &:disabled {
+    background-color: var(--disabled-color, #cccccc);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
 
   &:focus {
@@ -229,21 +245,38 @@ export function Suggest() {
     setIsLoading(true);
 
     try {
-      // Имитация отправки данных
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      clearDraft(); // Очищаем черновик после успешной отправки
+      // Отправляем данные на сервер
+      const response = await fetch('http://localhost:3001/api/suggestions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url,
+          section,
+          description
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit suggestion');
+      }
+
+      // Очищаем черновик и форму
+      clearDraft();
+      setSection('');
+      setUrl('');
+      setDescription('');
       
+      // Показываем сообщение об успехе
       setToast({
         show: true,
         message: 'Материал успешно предложен!',
         type: 'success'
       });
-      
-      // Очистка формы
-      setSection('');
-      setUrl('');
-      setDescription('');
+
     } catch (err) {
+      console.error('Error submitting suggestion:', err);
       setToast({
         show: true,
         message: 'Произошла ошибка при отправке формы',

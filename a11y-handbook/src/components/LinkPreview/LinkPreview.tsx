@@ -1,14 +1,150 @@
 import { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { fetchPreview } from '../../api/preview';
 import { PreviewData } from '../../types/preview';
 import { usePreviewCache } from '../../hooks/usePreviewCache';
 
-interface LinkPreviewProps {
-  url: string;
-}
+// Анимации
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
 
-export function LinkPreview({ url }: LinkPreviewProps) {
+const shimmer = keyframes`
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+`;
+
+// Стилизованные компоненты
+const PreviewContainer = styled.div<{ $isLoading?: boolean }>`
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 12px;
+  background: var(--background-color, #ffffff);
+  transition: all 0.2s ease;
+  animation: ${fadeIn} 0.3s ease-out;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 768px) {
+    border-radius: 8px;
+    margin-top: 8px;
+  }
+`;
+
+const PreviewImage = styled.img`
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+  background-color: var(--skeleton-color, #f5f5f5);
+
+  @media (max-width: 768px) {
+    height: 150px;
+  }
+`;
+
+const PreviewContent = styled.div`
+  padding: 16px;
+
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
+`;
+
+const PreviewTitle = styled.h3`
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-color, #1a1a1a);
+  line-height: 1.4;
+
+  @media (max-width: 768px) {
+    font-size: 16px;
+  }
+`;
+
+const PreviewDescription = styled.p`
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--text-secondary-color, #666666);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+`;
+
+const PreviewMeta = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const SiteFavicon = styled.img`
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  flex-shrink: 0;
+`;
+
+const SiteDomain = styled.span`
+  font-size: 14px;
+  color: var(--text-secondary-color, #666666);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  @media (max-width: 768px) {
+    font-size: 13px;
+  }
+`;
+
+const LoadingContainer = styled.div`
+  padding: 16px;
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-color, #f5f5f5) 25%,
+    var(--skeleton-highlight, #efefef) 50%,
+    var(--skeleton-color, #f5f5f5) 75%
+  );
+  background-size: 200% 100%;
+  animation: ${shimmer} 1.5s infinite;
+  border-radius: 8px;
+  height: 120px;
+`;
+
+const ErrorContainer = styled.div`
+  padding: 16px;
+  color: var(--error-color, #dc3545);
+  text-align: center;
+  border: 1px solid var(--error-border-color, #f5c2c7);
+  border-radius: 8px;
+  background-color: var(--error-background, #f8d7da);
+`;
+
+// Компонент
+export function LinkPreview({ url }: { url: string }) {
   const [loading, setLoading] = useState(false);
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [error, setError] = useState('');
@@ -25,25 +161,20 @@ export function LinkPreview({ url }: LinkPreviewProps) {
       setError('');
       
       try {
-        // Сначала проверяем кэш
+        // Проверяем кэш
         const cachedData = previewCache.get(url);
         if (cachedData) {
-          console.log('Using cached preview data for:', url);
           setPreviewData(cachedData);
           setLoading(false);
           return;
         }
 
-        console.log('Fetching fresh preview data for:', url);
         const data = await fetchPreview(url);
-        
         if (isMounted) {
           setPreviewData(data);
-          // Сохраняем в кэш
           previewCache.set(url, data);
         }
       } catch (err) {
-        console.error('Preview error:', err);
         if (isMounted) {
           setError('Не удалось загрузить предпросмотр');
         }
@@ -54,7 +185,6 @@ export function LinkPreview({ url }: LinkPreviewProps) {
       }
     };
 
-    // Добавляем небольшую задержку перед запросом
     timeoutId = setTimeout(getPreview, 500);
 
     return () => {
@@ -64,19 +194,11 @@ export function LinkPreview({ url }: LinkPreviewProps) {
   }, [url]);
 
   if (loading) {
-    return (
-      <PreviewContainer>
-        <LoadingSpinner>Загрузка...</LoadingSpinner>
-      </PreviewContainer>
-    );
+    return <LoadingContainer aria-label="Загрузка предпросмотра..." />;
   }
 
   if (error) {
-    return (
-      <PreviewContainer>
-        <ErrorMessage>{error}</ErrorMessage>
-      </PreviewContainer>
-    );
+    return <ErrorContainer role="alert">{error}</ErrorContainer>;
   }
 
   if (!previewData) return null;
@@ -102,7 +224,16 @@ export function LinkPreview({ url }: LinkPreviewProps) {
             <SiteFavicon 
               src={previewData.favicon} 
               alt=""
-              onError={(e) => e.currentTarget.style.display = 'none'}
+              onError={(e) => {
+                // Если не удалось загрузить фавикон, пробуем загрузить стандартный favicon.ico
+                const target = e.target as HTMLImageElement;
+                if (!target.src.endsWith('/favicon.ico')) {
+                  target.src = `https://${previewData.domain}/favicon.ico`;
+                } else {
+                  // Если и стандартный favicon.ico не загрузился, скрываем элемент
+                  target.style.display = 'none';
+                }
+              }}
             />
           )}
           <SiteDomain>{previewData.domain}</SiteDomain>
@@ -111,73 +242,3 @@ export function LinkPreview({ url }: LinkPreviewProps) {
     </PreviewContainer>
   );
 }
-
-// Стили
-const PreviewContainer = styled.div`
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  overflow: hidden;
-  margin-top: 8px;
-  background: var(--background-color);
-  transition: all 0.2s ease;
-
-  &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-`;
-
-const PreviewImage = styled.img`
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-bottom: 1px solid var(--border-color);
-`;
-
-const PreviewContent = styled.div`
-  padding: 16px;
-`;
-
-const PreviewTitle = styled.h3`
-  margin: 0 0 8px;
-  font-size: 16px;
-  color: var(--text-color);
-`;
-
-const PreviewDescription = styled.p`
-  margin: 0 0 12px;
-  font-size: 14px;
-  color: var(--text-secondary-color);
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-`;
-
-const PreviewMeta = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const SiteFavicon = styled.img`
-  width: 16px;
-  height: 16px;
-`;
-
-const SiteDomain = styled.span`
-  font-size: 14px;
-  color: var(--text-secondary-color);
-`;
-
-const LoadingSpinner = styled.div`
-  padding: 16px;
-  text-align: center;
-  color: var(--text-secondary-color);
-`;
-
-const ErrorMessage = styled.div`
-  padding: 16px;
-  color: var(--error-color);
-  text-align: center;
-`;

@@ -2,7 +2,7 @@ export interface PreviewData {
   title: string;
   description: string;
   image?: string;
-  favicon?: string;
+  favicon: string;
   siteName?: string;
   type?: string;
   url: string;

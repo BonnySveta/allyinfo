@@ -1,4 +1,3 @@
- 
 /node_modules
 /.pnp
 .pnp.js
@@ -24,3 +23,5 @@ yarn-error.log*
 # IDE
 .idea
 .vscode
+
+server/data/*.db 

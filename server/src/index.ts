@@ -3,6 +3,22 @@ import cors from 'cors';
 import * as cheerio from 'cheerio';
 import fetch from 'node-fetch';
 import { PreviewData } from './types/preview';
+import { db, queries } from './db';
+
+// Добавляем интерфейс для данных из БД
+interface SuggestionRow {
+  id: number;
+  url: string;
+  section: string;
+  description: string | null;
+  preview_title: string;
+  preview_description: string;
+  preview_image: string | null;
+  preview_favicon: string;
+  preview_domain: string;
+  status: string;
+  created_at: string;
+}
 
 const app = express();
 const port = 3001;
@@ -115,6 +131,102 @@ app.post('/api/preview', async (req, res) => {
   }
 });
 
+app.post('/api/suggestions', async (req, res) => {
+  try {
+    const { url, section, description } = req.body;
+
+    // Получаем превью используя существующую логику
+    const preview = await fetch(`http://localhost:${port}/api/preview`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url })
+    }).then(res => res.json());
+
+    if (preview.error) {
+      throw new Error(preview.error);
+    }
+
+    // Сохраняем в БД
+    const result = queries.insert.run({
+      url,
+      section,
+      description,
+      preview_title: preview.title,
+      preview_description: preview.description,
+      preview_image: preview.image,
+      preview_favicon: preview.favicon,
+      preview_domain: preview.domain,
+      status: 'pending'
+    });
+
+    res.status(201).json({
+      id: result.lastInsertRowid,
+      url,
+      section,
+      description,
+      preview,
+      status: 'pending'
+    });
+
+  } catch (error) {
+    console.error('Error saving suggestion:', error);
+    res.status(500).json({ 
+      error: 'Failed to save suggestion',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.get('/api/suggestions', (req, res) => {
+  try {
+    const rows = queries.getApproved.all() as SuggestionRow[];
+    
+    const suggestions = rows.map(row => ({
+      id: row.id,
+      url: row.url,
+      section: row.section,
+      description: row.description,
+      preview: {
+        title: row.preview_title,
+        description: row.preview_description,
+        image: row.preview_image,
+        favicon: row.preview_favicon,
+        domain: row.preview_domain
+      },
+      status: row.status,
+      createdAt: row.created_at
+    }));
+
+    res.json(suggestions);
+
+  } catch (error) {
+    console.error('Error fetching suggestions:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch suggestions',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Эндпоинт для просмотра всех предложений
+app.get('/api/suggestions/all', (_req, res) => {
+  try {
+    console.log('Fetching all suggestions...');
+    const suggestions = queries.getAll.all();
+    console.log('Found suggestions:', suggestions);
+    
+    res.json(suggestions);
+  } catch (error) {
+    console.error('Error fetching suggestions:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch suggestions',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 app.listen(port, () => {
-  console.log(`Preview server running on port ${port}`);
+  console.log(`Server running on port ${port}`);
 }); 
