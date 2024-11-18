@@ -27,6 +27,7 @@ import { ApprovedList } from './components/ApprovedList/ApprovedList';
 import { AuthProvider } from './context/AuthContext';
 import { useState, useEffect } from 'react';
 import { Resource, ResourcesBySection } from './types/resource';
+import { Support } from './pages/Support/Support';
 
 const Container = styled.div`
   padding: 2rem;
@@ -129,6 +130,7 @@ function App() {
                   <Route path="/suggest" element={<Suggest />} />
                   <Route path="/admin/suggestions" element={<Suggestions />} />
                   <Route path="/admin/approved" element={<ApprovedList />} />
+                  <Route path="/support" element={<Support />} />
                 </Routes>
               </main>
             </Container>

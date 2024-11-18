@@ -86,6 +86,17 @@ const AdminMenuItem = styled(NavLink)`
   }
 `;
 
+const SupportLink = styled(NavLink)`
+  color: var(--accent-color);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
 export function Header() {
   const { isAdmin, login, logout } = useAuth();
   
@@ -95,6 +106,10 @@ export function Header() {
         <NavLink to="/" end>Главная</NavLink>
         <NavLink to="/feedback">Обратная связь</NavLink>
         <NavLink to="/suggest">Предложить материал</NavLink>
+        <SupportLink to="/support">
+          <span role="img" aria-hidden="true">❤️</span>
+          Поддержать проект
+        </SupportLink>
         {isAdmin && (
           <AdminMenu>
             <AdminLink to="/admin">
