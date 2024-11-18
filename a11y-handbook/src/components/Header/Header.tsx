@@ -1,6 +1,7 @@
 import { NavLink as RouterNavLink } from 'react-router-dom';
 import { ThemeToggle } from '../ThemeToggle/ThemeToggle';
 import styled from 'styled-components';
+import { useAuth } from '../../context/AuthContext';
 
 const HeaderContainer = styled.header`
   display: flex;
@@ -47,15 +48,71 @@ const NavLink = styled(RouterNavLink)`
   }
 `;
 
+const AdminLink = styled(NavLink)`
+  color: var(--accent-color);
+  
+  &::before {
+    content: '👑 ';
+  }
+`;
+
+const AdminMenu = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
+const AdminMenuContent = styled.div`
+  display: none;
+  position: absolute;
+  background-color: var(--nav-background);
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+  border-radius: 4px;
+
+  ${AdminMenu}:hover & {
+    display: block;
+  }
+`;
+
+const AdminMenuItem = styled(NavLink)`
+  color: var(--text-color);
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  
+  &:hover {
+    background-color: var(--nav-hover-background);
+  }
+`;
+
 export function Header() {
+  const { isAdmin, login, logout } = useAuth();
+  
   return (
     <HeaderContainer>
       <Nav>
         <NavLink to="/" end>Главная</NavLink>
         <NavLink to="/feedback">Обратная связь</NavLink>
         <NavLink to="/suggest">Предложить материал</NavLink>
+        {isAdmin && (
+          <AdminMenu>
+            <AdminLink to="/admin">
+              Админ-панель
+            </AdminLink>
+            <AdminMenuContent>
+              <AdminMenuItem to="/admin/suggestions">Модерация</AdminMenuItem>
+              <AdminMenuItem to="/admin/approved">Одобренные</AdminMenuItem>
+            </AdminMenuContent>
+          </AdminMenu>
+        )}
       </Nav>
-      <ThemeToggle />
+      <div>
+        <button onClick={isAdmin ? logout : login}>
+          {isAdmin ? 'Выйти' : 'Войти как админ'}
+        </button>
+        <ThemeToggle />
+      </div>
     </HeaderContainer>
   );
-} 
+}

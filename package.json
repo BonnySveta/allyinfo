@@ -6,6 +6,9 @@
     "server"
   ],
   "scripts": {
+    "build": "npm run build --workspace=server && npm run build --workspace=a11y-handbook",
+    "build:server": "npm run build --workspace=server",
+    "build:client": "npm run build --workspace=a11y-handbook",
     "start:client": "npm run start --workspace=a11y-handbook",
     "start:server": "npm run dev --workspace=server",
     "dev": "concurrently \"npm run start:client\" \"npm run start:server\""

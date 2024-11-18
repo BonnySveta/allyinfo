@@ -23,6 +23,8 @@ import { Card } from './components/Card/Card';
 import { CardsGrid } from './components/CardsGrid/CardsGrid';
 import { LoadingSpinner } from './components/LoadingSpinner/LoadingSpinner';
 import { Suggestions } from './pages/Admin/Suggestions';
+import { ApprovedList } from './components/ApprovedList/ApprovedList';
+import { AuthProvider } from './context/AuthContext';
 
 const Container = styled.div`
   padding: 20px;
@@ -37,48 +39,51 @@ const Title = styled.h1`
 
 function App() {
   return (
-    <ThemeProvider>
-      <GlobalStyle />
-      <BrowserRouter>
-        <Suspense fallback={<LoadingSpinner />}>
-          <Container>
-            <Header />
-            <main>
-              <Routes>
-                <Route path="/" element={
-                  <>
-                    <Title>Справочник по цифровой доступности</Title>
-                    <CardsGrid>
-                      {navigationConfig.map((item) => (
-                        <Card
-                          key={item.path}
-                          title={item.title}
-                          path={item.path}
-                          children={item.children}
-                          isNew={item.isNew}
-                        />
-                      ))}
-                    </CardsGrid>
-                  </>
-                } />
-                <Route path="/articles/dev" element={<ArticlesDev />} />
-                <Route path="/articles/design" element={<ArticlesDesign />} />
-                <Route path="/articles/management" element={<ArticlesManagement />} />
-                <Route path="/articles/qa" element={<ArticlesQA />} />
-                <Route path="/telegram" element={<Telegram />} />
-                <Route path="/podcasts" element={<Podcasts />} />
-                <Route path="/courses" element={<Courses />} />
-                <Route path="/youtube" element={<YouTube />} />
-                <Route path="/books" element={<Books />} />
-                <Route path="/feedback" element={<Feedback />} />
-                <Route path="/suggest" element={<Suggest />} />
-                <Route path="/admin/suggestions" element={<Suggestions />} />
-              </Routes>
-            </main>
-          </Container>
-        </Suspense>
-      </BrowserRouter>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <GlobalStyle />
+        <BrowserRouter>
+          <Suspense fallback={<LoadingSpinner />}>
+            <Container>
+              <Header />
+              <main>
+                <Routes>
+                  <Route path="/" element={
+                    <>
+                      <Title>Справочник по цифровой доступности</Title>
+                      <CardsGrid>
+                        {navigationConfig.map((item) => (
+                          <Card
+                            key={item.path}
+                            title={item.title}
+                            path={item.path}
+                            children={item.children}
+                            isNew={item.isNew}
+                          />
+                        ))}
+                      </CardsGrid>
+                    </>
+                  } />
+                  <Route path="/articles/dev" element={<ArticlesDev />} />
+                  <Route path="/articles/design" element={<ArticlesDesign />} />
+                  <Route path="/articles/management" element={<ArticlesManagement />} />
+                  <Route path="/articles/qa" element={<ArticlesQA />} />
+                  <Route path="/telegram" element={<Telegram />} />
+                  <Route path="/podcasts" element={<Podcasts />} />
+                  <Route path="/courses" element={<Courses />} />
+                  <Route path="/youtube" element={<YouTube />} />
+                  <Route path="/books" element={<Books />} />
+                  <Route path="/feedback" element={<Feedback />} />
+                  <Route path="/suggest" element={<Suggest />} />
+                  <Route path="/admin/suggestions" element={<Suggestions />} />
+                  <Route path="/admin/approved" element={<ApprovedList />} />
+                </Routes>
+              </main>
+            </Container>
+          </Suspense>
+        </BrowserRouter>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
 

@@ -21,6 +21,7 @@
     "jsx": "react-jsx"
   },
   "include": [
-    "src"
-, "src/context", "../server/src/index.ts"  ]
+    "src",
+    "src/context"
+  ]
 }

@@ -31,6 +31,23 @@ app.use(cors({
 
 app.use(express.json());
 
+app.get('/', (_req, res) => {
+  res.json({
+    message: 'API is running',
+    endpoints: {
+      suggestions: {
+        getAll: 'GET /api/suggestions/all',
+        getApproved: 'GET /api/suggestions',
+        create: 'POST /api/suggestions',
+        updateStatus: 'PUT /api/suggestions/:id/status'
+      },
+      preview: {
+        get: 'POST /api/preview'
+      }
+    }
+  });
+});
+
 app.post('/api/preview', async (req, res) => {
   console.log('Received preview request for:', req.body.url);
   
