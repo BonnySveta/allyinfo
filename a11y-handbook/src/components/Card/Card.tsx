@@ -1,186 +1,181 @@
-import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { FaCode, FaPalette, FaUserTie, FaCheckSquare, FaTelegram, FaPodcast, FaGraduationCap, FaYoutube, FaBook, FaNewspaper, FaCalendarAlt } from 'react-icons/fa';
-import { podcastsList } from '../../config/podcasts';
 
-const CardWrapper = styled.div`
-  background: var(--card-background, var(--nav-background));
+interface Resource {
+  id: number;
+  url: string;
+  preview: {
+    title: string;
+    description: string;
+    favicon: string;
+  };
+  createdAt: string;
+}
+
+interface CardProps {
+  title: string;
+  path: string;
+  resources?: Resource[];
+}
+
+const CardContainer = styled.div`
+  background: var(--card-background);
   border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  }
-`;
-
-const CardTitle = styled.h2`
-  color: var(--text-color);
-  margin: 0 0 1rem 0;
-  font-size: 1.25rem;
-`;
-
-const CardList = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 0;
-`;
-
-const CardListItem = styled.li`
-  margin-bottom: 0.5rem;
-`;
-
-const ExternalCardLink = styled.a`
-  color: var(--text-color);
-  text-decoration: none;
-  padding: 0.5rem;
-  display: block;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: var(--nav-hover-background);
-  }
 `;
 
 const CardHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   margin-bottom: 1rem;
 `;
 
-const IconWrapper = styled.div`
-  font-size: 1.5rem;
-  color: var(--accent-color);
-`;
-
-const CardMeta = styled.div`
+const CardTitle = styled.h2`
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-top: auto;
-  padding-top: 0.5rem;
-  font-size: 0.875rem;
-`;
-
-const Counter = styled.span`
-  color: var(--text-secondary-color);
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
+  gap: 0.5rem;
 `;
 
 const NewBadge = styled.span`
-  background-color: var(--accent-color);
+  background: var(--accent-color);
   color: white;
   padding: 0.25rem 0.5rem;
-  border-radius: 12px;
+  border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 500;
 `;
 
-const AnimatedCardWrapper = styled(CardWrapper)<{ $delay: number }>`
-  animation: fadeInUp 0.5s ease forwards;
-  animation-delay: ${({ $delay }) => $delay}ms;
-  opacity: 0;
-`;
-
 const CardContent = styled.div`
-  flex: 1;
+  margin: 1rem 0;
 `;
 
-interface CardProps {
-  title: string;
-  path: string;
-  children?: { title: string; path: string; isNew?: boolean; }[];
-  icon?: string;
-  isNew?: boolean;
-}
+const CardFooter = styled.div`
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+`;
 
-const getIcon = (path: string) => {
-  switch (path) {
-    case '/articles': return <FaNewspaper />;
-    case '/articles/dev': return <FaCode />;
-    case '/articles/design': return <FaPalette />;
-    case '/articles/management': return <FaUserTie />;
-    case '/articles/qa': return <FaCheckSquare />;
-    case '/events': return <FaCalendarAlt />;
-    case '/telegram': return <FaTelegram />;
-    case '/podcasts': return <FaPodcast />;
-    case 'https://inclusivepineapple.github.io/': return <FaPodcast />;
-    case '/courses': return <FaGraduationCap />;
-    case '/youtube': return <FaYoutube />;
-    case '/books': return <FaBook />;
-    default: return null;
+const ResourceCount = styled.span`
+  color: var(--text-secondary);
+`;
+
+const ResourcesList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+`;
+
+const ResourceItem = styled.li`
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const ResourceLink = styled.a`
+  color: var(--accent-color);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  &:hover {
+    text-decoration: underline;
   }
-};
+`;
 
-export const Card: React.FC<CardProps> = ({ title, path, children, isNew }) => {
-  const icon = getIcon(path);
-  const itemCount = children?.length || 0;
+const Favicon = styled.img`
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: 2px;
+`;
 
-  const renderContent = () => {
-    if (path === '/podcasts') {
-      const recentPodcasts = podcastsList.slice(0, 4);
-      return (
-        <CardList>
-          {recentPodcasts.map((podcast) => (
-            <CardListItem key={podcast.url}>
-              <ExternalCardLink 
-                href={podcast.url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                {podcast.title}
-              </ExternalCardLink>
-            </CardListItem>
-          ))}
-        </CardList>
-      );
-    }
+const ResourceTitle = styled.span`
+  flex-grow: 1;
+`;
 
-    return children && children.length > 0 && (
-      <CardList>
-        {children.map((child) => (
-          <CardListItem key={child.path}>
-            <Link to={child.path}>
-              {child.title}
-              {child.isNew && <NewBadge>New</NewBadge>}
-            </Link>
-          </CardListItem>
-        ))}
-      </CardList>
+const EmptyState = styled.div`
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 1rem;
+`;
+
+const NewResourceBadge = styled.span`
+  background: var(--accent-color);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  margin-left: 0.5rem;
+`;
+
+export function Card({ title, path, resources = [] }: CardProps) {
+  const sortedResources = [...resources].sort((a, b) => 
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
+  const isToday = (date: string) => {
+    const today = new Date();
+    const itemDate = new Date(date);
+    return (
+      itemDate.getDate() === today.getDate() &&
+      itemDate.getMonth() === today.getMonth() &&
+      itemDate.getFullYear() === today.getFullYear()
     );
   };
 
   return (
-    <AnimatedCardWrapper $delay={Math.random() * 300}>
+    <CardContainer>
+      <CardHeader>
+        <CardTitle>
+          {title}
+        </CardTitle>
+      </CardHeader>
       <CardContent>
-        <CardHeader>
-          {icon && <IconWrapper>{icon}</IconWrapper>}
-          <CardTitle>
-            <Link to={path}>
-              {title}
-              {isNew && <NewBadge>New</NewBadge>}
-            </Link>
-          </CardTitle>
-        </CardHeader>
-        {renderContent()}
+        {sortedResources.length > 0 ? (
+          <ResourcesList>
+            {sortedResources.slice(0, 5).map(resource => (
+              <ResourceItem key={resource.id}>
+                <ResourceLink 
+                  href={resource.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  {resource.preview.favicon && (
+                    <Favicon 
+                      src={resource.preview.favicon} 
+                      alt=""
+                      onError={(e) => {
+                        // Если фавикон не загрузился, скрываем элемент
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  )}
+                  <ResourceTitle>{resource.preview.title}</ResourceTitle>
+                  {isToday(resource.createdAt) && <NewResourceBadge>New</NewResourceBadge>}
+                </ResourceLink>
+              </ResourceItem>
+            ))}
+          </ResourcesList>
+        ) : (
+          <EmptyState>Пока нет материалов</EmptyState>
+        )}
       </CardContent>
-      {(children || path === '/podcasts') && (
-        <CardMeta>
-          <Counter>
-            <FaBook /> {path === '/podcasts' ? podcastsList.length : itemCount} {itemCount === 1 ? 'материал' : 'материалов'}
-          </Counter>
-        </CardMeta>
+      {sortedResources.length > 0 && (
+        <CardFooter>
+          <ResourceCount>{resources.length} материалов</ResourceCount>
+          {resources.length > 5 && (
+            <Link to={path}>Смотреть все</Link>
+          )}
+        </CardFooter>
       )}
-    </AnimatedCardWrapper>
+    </CardContainer>
   );
-}; 
+} 

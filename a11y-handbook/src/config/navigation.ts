@@ -1,71 +1,51 @@
 interface NavigationItem {
   title: string;
   path: string;
+  section: string;
   isNew?: boolean;
-  children?: NavigationItem[];
 }
 
 export const navigationConfig: NavigationItem[] = [
   {
     title: 'Статьи',
     path: '/articles',
-    children: [
-      {
-        title: 'Для разработчиков',
-        path: '/articles/dev'
-      },
-      {
-        title: 'Для тестировщиков',
-        path: '/articles/qa'
-      },
-      {
-        title: 'Для дизайнеров',
-        path: '/articles/design'
-      },
-      {
-        title: 'Для менеджеров',
-        path: '/articles/management'
-      }
-    ]
+    section: 'articles',
+    isNew: false
   },
   {
     title: 'События',
     path: '/events',
-    isNew: true,
-    children: [
-      {
-        title: 'Конференции',
-        path: '/events/conferences'
-      },
-      {
-        title: 'Митапы',
-        path: '/events/meetups'
-      },
-      {
-        title: 'Вебинары',
-        path: '/events/webinars'
-      }
-    ]
+    section: 'events',
+    isNew: true
   },
   {
     title: 'Курсы',
     path: '/courses',
+    section: 'courses',
     isNew: true
   },
   {
     title: 'Подкасты',
-    path: '/podcasts'
+    path: '/podcasts',
+    section: 'podcasts',
+    isNew: false
   },
   {
     title: 'YouTube',
-    path: '/youtube'
+    path: '/youtube',
+    section: 'youtube',
+    isNew: false
   },
   {
-    title: 'Telegram-каналы',
-    path: '/telegram'
+    title: 'Telegram',
+    path: '/telegram',
+    section: 'telegram',
+    isNew: false
   },
   {
     title: 'Книги',
-    path: '/books'
+    path: '/books',
+    section: 'books',
+    isNew: false
   }
 ]; 
