@@ -145,6 +145,7 @@ const ErrorContainer = styled.div`
 
 // Компонент
 export function LinkPreview({ url }: { url: string }) {
+  console.log('Preview data for URL:', url);
   const [loading, setLoading] = useState(false);
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [error, setError] = useState('');

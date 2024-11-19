@@ -4,10 +4,6 @@ import styled from 'styled-components';
 import { navigationConfig } from './config/navigation';
 import {
   Articles,
-  ArticlesDev,
-  ArticlesDesign,
-  ArticlesManagement,
-  ArticlesQA,
   Telegram,
   Podcasts,
   Courses,
@@ -106,26 +102,28 @@ function App() {
                       ) : (
                         <CardsGrid>
                           {navigationConfig.map((item) => (
-                            <Card
-                              key={item.path}
-                              title={item.title}
-                              path={item.path}
-                              resources={resources[item.section] || []}
-                            />
+                            <Link 
+                              to={item.path} 
+                              key={item.path} 
+                              style={{ textDecoration: 'none' }}
+                            >
+                              <Card
+                                title={item.title}
+                                path={item.path}
+                                resources={resources[item.section] || []}
+                              />
+                            </Link>
                           ))}
                         </CardsGrid>
                       )}
                     </>
                   } />
-                  <Route path="/articles/dev" element={<ArticlesDev />} />
-                  <Route path="/articles/design" element={<ArticlesDesign />} />
-                  <Route path="/articles/management" element={<ArticlesManagement />} />
-                  <Route path="/articles/qa" element={<ArticlesQA />} />
-                  <Route path="/telegram" element={<Telegram />} />
-                  <Route path="/podcasts" element={<Podcasts />} />
-                  <Route path="/courses" element={<Courses />} />
-                  <Route path="/youtube" element={<YouTube />} />
-                  <Route path="/books" element={<Books />} />
+                  <Route path="/articles" element={<Articles resources={resources['articles'] || []} />} />
+                  <Route path="/telegram" element={<Telegram resources={resources['telegram'] || []} />} />
+                  <Route path="/podcasts" element={<Podcasts resources={resources['podcasts'] || []} />} />
+                  <Route path="/courses" element={<Courses resources={resources['courses'] || []} />} />
+                  <Route path="/youtube" element={<YouTube resources={resources['youtube'] || []} />} />
+                  <Route path="/books" element={<Books resources={resources['books'] || []} />} />
                   <Route path="/feedback" element={<Feedback />} />
                   <Route path="/suggest" element={<Suggest />} />
                   <Route path="/admin/suggestions" element={<Suggestions />} />

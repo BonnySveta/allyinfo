@@ -4,10 +4,14 @@ import { Link } from 'react-router-dom';
 interface Resource {
   id: number;
   url: string;
+  section: string;
+  description: string | null;
   preview: {
     title: string;
     description: string;
+    image: string | null;
     favicon: string;
+    domain: string;
   };
   createdAt: string;
 }
@@ -148,13 +152,24 @@ export function Card({ title, path, resources = [] }: CardProps) {
                   target="_blank" 
                   rel="noopener noreferrer"
                 >
-                  {resource.preview.favicon && (
+                  {((resource.url.includes('t.me/') && resource.preview.image) || resource.preview.favicon) && (
                     <Favicon 
-                      src={resource.preview.favicon} 
+                      src={
+                        // Если это Telegram канал и есть preview.image, используем его
+                        resource.url.includes('t.me/') && resource.preview.image 
+                          ? resource.preview.image 
+                          : resource.preview.favicon
+                      } 
                       alt=""
                       onError={(e) => {
-                        // Если фавикон не загрузился, скрываем элемент
-                        (e.target as HTMLImageElement).style.display = 'none';
+                        const img = e.target as HTMLImageElement;
+                        if (!resource.url.includes('t.me/') && img.src === resource.preview.favicon && resource.preview.image) {
+                          // Для не-Telegram ресурсов, если фавикон не загрузился, пробуем использовать image
+                          img.src = resource.preview.image;
+                        } else {
+                          // Если изображение не загрузилось, скрываем элемент
+                          img.style.display = 'none';
+                        }
                       }}
                     />
                   )}

@@ -1,8 +1,22 @@
-export function Books() {
+import { Resource } from '../../types/resource';
+
+interface BooksProps {
+  resources: Resource[];
+}
+
+export function Books({ resources }: BooksProps) {
   return (
     <div>
       <h1>Книги</h1>
-      <p>Книги и руководства по цифровой доступности</p>
+      {resources.map((resource) => (
+        <div key={resource.id}>
+          <h2>{resource.preview.title}</h2>
+          <p>{resource.preview.description}</p>
+          <a href={resource.url} target="_blank" rel="noopener noreferrer">
+            Подробнее
+          </a>
+        </div>
+      ))}
     </div>
   );
 } 

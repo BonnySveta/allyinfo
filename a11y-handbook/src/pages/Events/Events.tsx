@@ -1,19 +1,19 @@
 import { Resource } from '../../types/resource';
 
-interface ArticlesProps {
+interface EventsProps {
   resources: Resource[];
 }
 
-export function Articles({ resources }: ArticlesProps) {
+export function Events({ resources }: EventsProps) {
   return (
     <div>
-      <h1>Статьи</h1>
+      <h1>События</h1>
       {resources.map((resource) => (
         <div key={resource.id}>
           <h2>{resource.preview.title}</h2>
           <p>{resource.preview.description}</p>
           <a href={resource.url} target="_blank" rel="noopener noreferrer">
-            Читать далее
+            Подробнее о событии
           </a>
         </div>
       ))}
