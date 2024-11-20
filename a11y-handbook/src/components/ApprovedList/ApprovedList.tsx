@@ -51,30 +51,117 @@ const ActionButton = styled.button`
   }
 `;
 
+const FiltersContainer = styled.div`
+  margin-bottom: 20px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+`;
+
+const SearchInput = styled.input`
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 200px;
+`;
+
+const Select = styled.select`
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+`;
+
+const Pagination = styled.div`
+  margin-top: 20px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+`;
+
+const PageButton = styled.button<{ $active?: boolean }>`
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: ${props => props.$active ? '#007bff' : 'white'};
+  color: ${props => props.$active ? 'white' : 'black'};
+  cursor: pointer;
+
+  &:hover {
+    background: ${props => props.$active ? '#007bff' : '#f0f0f0'};
+  }
+`;
+
 export function ApprovedList() {
   const [items, setItems] = useState<ApprovedItem[]>([]);
+  const [sections, setSections] = useState<string[]>([]);
+  const [search, setSearch] = useState('');
+  const [section, setSection] = useState('');
+  const [sortBy, setSortBy] = useState('date');
+  const [order, setOrder] = useState('desc');
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Partial<ApprovedItem>>({});
 
   useEffect(() => {
-    const fetchApproved = async () => {
+    const loadSections = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/suggestions');
-        if (!response.ok) throw new Error('Failed to fetch approved items');
+        console.log('Loading sections...');
+        const response = await fetch('http://localhost:3001/api/sections');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
-        setItems(data);
-      } catch (err) {
-        setError('Не удалось загрузить данные');
-        console.error(err);
-      } finally {
-        setLoading(false);
+        console.log('Loaded sections:', data);
+        setSections(data);
+      } catch (error) {
+        console.error('Error loading sections:', error);
+        setError('Ошибка при загрузке разделов');
       }
     };
-
-    fetchApproved();
+    
+    loadSections();
   }, []);
+
+  const loadItems = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      
+      if (search) params.append('search', search);
+      if (section) params.append('section', section);
+      params.append('sortBy', sortBy);
+      params.append('order', order);
+      params.append('page', String(page));
+      params.append('limit', String(limit));
+
+      console.log('Request params:', params.toString());
+
+      const response = await fetch(`http://localhost:3001/api/suggestions?${params}`);
+      const data = await response.json();
+
+      console.log('Response data:', data);
+
+      if (data && data.items) {
+        setItems(data.items);
+        setTotal(data.pagination.total);
+      }
+    } catch (error) {
+      console.error('Error loading items:', error);
+      setError('Ошибка при загрузке данных');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadItems();
+  }, [search, section, sortBy, order, page]);
 
   const handleEdit = (item: ApprovedItem) => {
     setEditingId(item.id);
@@ -160,86 +247,91 @@ export function ApprovedList() {
     }
   };
 
-  if (loading) return <div>Загрузка...</div>;
-  if (error) return <div>{error}</div>;
-
   return (
     <div>
       <h1>Одобренные материалы</h1>
-      <Table>
-        <thead>
-          <tr>
-            <Th>ID</Th>
-            <Th>Раздел</Th>
-            <Th>Название</Th>
-            <Th>Домен</Th>
-            <Th>Описание</Th>
-            <Th>Дата добавления</Th>
-            <Th>Действия</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map(item => (
-            <tr key={item.id}>
-              <Td>{item.id}</Td>
-              <Td>
-                {editingId === item.id ? (
-                  <input
-                    value={editForm.section || ''}
-                    onChange={e => setEditForm({ ...editForm, section: e.target.value })}
-                  />
-                ) : (
-                  item.section
-                )}
-              </Td>
-              <Td>
-                {editingId === item.id ? (
-                  <input
-                    value={editForm.preview?.title || ''}
-                    onChange={e => setEditForm({
-                      ...editForm,
-                      preview: {
-                        ...editForm.preview,
-                        title: e.target.value,
-                        domain: editForm.preview?.domain || ''
-                      }
-                    })}
-                  />
-                ) : (
-                  <Link href={item.url} target="_blank" rel="noopener noreferrer">
-                    {item.preview.title}
-                  </Link>
-                )}
-              </Td>
-              <Td>{item.preview.domain}</Td>
-              <Td>
-                {editingId === item.id ? (
-                  <input
-                    value={editForm.description || ''}
-                    onChange={e => setEditForm({ ...editForm, description: e.target.value })}
-                  />
-                ) : (
-                  item.description || '—'
-                )}
-              </Td>
-              <Td>{new Date(item.createdAt).toLocaleDateString('ru-RU')}</Td>
-              <Td>
-                {editingId === item.id ? (
-                  <>
-                    <ActionButton onClick={handleSave}>Сохранить</ActionButton>
-                    <ActionButton onClick={() => setEditingId(null)}>Отмена</ActionButton>
-                  </>
-                ) : (
-                  <>
+      
+      <FiltersContainer>
+        <SearchInput
+          placeholder="Поиск..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        <Select value={section} onChange={(e) => setSection(e.target.value)}>
+          <option value="">Все разделы</option>
+          {sections.map(s => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </Select>
+
+        <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <option value="date">По дате</option>
+          <option value="title">По названию</option>
+          <option value="section">По разделу</option>
+        </Select>
+
+        <Select value={order} onChange={(e) => setOrder(e.target.value)}>
+          <option value="desc">По убыванию</option>
+          <option value="asc">По возрастанию</option>
+        </Select>
+      </FiltersContainer>
+
+      {loading ? (
+        <div>Загрузка...</div>
+      ) : error ? (
+        <div>{error}</div>
+      ) : items.length === 0 ? (
+        <div>Нет данных для отображения</div>
+      ) : (
+        <>
+          <Table>
+            <thead>
+              <tr>
+                <Th>ID</Th>
+                <Th>Раздел</Th>
+                <Th>Название</Th>
+                <Th>Домен</Th>
+                <Th>Описание</Th>
+                <Th>Дата добавления</Th>
+                <Th>Действия</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map(item => (
+                <tr key={item.id}>
+                  <Td>{item.id}</Td>
+                  <Td>{item.section}</Td>
+                  <Td>
+                    <Link href={item.url} target="_blank" rel="noopener noreferrer">
+                      {item.preview.title}
+                    </Link>
+                  </Td>
+                  <Td>{item.preview.domain}</Td>
+                  <Td>{item.description || '—'}</Td>
+                  <Td>{new Date(item.createdAt).toLocaleDateString('ru-RU')}</Td>
+                  <Td>
                     <ActionButton onClick={() => handleEdit(item)}>Редактировать</ActionButton>
                     <ActionButton onClick={() => handleDelete(item.id)}>Удалить</ActionButton>
-                  </>
-                )}
-              </Td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+                  </Td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+
+          <Pagination>
+            {Array.from({ length: Math.ceil(total / limit) }).map((_, i) => (
+              <PageButton
+                key={i + 1}
+                $active={page === i + 1}
+                onClick={() => setPage(i + 1)}
+              >
+                {i + 1}
+              </PageButton>
+            ))}
+          </Pagination>
+        </>
+      )}
     </div>
   );
 } 

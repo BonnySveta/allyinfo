@@ -4,6 +4,7 @@ import * as cheerio from 'cheerio';
 import fetch from 'node-fetch';
 import { PreviewData } from './types/preview';
 import { db, queries } from './db';
+import { searchController } from './controllers/search';
 
 // Добавляем интерфейс для данных из БД
 interface SuggestionRow {
@@ -20,6 +21,11 @@ interface SuggestionRow {
   created_at: string;
 }
 
+// Добавляем интерфейс для строки с разделом
+interface SectionRow {
+  section: string;
+}
+
 const app = express();
 const port = 3001;
 
@@ -30,6 +36,11 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// Тестовый эндпоинт
+app.get('/api/test', (_req, res) => {
+  res.json({ message: 'API is working' });
+});
 
 app.get('/', (_req, res) => {
   res.json({
@@ -130,7 +141,7 @@ app.post('/api/preview', async (req, res) => {
       }
     };
 
-    // Обработка относительных URL для изображений
+    // Обаботка относительных URL для изображений
     if (preview.image && preview.image.startsWith('/')) {
       preview.image = new URL(preview.image, url).toString();
     }
@@ -196,36 +207,7 @@ app.post('/api/suggestions', async (req, res) => {
   }
 });
 
-app.get('/api/suggestions', (req, res) => {
-  try {
-    const rows = queries.getApproved.all() as SuggestionRow[];
-    
-    const suggestions = rows.map(row => ({
-      id: row.id,
-      url: row.url,
-      section: row.section,
-      description: row.description,
-      preview: {
-        title: row.preview_title,
-        description: row.preview_description,
-        image: row.preview_image,
-        favicon: row.preview_favicon,
-        domain: row.preview_domain
-      },
-      status: row.status,
-      createdAt: row.created_at
-    }));
-
-    res.json(suggestions);
-
-  } catch (error) {
-    console.error('Error fetching suggestions:', error);
-    res.status(500).json({ 
-      error: 'Failed to fetch suggestions',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
-});
+app.get('/api/suggestions', searchController(db));
 
 // Эндпоинт для просмотра всех предложений
 app.get('/api/suggestions/all', (_req, res) => {
@@ -244,7 +226,7 @@ app.get('/api/suggestions/all', (_req, res) => {
   }
 });
 
-// Эндпоинт для обновления статуса предложения
+// Эндпоинт для бновления статуса предложения
 app.put('/api/suggestions/:id/status', async (req, res) => {
   try {
     const { id } = req.params;
@@ -351,7 +333,7 @@ app.delete('/api/suggestions/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Удаляем запись
+    // Удаляе запись
     const result = queries.delete.run({
       id: Number(id)
     });
@@ -376,6 +358,42 @@ app.delete('/api/suggestions/:id', async (req, res) => {
     });
   }
 });
+
+// Эндпоинт для получения списка разделов
+app.get('/api/sections', (_req, res) => {
+  try {
+    console.log('Fetching sections...');
+    
+    const query = db.prepare(`
+      SELECT DISTINCT section 
+      FROM suggestions 
+      WHERE status = 'approved'
+    `);
+    
+    // Добавляем явное приведение типов
+    const rows = query.all() as SectionRow[];
+    const sections = rows.map(row => row.section);
+    
+    console.log('Found sections:', sections);
+    res.json(sections);
+  } catch (error) {
+    console.error('Error fetching sections:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch sections' 
+    });
+  }
+});
+
+// Отладочный запрос для проверки данных в базе
+const debugQuery = db.prepare(`
+  SELECT preview_title, lower(preview_title) as lower_title 
+  FROM suggestions 
+  WHERE status = 'approved'
+`).all();
+console.log('Debug - all titles:', debugQuery);
+
+const encodingCheck = db.prepare('PRAGMA encoding').get();
+console.log('Database encoding:', encodingCheck);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

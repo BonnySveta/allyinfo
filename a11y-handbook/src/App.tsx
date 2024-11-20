@@ -56,30 +56,33 @@ function App() {
     const fetchResources = async () => {
       try {
         const response = await fetch('http://localhost:3001/api/suggestions');
-        if (!response.ok) throw new Error('Failed to fetch resources');
+        const data = await response.json();
         
-        const data: Resource[] = await response.json();
+        // Получаем массив элементов
+        const items = data.items || data || [];
         
-        // Группируем ресурсы по разделам
-        const grouped = data.reduce((acc: ResourcesBySection, resource) => {
-          const section = resource.section.replace(/^\//, '');
-          if (!acc[section]) {
-            acc[section] = [];
+        // Группируем по разделам
+        return items.reduce((acc: ResourcesBySection, item: Resource) => {
+          if (!acc[item.section]) {
+            acc[item.section] = [];
           }
-          acc[section].push(resource);
+          acc[item.section].push(item);
           return acc;
         }, {});
-
-        setResources(grouped);
-      } catch (err) {
-        setError('Не удалось загрузить ресурсы');
-        console.error(err);
-      } finally {
-        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching resources:', error);
+        return {};
       }
     };
 
-    fetchResources();
+    fetchResources().then((data) => {
+      setResources(data);
+      setLoading(false);
+    }).catch((err) => {
+      setError('Не удалось загрузить ресурсы');
+      console.error(err);
+      setLoading(false);
+    });
   }, []);
 
   return (
