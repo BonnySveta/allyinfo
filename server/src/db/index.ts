@@ -63,7 +63,44 @@ export const queries = {
     UPDATE suggestions 
     SET status = @status 
     WHERE id = @id
+  `),
+
+  update: db.prepare(`
+    UPDATE suggestions 
+    SET 
+      section = @section,
+      description = @description,
+      preview_title = @preview_title,
+      preview_domain = @preview_domain
+    WHERE id = @id
+  `),
+
+  delete: db.prepare(`
+    DELETE FROM suggestions 
+    WHERE id = @id
   `)
+};
+
+// Добавляем функции-обертки для удобства использования
+export const updateSuggestion = (id: number, data: {
+  section: string;
+  description: string | null;
+  preview: {
+    title: string;
+    domain: string;
+  };
+}) => {
+  return queries.update.run({
+    id,
+    section: data.section,
+    description: data.description,
+    preview_title: data.preview.title,
+    preview_domain: data.preview.domain
+  });
+};
+
+export const deleteSuggestion = (id: number) => {
+  return queries.delete.run({ id });
 };
 
 export { db }; 

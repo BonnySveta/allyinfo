@@ -25,7 +25,7 @@ const port = 3001;
 
 app.use(cors({
   origin: 'http://localhost:3000',
-  methods: ['GET', 'POST', 'PUT', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 }));
 
@@ -288,6 +288,90 @@ app.put('/api/suggestions/:id/status', async (req, res) => {
     console.error('Error updating suggestion status:', error);
     res.status(500).json({ 
       error: 'Failed to update suggestion status',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Эндпоинт для обновления материала
+app.put('/api/suggestions/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { section, description, preview } = req.body;
+
+    // Обновляем запись
+    const result = queries.update.run({
+      id: Number(id),
+      section,
+      description,
+      preview_title: preview.title,
+      preview_domain: preview.domain
+    });
+
+    // Проверяем, была ли обновлена запись
+    if (result.changes === 0) {
+      return res.status(404).json({ 
+        error: 'Материал не найден' 
+      });
+    }
+
+    // Получаем обновленную запись
+    const updatedRow = queries.getById.get({ id: Number(id) }) as SuggestionRow;
+    
+    // Форматируем ответ
+    const updatedSuggestion = {
+      id: updatedRow.id,
+      url: updatedRow.url,
+      section: updatedRow.section,
+      description: updatedRow.description,
+      preview: {
+        title: updatedRow.preview_title,
+        description: updatedRow.preview_description,
+        image: updatedRow.preview_image,
+        favicon: updatedRow.preview_favicon,
+        domain: updatedRow.preview_domain
+      },
+      status: updatedRow.status,
+      createdAt: updatedRow.created_at
+    };
+
+    res.json(updatedSuggestion);
+
+  } catch (error) {
+    console.error('Error updating suggestion:', error);
+    res.status(500).json({ 
+      error: 'Failed to update suggestion',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Эндпоинт для удаления материала
+app.delete('/api/suggestions/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Удаляем запись
+    const result = queries.delete.run({
+      id: Number(id)
+    });
+
+    // Проверяем, была ли удалена запись
+    if (result.changes === 0) {
+      return res.status(404).json({ 
+        error: 'Материал не найден' 
+      });
+    }
+
+    res.json({ 
+      message: 'Материал успешно удален',
+      id: Number(id)
+    });
+
+  } catch (error) {
+    console.error('Error deleting suggestion:', error);
+    res.status(500).json({ 
+      error: 'Failed to delete suggestion',
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
