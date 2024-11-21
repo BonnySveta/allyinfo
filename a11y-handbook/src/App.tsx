@@ -47,6 +47,16 @@ const ErrorMessage = styled.div`
   margin: 2rem 0;
 `;
 
+interface ApiResponse {
+  items: Resource[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
 function App() {
   const [resources, setResources] = useState<ResourcesBySection>({});
   const [loading, setLoading] = useState(true);
@@ -58,32 +68,39 @@ function App() {
         const response = await fetch('http://localhost:3001/api/suggestions');
         const data = await response.json();
         
-        // Получаем массив элементов
-        const items = data.items || data || [];
-        
-        // Группируем по разделам
-        return items.reduce((acc: ResourcesBySection, item: Resource) => {
+        const transformedData = data.items.map((item: any) => ({
+          ...item,
+          preview: {
+            title: item.preview_title,
+            description: item.preview_description,
+            image: item.preview_image,
+            favicon: item.preview_favicon,
+            domain: item.preview_domain
+          }
+        }));
+
+        const grouped = transformedData.reduce((acc: ResourcesBySection, item: Resource) => {
           if (!acc[item.section]) {
             acc[item.section] = [];
           }
           acc[item.section].push(item);
           return acc;
         }, {});
-      } catch (error) {
-        console.error('Error fetching resources:', error);
-        return {};
+
+        setResources(grouped);
+        setLoading(false);
+      } catch (err) {
+        setError('Не удалось загрузить ресурсы');
+        console.error(err);
+        setLoading(false);
       }
     };
 
-    fetchResources().then((data) => {
-      setResources(data);
-      setLoading(false);
-    }).catch((err) => {
-      setError('Не удалось загрузить ресурсы');
-      console.error(err);
-      setLoading(false);
-    });
+    fetchResources();
   }, []);
+
+  console.log('Current resources state:', resources);
+  console.log('Navigation config:', navigationConfig);
 
   return (
     <AuthProvider>
@@ -104,19 +121,22 @@ function App() {
                         <ErrorMessage>{error}</ErrorMessage>
                       ) : (
                         <CardsGrid>
-                          {navigationConfig.map((item) => (
-                            <Link 
-                              to={item.path} 
-                              key={item.path} 
-                              style={{ textDecoration: 'none' }}
-                            >
-                              <Card
-                                title={item.title}
-                                path={item.path}
-                                resources={resources[item.section] || []}
-                              />
-                            </Link>
-                          ))}
+                          {navigationConfig.map((item) => {
+                            console.log(`Resources for ${item.section}:`, resources[item.section]);
+                            return (
+                              <Link 
+                                to={item.path} 
+                                key={item.path} 
+                                style={{ textDecoration: 'none' }}
+                              >
+                                <Card
+                                  title={item.title}
+                                  path={item.path}
+                                  resources={resources[item.section] || []}
+                                />
+                              </Link>
+                            );
+                          })}
                         </CardsGrid>
                       )}
                     </>

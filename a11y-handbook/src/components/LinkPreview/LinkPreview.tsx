@@ -211,6 +211,7 @@ export function LinkPreview({ url }: { url: string }) {
           src={previewData.image} 
           alt=""
           onError={(e) => {
+            console.log('Failed to load preview image:', previewData.image);
             e.currentTarget.style.display = 'none';
           }}
         />

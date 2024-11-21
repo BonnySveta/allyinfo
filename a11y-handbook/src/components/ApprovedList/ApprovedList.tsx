@@ -1,17 +1,6 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
-
-interface ApprovedItem {
-  id: number;
-  url: string;
-  section: string;
-  description: string | null;
-  preview: {
-    title: string;
-    domain: string;
-  };
-  createdAt: string;
-}
+import { Resource } from '../../types/resource';
 
 const Table = styled.table`
   width: 100%;
@@ -92,7 +81,7 @@ const PageButton = styled.button<{ $active?: boolean }>`
 `;
 
 export function ApprovedList() {
-  const [items, setItems] = useState<ApprovedItem[]>([]);
+  const [items, setItems] = useState<Resource[]>([]);
   const [sections, setSections] = useState<string[]>([]);
   const [search, setSearch] = useState('');
   const [section, setSection] = useState('');
@@ -104,7 +93,7 @@ export function ApprovedList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState<Partial<ApprovedItem>>({});
+  const [editForm, setEditForm] = useState<Partial<Resource>>({});
 
   useEffect(() => {
     const loadSections = async () => {
@@ -140,17 +129,27 @@ export function ApprovedList() {
       params.append('page', String(page));
       params.append('limit', String(limit));
 
-      console.log('Request params:', params.toString());
-
       const response = await fetch(`http://localhost:3001/api/suggestions?${params}`);
       const data = await response.json();
 
-      console.log('Response data:', data);
+      const transformedItems = data.items.map((item: any) => ({
+        id: item.id,
+        url: item.url,
+        section: item.section,
+        description: item.description,
+        preview: {
+          title: item.preview_title,
+          description: item.preview_description,
+          image: item.preview_image,
+          favicon: item.preview_favicon,
+          domain: item.preview_domain
+        },
+        status: item.status,
+        createdAt: item.created_at
+      }));
 
-      if (data && data.items) {
-        setItems(data.items);
-        setTotal(data.pagination.total);
-      }
+      setItems(transformedItems);
+      setTotal(data.pagination.total);
     } catch (error) {
       console.error('Error loading items:', error);
       setError('Ошибка при загрузке данных');
@@ -163,14 +162,14 @@ export function ApprovedList() {
     loadItems();
   }, [search, section, sortBy, order, page]);
 
-  const handleEdit = (item: ApprovedItem) => {
+  const handleEdit = (item: Resource) => {
     setEditingId(item.id);
     setEditForm(item);
   };
 
   const handleSave = async () => {
     try {
-      if (!editingId || !editForm.section || !editForm.preview?.title || !editForm.preview?.domain) {
+      if (!editingId || !editForm.section || !editForm.preview?.title) {
         throw new Error('Необходимые поля не заполнены');
       }
 
@@ -179,6 +178,9 @@ export function ApprovedList() {
         description: editForm.description ?? null,
         preview: {
           title: editForm.preview.title,
+          description: editForm.preview.description,
+          image: editForm.preview.image,
+          favicon: editForm.preview.favicon,
           domain: editForm.preview.domain
         }
       };
@@ -216,7 +218,7 @@ export function ApprovedList() {
             section: updateData.section,
             description: updateData.description,
             preview: updateData.preview
-          } as ApprovedItem;
+          } as Resource;
         }
         return item;
       });
