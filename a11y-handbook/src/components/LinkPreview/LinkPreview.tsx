@@ -144,8 +144,12 @@ const ErrorContainer = styled.div`
 `;
 
 // Компонент
-export function LinkPreview({ url }: { url: string }) {
-  console.log('Preview data for URL:', url);
+interface LinkPreviewProps {
+  url: string;
+  onLoad?: (data: PreviewData) => void;
+}
+
+export function LinkPreview({ url, onLoad }: LinkPreviewProps) {
   const [loading, setLoading] = useState(false);
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [error, setError] = useState('');
@@ -162,10 +166,10 @@ export function LinkPreview({ url }: { url: string }) {
       setError('');
       
       try {
-        // Проверяем кэш
         const cachedData = previewCache.get(url);
         if (cachedData) {
           setPreviewData(cachedData);
+          onLoad?.(cachedData);
           setLoading(false);
           return;
         }
@@ -174,6 +178,7 @@ export function LinkPreview({ url }: { url: string }) {
         if (isMounted) {
           setPreviewData(data);
           previewCache.set(url, data);
+          onLoad?.(data);
         }
       } catch (err) {
         if (isMounted) {
@@ -192,7 +197,7 @@ export function LinkPreview({ url }: { url: string }) {
       isMounted = false;
       clearTimeout(timeoutId);
     };
-  }, [url]);
+  }, [url, onLoad]);
 
   if (loading) {
     return <LoadingContainer aria-label="Загрузка предпросмотра..." />;

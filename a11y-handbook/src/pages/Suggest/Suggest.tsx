@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { navigationConfig } from '../../config/navigation';
 import { Toast } from '../../components/Toast/Toast';
 import { LinkPreview } from '../../components/LinkPreview/LinkPreview';
+import { PreviewData } from '../../types/preview';
 
 interface FormData {
   section: string;
@@ -219,22 +220,47 @@ export function Suggest() {
     }
   };
 
+  // Добавляем состояние для отслеживания загрузки превью
+  const [previewData, setPreviewData] = useState<{
+    title: string;
+    description: string | null;
+    image: string | null;
+    favicon: string;
+    domain: string;
+  } | null>(null);
+
+  // Добавляем состояние для отслеживания успешной загрузки превью
+  const [isPreviewLoaded, setIsPreviewLoaded] = useState(false);
+
+  // Добавляем состояние для хранения данных превью
+  const [previewDescription, setPreviewDescription] = useState<string | null>(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    console.log('URL input changed:', value);
     setUrl(value);
-    if (value) {
-      console.log('Validating URL:', value);
-      validateUrl(value);
+    setPreviewDescription(null);
+    setIsPreviewLoading(true);
+  };
+
+  // Добавляем обработчик для получения данных из превью
+  const handlePreviewLoad = (data: PreviewData) => {
+    setIsPreviewLoading(false);
+    if (data.description) {
+      setPreviewDescription(data.description);
+      setDescription(data.description);
+    } else {
+      setPreviewDescription(null);
     }
   };
 
+  // Обновляем отправку формы
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     
     if (!section || !url) {
-      setError('Пожалуйста, заполните все поля');
+      setError('Пожалуйста, заполните все обязательные поля');
       return;
     }
 
@@ -245,7 +271,6 @@ export function Suggest() {
     setIsLoading(true);
 
     try {
-      // Отправляем данные на сервер
       const response = await fetch('http://localhost:3001/api/suggestions', {
         method: 'POST',
         headers: {
@@ -254,7 +279,7 @@ export function Suggest() {
         body: JSON.stringify({
           url,
           section,
-          description
+          description: previewData?.description || description || null
         })
       });
 
@@ -262,13 +287,12 @@ export function Suggest() {
         throw new Error('Failed to submit suggestion');
       }
 
-      // Очищаем черновик и форму
       clearDraft();
       setSection('');
       setUrl('');
       setDescription('');
+      setPreviewData(null);
       
-      // Показываем сообщение об успехе
       setToast({
         show: true,
         message: 'Материал успешно предложен!',
@@ -353,7 +377,12 @@ export function Suggest() {
             aria-required="true"
             aria-invalid={Boolean(urlError)}
           />
-          {url && !urlError && <LinkPreview url={url} />}
+          {url && !urlError && (
+            <LinkPreview 
+              url={url} 
+              onLoad={handlePreviewLoad}
+            />
+          )}
           {urlError && (
             <ErrorMessage role="alert" aria-live="polite">
               {urlError}
@@ -361,23 +390,26 @@ export function Suggest() {
           )}
         </FormGroup>
 
-        <FormGroup>
-          <Label htmlFor="description">
-            <LabelText>
-              Описание материала
-            </LabelText>
-          </Label>
-          <TextArea
-            id="description"
-            value={description}
-            onChange={handleDescriptionChange}
-            placeholder="Краткое описание материала..."
-            aria-describedby="description-hint"
-          />
-          <HintText id="description-hint">
-            Опционально: добавьте краткое описание материала
-          </HintText>
-        </FormGroup>
+        {/* Показываем поле описания только если есть URL, нет описания в превью и превью не загружается */}
+        {url && !previewDescription && !isPreviewLoading && (
+          <FormGroup>
+            <Label htmlFor="description">
+              <LabelText>
+                Описание материала
+              </LabelText>
+            </Label>
+            <TextArea
+              id="description"
+              value={description}
+              onChange={handleDescriptionChange}
+              placeholder="Краткое описание материала..."
+              aria-describedby="description-hint"
+            />
+            <HintText id="description-hint">
+              Опционально: добавьте краткое описание материала
+            </HintText>
+          </FormGroup>
+        )}
 
         {error && (
           <ErrorMessage role="alert" aria-live="polite">
