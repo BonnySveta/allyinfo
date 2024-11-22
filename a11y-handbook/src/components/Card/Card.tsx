@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { Resource } from '../../types/resource';
-import { LinkPreview } from '../LinkPreview/LinkPreview';
 
 interface CardProps {
   title: string;
@@ -10,25 +9,27 @@ interface CardProps {
 }
 
 const CardContainer = styled.div`
-  background: var(--card-background);
-  border-radius: 8px;
+  background: var(--nav-background);
+  border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 `;
 
 const CardHeader = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--nav-hover-background);
 `;
 
 const CardTitle = styled.h2`
   margin: 0;
-  font-size: 1.25rem;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  font-size: 1.5rem;
+  color: var(--text-color);
+  font-weight: 600;
+  cursor: default;
 `;
 
 const NewBadge = styled.span`
@@ -44,30 +45,25 @@ const CardContent = styled.div`
   margin: 1rem 0;
 `;
 
-const CardFooter = styled.div`
-  margin-top: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-`;
-
-const ResourceCount = styled.span`
-  color: var(--text-secondary);
-`;
-
 const ResourcesList = styled.ul`
   list-style: none;
   padding: 0;
-  margin: 1rem 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 `;
 
 const ResourceItem = styled.li`
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  margin: 0;
+  padding: 0.75rem;
+  background: var(--nav-background);
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: var(--interactive-element-hover);
+  }
 `;
 
 const ResourceLink = styled.a`
@@ -75,45 +71,56 @@ const ResourceLink = styled.a`
   align-items: center;
   color: var(--text-color);
   text-decoration: none;
-  font-size: 14px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  font-weight: 400;
   
   &:hover {
-    text-decoration: underline;
+    color: var(--link-hover-color);
+    text-decoration: none;
   }
 `;
 
 const ResourceIcon = styled.img`
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  border-radius: 2px;
-  object-fit: cover;
-  margin-right: 8px;
-`;
-
-const EmptyState = styled.div`
-  color: var(--text-secondary);
-  text-align: center;
-  padding: 1rem;
-`;
-
-const NewResourceBadge = styled.span`
-  background: var(--accent-color);
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  margin-left: 0.5rem;
-`;
-
-const TELEGRAM_FALLBACK_ICON = 'https://telegram.org/img/t_logo.png';
-
-const PreviewImage = styled.img`
   width: 20px;
   height: 20px;
   flex-shrink: 0;
   border-radius: 4px;
   object-fit: cover;
+  margin-right: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--background-primary);
+`;
+
+const EmptyState = styled.div`
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 2rem;
+  background: var(--background-secondary);
+  border-radius: 8px;
+  font-size: 0.9rem;
+`;
+
+const ViewAllLink = styled(Link)`
+  color: var(--link-color);
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &:hover {
+    color: var(--link-hover-color);
+  }
+
+  &::after {
+    content: '→';
+    transition: transform 0.2s ease;
+  }
+
+  &:hover::after {
+    transform: translateX(4px);
+  }
 `;
 
 export function Card({ title, path, resources = [] }: CardProps) {
@@ -137,15 +144,22 @@ export function Card({ title, path, resources = [] }: CardProps) {
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
+  const hasMoreResources = resources.length > 3;
+
   return (
     <CardContainer>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
+        {hasMoreResources && (
+          <ViewAllLink to={path}>
+            Все материалы ({resources.length})
+          </ViewAllLink>
+        )}
       </CardHeader>
       <CardContent>
         {resources.length > 0 ? (
           <ResourcesList>
-            {sortedResources.slice(0, 5).map(resource => (
+            {sortedResources.slice(0, 3).map(resource => (
               <ResourceItem key={resource.id}>
                 <ResourceLink 
                   href={resource.url} 
