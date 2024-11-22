@@ -2,21 +2,11 @@ import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { LinkPreview } from '../LinkPreview/LinkPreview';
 import { Toast } from '../Toast/Toast';
+import { Resource } from '../../types/resource';
 
-interface Suggestion {
-  id: number;
-  url: string;
-  section: string;
-  description: string | null;
-  preview: {
-    title: string;
-    description: string;
-    image: string | null;
-    favicon: string;
-    domain: string;
-  };
+// Расширяем интерфейс Resource для добавления поля status
+interface SuggestionResource extends Resource {
   status: 'pending' | 'approved' | 'rejected';
-  createdAt: string;
 }
 
 const Container = styled.div`
@@ -105,7 +95,7 @@ const ErrorText = styled.div`
 `;
 
 export function SuggestionsList() {
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<SuggestionResource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [toast, setToast] = useState<{
@@ -125,7 +115,11 @@ export function SuggestionsList() {
         throw new Error('Failed to fetch suggestions');
       }
       const data = await response.json();
-      setSuggestions(data);
+      const formattedData = data.map((item: any) => ({
+        ...item,
+        createdAt: item.created_at
+      }));
+      setSuggestions(formattedData);
     } catch (err) {
       setError('Не удалось загрузить предложения');
       console.error('Error fetching suggestions:', err);
@@ -192,6 +186,7 @@ export function SuggestionsList() {
     <Container>
       <h1>Предложенные материалы</h1>
       {suggestions.map(suggestion => (
+        console.log('Suggestion in render:', suggestion),
         <SuggestionCard key={suggestion.id}>
           <div>
             <SectionTag>{suggestion.section}</SectionTag>

@@ -141,6 +141,7 @@ const ViewAllLink = styled(Link)`
 `;
 
 const isNew = (date: string): boolean => {
+  console.log('Date in isNew:', date);
   const resourceDate = new Date(date);
   const currentDate = new Date();
   const diffTime = Math.abs(currentDate.getTime() - resourceDate.getTime());
@@ -150,9 +151,11 @@ const isNew = (date: string): boolean => {
 
 export function Card({ title, path, resources = [] }: CardProps) {
   const transformedResources = resources.map(resource => {
+    console.log('Resource in transform:', resource);
     if ('preview_title' in resource) {
       return {
         ...resource,
+        createdAt: (resource as any).created_at,
         preview: {
           title: (resource as any).preview_title,
           description: (resource as any).preview_description,
@@ -168,6 +171,8 @@ export function Card({ title, path, resources = [] }: CardProps) {
   const sortedResources = [...transformedResources].sort((a, b) => 
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
+
+  console.log('Sorted resources:', sortedResources.map(r => r.description));
 
   const hasMoreResources = resources.length > 3;
 
@@ -207,7 +212,7 @@ export function Card({ title, path, resources = [] }: CardProps) {
                 <span>
                   {resource.preview?.title}
                   {isNew(resource.createdAt) && (
-                    <NewBadge aria-label="Новый материал">Новое</NewBadge>
+                    <NewBadge aria-label="Новый материал">New</NewBadge>
                   )}
                 </span>
               </ResourceItem>
