@@ -45,7 +45,7 @@ export function SuggestForm() {
     type: 'success' | 'error';
   }>({ show: false, message: '', type: 'success' });
 
-  const sections = navigationConfig.filter(item => !item.path.includes('articles'));
+  const sections = navigationConfig;
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
