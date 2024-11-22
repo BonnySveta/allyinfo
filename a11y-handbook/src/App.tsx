@@ -24,6 +24,7 @@ import { AuthProvider } from './context/AuthContext';
 import { useState, useEffect } from 'react';
 import { Resource, ResourcesBySection } from './types/resource';
 import { Support } from './pages/Support/Support';
+import { AdminFeedbackList } from './pages/Admin/FeedbackList';
 
 const Container = styled.div`
   padding: 2rem;
@@ -152,6 +153,7 @@ function App() {
                   <Route path="/admin/suggestions" element={<Suggestions />} />
                   <Route path="/admin/approved" element={<ApprovedList />} />
                   <Route path="/support" element={<Support />} />
+                  <Route path="/admin/feedback-list" element={<AdminFeedbackList />} />
                 </Routes>
               </main>
             </Container>

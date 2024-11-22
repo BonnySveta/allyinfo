@@ -6,7 +6,7 @@ const db = new Database(path.join(__dirname, '../../data/suggestions.db'), {
   verbose: console.log
 });
 
-// Создаем таблицу, если её нет
+// Создаем таблицы, если их нет
 db.exec(`
   CREATE TABLE IF NOT EXISTS suggestions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,7 +20,14 @@ db.exec(`
     preview_domain TEXT NOT NULL,
     status TEXT DEFAULT 'pending',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
+  );
+
+  CREATE TABLE IF NOT EXISTS feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    message TEXT NOT NULL,
+    status TEXT DEFAULT 'new',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 // Подготавливаем запросы
@@ -78,6 +85,32 @@ export const queries = {
   delete: db.prepare(`
     DELETE FROM suggestions 
     WHERE id = @id
+  `),
+
+  insertFeedback: db.prepare(`
+    INSERT INTO feedback (message) 
+    VALUES (@message)
+  `),
+
+  getAllFeedback: db.prepare(`
+    SELECT * FROM feedback 
+    ORDER BY created_at DESC
+  `),
+
+  getFeedbackById: db.prepare(`
+    SELECT * FROM feedback 
+    WHERE id = @id
+  `),
+
+  updateFeedbackStatus: db.prepare(`
+    UPDATE feedback 
+    SET status = @status 
+    WHERE id = @id
+  `),
+
+  deleteFeedback: db.prepare(`
+    DELETE FROM feedback 
+    WHERE id = @id
   `)
 };
 
@@ -101,6 +134,18 @@ export const updateSuggestion = (id: number, data: {
 
 export const deleteSuggestion = (id: number) => {
   return queries.delete.run({ id });
+};
+
+export const addFeedback = (message: string) => {
+  return queries.insertFeedback.run({ message });
+};
+
+export const updateFeedbackStatus = (id: number, status: string) => {
+  return queries.updateFeedbackStatus.run({ id, status });
+};
+
+export const deleteFeedback = (id: number) => {
+  return queries.deleteFeedback.run({ id });
 };
 
 export { db }; 

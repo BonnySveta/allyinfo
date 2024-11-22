@@ -118,6 +118,7 @@ export function Header() {
             <AdminMenuContent>
               <AdminMenuItem to="/admin/suggestions">Модерация</AdminMenuItem>
               <AdminMenuItem to="/admin/approved">Одобренные</AdminMenuItem>
+              <AdminMenuItem to="/admin/feedback-list">Обратная связь</AdminMenuItem>
             </AdminMenuContent>
           </AdminMenu>
         )}
