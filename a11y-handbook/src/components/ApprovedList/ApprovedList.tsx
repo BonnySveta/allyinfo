@@ -80,6 +80,91 @@ const PageButton = styled.button<{ $active?: boolean }>`
   }
 `;
 
+const EditForm = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--nav-background);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 500px;
+  z-index: 1000;
+`;
+
+const Overlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+`;
+
+const FormGroup = styled.div`
+  margin-bottom: 1rem;
+`;
+
+const Label = styled.label`
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+`;
+
+const TextArea = styled.textarea`
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  min-height: 100px;
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+`;
+
+const Button = styled.button`
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  
+  &.primary {
+    background: var(--accent-color);
+    color: white;
+  }
+  
+  &.secondary {
+    background: var(--background-secondary);
+    color: var(--text-color);
+  }
+`;
+
+interface EditFormData {
+  section?: string;
+  description?: string | null;
+  preview?: {
+    title: string;
+    description?: string;
+    image?: string | null;
+    favicon?: string;
+    domain?: string;
+  };
+}
+
 export function ApprovedList() {
   const [items, setItems] = useState<Resource[]>([]);
   const [sections, setSections] = useState<string[]>([]);
@@ -93,7 +178,7 @@ export function ApprovedList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState<Partial<Resource>>({});
+  const [editForm, setEditForm] = useState<EditFormData>({});
 
   useEffect(() => {
     const loadSections = async () => {
@@ -178,10 +263,10 @@ export function ApprovedList() {
         description: editForm.description ?? null,
         preview: {
           title: editForm.preview.title,
-          description: editForm.preview.description,
-          image: editForm.preview.image,
-          favicon: editForm.preview.favicon,
-          domain: editForm.preview.domain
+          description: editForm.preview.description || '',
+          image: editForm.preview.image || null,
+          favicon: editForm.preview.favicon || '',
+          domain: editForm.preview.domain || ''
         }
       };
 
@@ -332,6 +417,62 @@ export function ApprovedList() {
               </PageButton>
             ))}
           </Pagination>
+
+          {editingId && (
+            <>
+              <Overlay onClick={() => setEditingId(null)} />
+              <EditForm>
+                <h2>Редактирование материала</h2>
+                
+                <FormGroup>
+                  <Label>Раздел</Label>
+                  <Select
+                    value={editForm.section || ''}
+                    onChange={(e) => setEditForm({ ...editForm, section: e.target.value })}
+                  >
+                    {sections.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </Select>
+                </FormGroup>
+
+                <FormGroup>
+                  <Label>Название</Label>
+                  <Input
+                    value={editForm.preview?.title || ''}
+                    onChange={(e) => setEditForm({
+                      ...editForm,
+                      preview: {
+                        ...editForm.preview,
+                        title: e.target.value,
+                        description: editForm.preview?.description || '',
+                        image: editForm.preview?.image || null,
+                        favicon: editForm.preview?.favicon || '',
+                        domain: editForm.preview?.domain || ''
+                      }
+                    })}
+                  />
+                </FormGroup>
+
+                <FormGroup>
+                  <Label>Описание</Label>
+                  <TextArea
+                    value={editForm.description || ''}
+                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  />
+                </FormGroup>
+
+                <ButtonGroup>
+                  <Button className="secondary" onClick={() => setEditingId(null)}>
+                    Отмена
+                  </Button>
+                  <Button className="primary" onClick={handleSave}>
+                    Сохранить
+                  </Button>
+                </ButtonGroup>
+              </EditForm>
+            </>
+          )}
         </>
       )}
     </div>
