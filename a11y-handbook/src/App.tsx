@@ -26,17 +26,52 @@ import { Resource, ResourcesBySection } from './types/resource';
 import { Support } from './pages/Support/Support';
 import { AdminFeedbackList } from './pages/Admin/FeedbackList';
 
-const Container = styled.div`
+const PageContainer = styled.div`
+  min-height: 100vh;
+  background-color: var(--background-color);
+`;
+
+const MainContainer = styled.div`
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  background-color: var(--background-color);
-  min-height: 100vh;
+
+  @media (max-width: 768px) {
+    padding-top: calc(24px + 2rem);
+  }
+`;
+
+const TitleContainer = styled.div`
+  margin: 2rem 0 3rem;
+  padding: 0 2rem;
+
+  @media (max-width: 768px) {
+    margin: 1.5rem 0 2rem;
+    padding: 0 1rem;
+  }
 `;
 
 const Title = styled.h1`
+  font-size: 2.5rem;
+  text-align: left;
+  margin-bottom: 0.5rem;
   color: var(--text-color);
-  margin-bottom: 20px;
+
+  @media (max-width: 768px) {
+    font-size: 1.75rem;
+  }
+`;
+
+const Subtitle = styled.p`
+  font-size: 1.5rem;
+  text-align: left;
+  margin: 0;
+  color: var(--text-secondary-color);
+  font-weight: 400;
+
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
 `;
 
 const ErrorMessage = styled.div`
@@ -100,63 +135,57 @@ function App() {
     fetchResources();
   }, []);
 
-  console.log('Current resources state:', resources);
-  console.log('Navigation config:', navigationConfig);
-
   return (
     <AuthProvider>
       <ThemeProvider>
         <GlobalStyle />
         <BrowserRouter>
           <Suspense fallback={<LoadingSpinner />}>
-            <Container>
+            <PageContainer>
               <Header />
-              <main>
-                <Routes>
-                  <Route path="/" element={
-                    <>
-                      <Title>Справочник по цифровой доступности</Title>
-                      {loading ? (
-                        <LoadingSpinner />
-                      ) : error ? (
-                        <ErrorMessage>{error}</ErrorMessage>
-                      ) : (
-                        <CardsGrid>
-                          {navigationConfig.map((item) => {
-                            console.log(`Resources for ${item.section}:`, resources[item.section]);
-                            return (
-                              <Link 
-                                to={item.path} 
-                                key={item.path} 
-                                style={{ textDecoration: 'none' }}
-                              >
-                                <Card
-                                  title={item.title}
-                                  path={item.path}
-                                  resources={resources[item.section] || []}
-                                />
-                              </Link>
-                            );
-                          })}
-                        </CardsGrid>
-                      )}
-                    </>
-                  } />
-                  <Route path="/articles" element={<Articles resources={resources['articles'] || []} />} />
-                  <Route path="/telegram" element={<Telegram resources={resources['telegram'] || []} />} />
-                  <Route path="/podcasts" element={<Podcasts resources={resources['podcasts'] || []} />} />
-                  <Route path="/courses" element={<Courses resources={resources['courses'] || []} />} />
-                  <Route path="/youtube" element={<YouTube resources={resources['youtube'] || []} />} />
-                  <Route path="/books" element={<Books resources={resources['books'] || []} />} />
-                  <Route path="/feedback" element={<Feedback />} />
-                  <Route path="/suggest" element={<Suggest />} />
-                  <Route path="/admin/suggestions" element={<Suggestions />} />
-                  <Route path="/admin/approved" element={<ApprovedList />} />
-                  <Route path="/support" element={<Support />} />
-                  <Route path="/admin/feedback-list" element={<AdminFeedbackList />} />
-                </Routes>
-              </main>
-            </Container>
+              <MainContainer>
+                <main>
+                  <Routes>
+                    <Route path="/" element={
+                      <>
+                        <TitleContainer>
+                          <Title>ALLY WIKI</Title>
+                          <Subtitle>справочник цифровой доступности</Subtitle>
+                        </TitleContainer>
+                        {loading ? (
+                          <LoadingSpinner />
+                        ) : error ? (
+                          <ErrorMessage>{error}</ErrorMessage>
+                        ) : (
+                          <CardsGrid>
+                            {navigationConfig.map((item) => (
+                              <Card
+                                key={item.path}
+                                title={item.title}
+                                path={item.path}
+                                resources={resources[item.section] || []}
+                              />
+                            ))}
+                          </CardsGrid>
+                        )}
+                      </>
+                    } />
+                    <Route path="/articles" element={<Articles resources={resources['articles'] || []} />} />
+                    <Route path="/telegram" element={<Telegram resources={resources['telegram'] || []} />} />
+                    <Route path="/podcasts" element={<Podcasts resources={resources['podcasts'] || []} />} />
+                    <Route path="/courses" element={<Courses resources={resources['courses'] || []} />} />
+                    <Route path="/youtube" element={<YouTube resources={resources['youtube'] || []} />} />
+                    <Route path="/books" element={<Books resources={resources['books'] || []} />} />
+                    <Route path="/feedback" element={<Feedback />} />
+                    <Route path="/suggest" element={<Suggest />} />
+                    <Route path="/admin/suggestions" element={<Suggestions />} />
+                    <Route path="/admin/approved" element={<ApprovedList />} />
+                    <Route path="/support" element={<Support />} />
+                    <Route path="/admin/feedback-list" element={<AdminFeedbackList />} />
+                  </Routes>
+                </main>
+              </MainContainer>
+            </PageContainer>
           </Suspense>
         </BrowserRouter>
       </ThemeProvider>

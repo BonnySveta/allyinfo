@@ -6,6 +6,12 @@ const CardsContainer = styled.div`
   gap: 2rem;
   padding: 2rem;
 
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0;
+  }
+
   @keyframes fadeInUp {
     from {
       opacity: 0;

@@ -16,10 +16,12 @@ const ToggleButton = styled.button`
   border: none;
   background: none;
   cursor: pointer;
-  font-size: 1.2rem;
   color: var(--text-color);
   transition: all 0.3s ease;
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   
   &:hover {
     opacity: 0.8;
@@ -44,8 +46,18 @@ const ToggleButton = styled.button`
   }
 `;
 
+const ButtonText = styled.span`
+  display: none;
+  font-size: 0.9rem;
+  
+  @media (max-width: 768px) {
+    display: inline;
+  }
+`;
+
 export const ThemeToggle: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
+  const buttonText = theme === 'light' ? 'Тёмная тема' : 'Светлая тема';
   
   return (
     <ToggleButton 
@@ -61,6 +73,7 @@ export const ThemeToggle: React.FC = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
         </svg>
       )}
+      <ButtonText>{buttonText}</ButtonText>
     </ToggleButton>
   );
 }; 
