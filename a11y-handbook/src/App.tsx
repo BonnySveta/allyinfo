@@ -3,14 +3,9 @@ import { BrowserRouter, Link, Routes, Route } from 'react-router-dom';
 import styled from 'styled-components';
 import { navigationConfig } from './config/navigation';
 import {
-  Articles,
-  Telegram,
-  Podcasts,
-  Courses,
-  YouTube,
-  Books,
   Feedback,
-  Suggest
+  Suggest,
+  ResourcePage
 } from './pages/pages';
 import { Header } from './components/Header/Header';
 import { ThemeProvider } from './context/ThemeContext';
@@ -25,6 +20,7 @@ import { useState, useEffect } from 'react';
 import { Resource, ResourcesBySection } from './types/resource';
 import { Support } from './pages/Support/Support';
 import { AdminFeedbackList } from './pages/Admin/FeedbackList';
+import { ResourceSection } from './pages/ResourcePage/config';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -92,6 +88,16 @@ interface ApiResponse {
     totalPages: number;
   };
 }
+
+// Конфигурация страниц
+const pageConfig = {
+  articles: { path: '/articles', title: 'Статьи' },
+  telegram: { path: '/telegram', title: 'Telegram-каналы' },
+  podcasts: { path: '/podcasts', title: 'Подкасты' },
+  courses: { path: '/courses', title: 'Курсы' },
+  youtube: { path: '/youtube', title: 'YouTube-каналы' },
+  books: { path: '/books', title: 'Книги' },
+};
 
 function App() {
   const [resources, setResources] = useState<ResourcesBySection>({});
@@ -170,12 +176,17 @@ function App() {
                         )}
                       </>
                     } />
-                    <Route path="/articles" element={<Articles resources={resources['articles'] || []} />} />
-                    <Route path="/telegram" element={<Telegram resources={resources['telegram'] || []} />} />
-                    <Route path="/podcasts" element={<Podcasts resources={resources['podcasts'] || []} />} />
-                    <Route path="/courses" element={<Courses resources={resources['courses'] || []} />} />
-                    <Route path="/youtube" element={<YouTube resources={resources['youtube'] || []} />} />
-                    <Route path="/books" element={<Books resources={resources['books'] || []} />} />
+                    {Object.entries(pageConfig).map(([key, config]) => (
+                      <Route 
+                        key={config.path}
+                        path={config.path}
+                        element={
+                          <ResourcePage 
+                            section={key as ResourceSection}
+                          />
+                        }
+                      />
+                    ))}
                     <Route path="/feedback" element={<Feedback />} />
                     <Route path="/suggest" element={<Suggest />} />
                     <Route path="/admin/suggestions" element={<Suggestions />} />

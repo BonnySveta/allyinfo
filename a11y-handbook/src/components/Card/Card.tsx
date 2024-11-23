@@ -51,13 +51,15 @@ const CardTitle = styled.h2`
 const NewBadge = styled.span`
   background: var(--accent-color);
   color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
+  padding: 0 0.3rem 0.1rem;
+  border-radius: 7px;
+  font-size: 0.7rem;
   font-weight: 500;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
+  margin-left: 0.5rem;
+  vertical-align: middle;
 `;
 
 const CardContent = styled.div`
@@ -90,13 +92,12 @@ const ResourceItem = styled.a`
   &:hover {
     background: var(--interactive-element-hover);
     color: var(--link-hover-color);
+    transform: translateY(-2px);
   }
+`;
 
-  > span {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
+const ResourceContent = styled.span`
+  flex: 1;
 `;
 
 const ResourceIcon = styled.img`
@@ -209,12 +210,12 @@ export function Card({ title, path, resources = [] }: CardProps) {
                     }}
                   />
                 )}
-                <span>
+                <ResourceContent>
                   {resource.preview?.title}
                   {isNew(resource.createdAt) && (
                     <NewBadge aria-label="Новый материал">New</NewBadge>
                   )}
-                </span>
+                </ResourceContent>
               </ResourceItem>
             ))}
           </ResourcesList>

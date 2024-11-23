@@ -6,45 +6,42 @@ export interface SearchParams {
   order?: string;
   page?: string;
   limit?: string;
+  status?: string;
 }
 
 export function buildSearchQuery(params: SearchParams) {
   let query = `
     SELECT * FROM suggestions 
-    WHERE status = 'approved'
+    WHERE 1=1
   `;
 
-  const queryParams: any = {};
+  const queryParams: Record<string, any> = {};
 
-  // Добавляем поиск
-  if (params.search && typeof params.search === 'string') {
-    const searchTerm = decodeURIComponent(params.search);
-    query += `
-      AND (
-        (preview_title LIKE @searchPattern COLLATE NOCASE)
-        OR (preview_description LIKE @searchPattern COLLATE NOCASE)
-        OR (description LIKE @searchPattern COLLATE NOCASE)
-      )
-    `;
-    queryParams.searchPattern = `%${searchTerm}%`;
-  }
+  // Добавляем фильтр по статусу (по умолчанию 'approved')
+  query += ` AND status = @status`;
+  queryParams.status = params.status || 'approved';
 
-  // Добавляем фильтр по разделу
-  if (params.section && typeof params.section === 'string') {
+  if (params.section) {
     query += ` AND section = @section`;
     queryParams.section = params.section;
   }
 
-  // Добавляем сортировку
-  const sortMapping: Record<string, string> = {
-    date: 'created_at',
-    title: 'preview_title',
-    section: 'section'
+  if (params.search) {
+    query += ` AND (
+      preview_title LIKE @search 
+      OR preview_description LIKE @search 
+      OR description LIKE @search
+    )`;
+    queryParams.search = `%${params.search}%`;
+  }
+
+  // Сортировка
+  const sortBy = params.sortBy || 'created_at';
+  const order = params.order?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+  query += ` ORDER BY ${sortBy} ${order}`;
+
+  return {
+    query,
+    params: queryParams
   };
-
-  const sortField = sortMapping[params.sortBy || 'date'] || 'created_at';
-  const sortOrder = params.order === 'asc' ? 'ASC' : 'DESC';
-  query += ` ORDER BY ${sortField} ${sortOrder}`;
-
-  return { query, params: queryParams };
 } 

@@ -1,9 +1,3 @@
-export { Articles } from './Articles/Articles';
-export { Books } from './Books/Books';
-export { Courses } from './Courses/Courses';
-export { Events } from './Events/Events';
-export { Podcasts } from './Podcasts/Podcasts';
-export { Telegram } from './Telegram/Telegram';
-export { YouTube } from './YouTube/YouTube';
 export { Feedback } from './Feedback/Feedback';
-export { Suggest } from './Suggest/Suggest'; 
+export { Suggest } from './Suggest/Suggest';
+export { ResourcePage } from '../components/ResourcePage/ResourcePage'; 

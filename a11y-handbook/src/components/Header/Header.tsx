@@ -77,6 +77,8 @@ const NavLink = styled(RouterNavLink)`
 const Nav = styled.nav<{ $isOpen: boolean }>`
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
   gap: 1.5rem;
 
   @media (max-width: 768px) {
