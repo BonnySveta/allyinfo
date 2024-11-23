@@ -23,6 +23,7 @@ import { AdminFeedbackList } from './pages/Admin/FeedbackList';
 import { ResourceSection } from './pages/ResourcePage/config';
 import { Footer } from './components/Footer/Footer';
 import { StartBanner } from './components/StartBanner/StartBanner';
+import { Admin } from './pages/Admin/Admin';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -47,7 +48,7 @@ const TitleSection = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 2rem 0 3rem;
+  margin: 2rem 0;
   padding: 0 2rem;
 
   @media (max-width: 768px) {
@@ -129,11 +130,21 @@ function App() {
   useEffect(() => {
     const fetchResources = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/suggestions');
+        const params = new URLSearchParams({
+          status: 'approved',
+          sortBy: 'date',
+          order: 'desc'
+        });
+
+        const response = await fetch(`http://localhost:3001/api/suggestions?${params}`);
         const data = await response.json();
         
         const transformedData = data.items.map((item: any) => ({
-          ...item,
+          id: item.id,
+          url: item.url,
+          section: item.section,
+          description: item.description,
+          createdAt: item.created_at,
           preview: {
             title: item.preview_title,
             description: item.preview_description,
@@ -218,6 +229,7 @@ function App() {
                     <Route path="/admin/approved" element={<ApprovedList />} />
                     <Route path="/support" element={<Support />} />
                     <Route path="/admin/feedback-list" element={<AdminFeedbackList />} />
+                    <Route path="/admin" element={<Admin />} />
                   </Routes>
                 </main>
               </MainContainer>

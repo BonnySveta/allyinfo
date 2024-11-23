@@ -48,7 +48,7 @@ export const GlobalStyle = createGlobalStyle`
     --border-color: #404040;
     --border-hover-color: #666666;
     --border-focus-color: var(--accent-color);
-    --banner-background: #313c52;
+    --banner-background: #323a49;
   }
 
   body {

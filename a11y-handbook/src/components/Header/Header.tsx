@@ -171,49 +171,6 @@ const SupportLink = styled(NavLink)`
   }
 `;
 
-const AdminMenu = styled.div`
-  position: relative;
-  display: inline-block;
-`;
-
-const AdminMenuContent = styled.div`
-  display: none;
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background-color: var(--nav-background);
-  min-width: 200px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1;
-  border-radius: 8px;
-  border: 1px solid var(--nav-hover-background);
-  margin-top: 0.5rem;
-
-  ${AdminMenu}:hover & {
-    display: block;
-  }
-`;
-
-const AdminMenuItem = styled(NavLink)`
-  color: var(--text-color);
-  padding: 0.75rem 1rem;
-  text-decoration: none;
-  display: block;
-  font-size: 0.9rem;
-  
-  &:hover {
-    background-color: var(--nav-hover-background);
-  }
-
-  &:first-child {
-    border-radius: 8px 8px 0 0;
-  }
-
-  &:last-child {
-    border-radius: 0 0 8px 8px;
-  }
-`;
-
 const AdminLink = styled(NavLink)`
   color: var(--accent-color);
   display: flex;
@@ -271,7 +228,7 @@ const BurgerLine = styled.span<{ $isOpen: boolean }>`
 `;
 
 export function Header() {
-  const { isAdmin, login, logout } = useAuth();
+  const { isAdmin } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const burgerButtonRef = useRef<HTMLButtonElement>(null);
@@ -360,6 +317,9 @@ export function Header() {
               <NavLink to="/" end onClick={closeMenu}>Главная</NavLink>
             </NavItem>
             <NavItem>
+              <NavLink to="/getting-started" onClick={closeMenu}>Начинающим</NavLink>
+            </NavItem>
+            <NavItem>
               <NavLink to="/feedback" onClick={closeMenu}>Обратная связь</NavLink>
             </NavItem>
             <NavItem>
@@ -375,31 +335,10 @@ export function Header() {
           
           <Controls>
             {isAdmin && (
-              <AdminMenu>
-                <AdminLink to="/admin" onClick={closeMenu}>
-                  Админ-панель
-                </AdminLink>
-                <AdminMenuContent>
-                  <AdminMenuItem to="/admin/suggestions" onClick={closeMenu}>
-                    Модерация
-                  </AdminMenuItem>
-                  <AdminMenuItem to="/admin/approved" onClick={closeMenu}>
-                    Одобренные
-                  </AdminMenuItem>
-                  <AdminMenuItem to="/admin/feedback-list" onClick={closeMenu}>
-                    Обратная связь
-                  </AdminMenuItem>
-                </AdminMenuContent>
-              </AdminMenu>
+              <AdminLink to="/admin" onClick={closeMenu}>
+                Админ-панель
+              </AdminLink>
             )}
-            <AuthButton 
-              onClick={() => {
-                isAdmin ? logout() : login();
-                closeMenu();
-              }}
-            >
-              {isAdmin ? 'Выйти' : 'Войти как админ'}
-            </AuthButton>
             <ThemeToggle />
           </Controls>
         </Nav>

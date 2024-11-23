@@ -213,8 +213,14 @@ export function ApprovedList() {
       params.append('order', order);
       params.append('page', String(page));
       params.append('limit', String(limit));
+      params.append('status', 'approved');
 
       const response = await fetch(`http://localhost:3001/api/suggestions?${params}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
 
       const transformedItems = data.items.map((item: any) => ({
@@ -270,10 +276,10 @@ export function ApprovedList() {
         }
       };
 
-      console.log('Sending PUT request to:', `http://localhost:3001/api/suggestions/${editingId}`);
+      console.log('Sending PUT request to:', `http://localhost:3001/api/approved/${editingId}`);
       console.log('Update data:', updateData);
 
-      const response = await fetch(`http://localhost:3001/api/suggestions/${editingId}`, {
+      const response = await fetch(`http://localhost:3001/api/approved/${editingId}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -321,7 +327,7 @@ export function ApprovedList() {
     if (!window.confirm('Вы уверены, что хотите удалить эту запись?')) return;
     
     try {
-      const response = await fetch(`http://localhost:3001/api/suggestions/${id}`, {
+      const response = await fetch(`http://localhost:3001/api/approved/${id}`, {
         method: 'DELETE',
       });
       

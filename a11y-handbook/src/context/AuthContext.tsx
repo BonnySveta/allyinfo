@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 interface AuthContextType {
   isAdmin: boolean;
@@ -9,15 +9,28 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAdmin, setIsAdmin] = useState(false); // Позже можно добавить проверку через токен
+  const [isAdmin, setIsAdmin] = useState(() => {
+    return localStorage.getItem('isAdmin') === 'true';
+  });
 
   const login = () => {
     setIsAdmin(true);
+    localStorage.setItem('isAdmin', 'true');
   };
 
   const logout = () => {
     setIsAdmin(false);
+    localStorage.removeItem('isAdmin');
   };
+
+  // Добавляем утилиты в window для доступа из консоли
+  useEffect(() => {
+    (window as any).adminUtils = {
+      login,
+      logout,
+      isAdmin: () => isAdmin
+    };
+  }, [isAdmin]);
 
   return (
     <AuthContext.Provider value={{ isAdmin, login, logout }}>

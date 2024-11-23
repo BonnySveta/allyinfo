@@ -151,29 +151,9 @@ const isNew = (date: string): boolean => {
 };
 
 export function Card({ title, path, resources = [] }: CardProps) {
-  const transformedResources = resources.map(resource => {
-    console.log('Resource in transform:', resource);
-    if ('preview_title' in resource) {
-      return {
-        ...resource,
-        createdAt: (resource as any).created_at,
-        preview: {
-          title: (resource as any).preview_title,
-          description: (resource as any).preview_description,
-          image: (resource as any).preview_image,
-          favicon: (resource as any).preview_favicon,
-          domain: (resource as any).preview_domain
-        }
-      };
-    }
-    return resource;
-  });
-
-  const sortedResources = [...transformedResources].sort((a, b) => 
+  const sortedResources = [...resources].sort((a, b) => 
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
-
-  console.log('Sorted resources:', sortedResources.map(r => r.description));
 
   const hasMoreResources = resources.length > 3;
 
@@ -199,11 +179,7 @@ export function Card({ title, path, resources = [] }: CardProps) {
               >
                 {resource.preview && (
                   <ResourceIcon 
-                    src={
-                      resource.section === '/telegram' && resource.preview.image 
-                        ? resource.preview.image 
-                        : resource.preview.favicon
-                    }
+                    src={resource.preview.favicon}
                     alt=""
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
