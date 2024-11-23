@@ -89,7 +89,7 @@ interface ApiResponse {
   };
 }
 
-// Конфигурация страниц
+// Обновляем конфигурацию страниц
 const pageConfig = {
   articles: { path: '/articles', title: 'Статьи' },
   telegram: { path: '/telegram', title: 'Telegram-каналы' },
@@ -97,6 +97,7 @@ const pageConfig = {
   courses: { path: '/courses', title: 'Курсы' },
   youtube: { path: '/youtube', title: 'YouTube-каналы' },
   books: { path: '/books', title: 'Книги' },
+  resources: { path: '/resources', title: 'Ресурсы' },
 };
 
 function App() {

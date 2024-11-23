@@ -13,9 +13,9 @@ export const navigationConfig: NavigationItem[] = [
     isNew: false
   },
   {
-    title: 'События',
-    path: '/events',
-    section: '/events',
+    title: 'Ресурсы',
+    path: '/resources',
+    section: '/resources',
     isNew: false
   },
   {

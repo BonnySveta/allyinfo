@@ -29,6 +29,11 @@ export const pageConfig = {
     title: 'Книги',
     description: 'Книги о веб-доступности'
   },
+  resources: { 
+    path: '/resources', 
+    title: 'Ресурсы',
+    description: 'Полезные ресурсы и инструменты для работы с веб-доступностью'
+  }
 } as const;
 
 export type ResourceSection = keyof typeof pageConfig; 
