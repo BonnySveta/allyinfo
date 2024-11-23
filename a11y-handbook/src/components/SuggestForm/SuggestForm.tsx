@@ -142,11 +142,7 @@ export function SuggestForm() {
   // ... все useEffect и функции-обработчики остаются здесь ...
 
   return (
-    <FormContainer>
-      <RequiredFieldsHint>
-        Поля, отмеченные <RequiredMark>*</RequiredMark>, обязательны для заполнения
-      </RequiredFieldsHint>
-      
+    <FormContainer>      
       <StyledForm onSubmit={handleSubmit} noValidate>
         <FormGroup>
           <Label htmlFor="section">

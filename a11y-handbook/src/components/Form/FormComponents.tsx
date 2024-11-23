@@ -4,6 +4,10 @@ export const FormContainer = styled.div`
   max-width: 600px;
   margin: 0 auto;
   padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 0;
+  }
 `;
 
 export const StyledForm = styled.form`
@@ -56,17 +60,28 @@ export const Input = styled.input`
 export const TextArea = styled.textarea`
   padding: 0.75rem;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 8px;
   background-color: var(--input-background);
   color: var(--text-color);
   font-size: 1rem;
   width: 100%;
-  min-height: 100px;
+  min-height: 150px;
   resize: vertical;
+  font-family: inherit;
+  transition: all 0.2s ease;
 
   &:focus {
-    outline: 2px solid var(--accent-color);
-    outline-offset: 2px;
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px var(--accent-color-alpha);
+  }
+
+  &::placeholder {
+    color: var(--text-secondary);
+  }
+
+  &:hover {
+    border-color: var(--border-hover-color, #999);
   }
 `;
 

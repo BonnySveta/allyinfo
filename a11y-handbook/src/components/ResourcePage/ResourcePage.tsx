@@ -11,6 +11,10 @@ const PageContainer = styled.div`
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 0;
+  }
 `;
 
 const Title = styled.h1`

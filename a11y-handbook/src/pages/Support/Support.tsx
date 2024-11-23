@@ -4,6 +4,10 @@ const Container = styled.div`
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 0;
+  }
 `;
 
 const Title = styled.h1`
@@ -49,7 +53,7 @@ export function Support() {
       
       <Section>
         <Text>
-          Справочник по цифровой доступности — это некоммерческий проект, 
+          ALLY WIKI — это некоммерческий проект, 
           который развивается силами сообщества. Мы собираем и систематизируем 
           материалы, чтобы сделать веб доступнее для всех.
         </Text>

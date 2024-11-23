@@ -21,16 +21,21 @@ import { Resource, ResourcesBySection } from './types/resource';
 import { Support } from './pages/Support/Support';
 import { AdminFeedbackList } from './pages/Admin/FeedbackList';
 import { ResourceSection } from './pages/ResourcePage/config';
+import { Footer } from './components/Footer/Footer';
 
 const PageContainer = styled.div`
   min-height: 100vh;
   background-color: var(--background-color);
+  display: flex;
+  flex-direction: column;
 `;
 
 const MainContainer = styled.div`
+  flex: 1;
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
 
   @media (max-width: 768px) {
     padding-top: calc(24px + 2rem);
@@ -43,7 +48,7 @@ const TitleContainer = styled.div`
 
   @media (max-width: 768px) {
     margin: 1.5rem 0 2rem;
-    padding: 0 1rem;
+    padding: 0;
   }
 `;
 
@@ -197,6 +202,7 @@ function App() {
                   </Routes>
                 </main>
               </MainContainer>
+              <Footer />
             </PageContainer>
           </Suspense>
         </BrowserRouter>

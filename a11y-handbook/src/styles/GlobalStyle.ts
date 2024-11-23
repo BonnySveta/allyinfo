@@ -15,6 +15,16 @@ export const GlobalStyle = createGlobalStyle`
     --text-secondary-color: #666;
     --success-color: #4caf50;
     --error-color: #f44336;
+    --input-border: #e0e0e0;
+    --input-border-hover: #999999;
+    --input-border-focus: var(--accent-color, #0066cc);
+    --input-background: var(--background-color);
+    --input-text: var(--text-color);
+    --input-placeholder: var(--text-secondary-color);
+    --input-shadow-focus: var(--accent-color-alpha, rgba(0, 102, 204, 0.2));
+    --border-color: #e0e0e0;
+    --border-hover-color: #999999;
+    --border-focus-color: var(--accent-color);
   }
 
   :root[data-theme="dark"] {
@@ -31,6 +41,12 @@ export const GlobalStyle = createGlobalStyle`
     --text-secondary-color: #999;
     --success-color: #4caf50;
     --error-color: #f44336;
+    --input-border: #404040;
+    --input-border-hover: #666666;
+    --input-background: var(--background-color);
+    --border-color: #404040;
+    --border-hover-color: #666666;
+    --border-focus-color: var(--accent-color);
   }
 
   body {
