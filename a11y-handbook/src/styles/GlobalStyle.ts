@@ -25,6 +25,7 @@ export const GlobalStyle = createGlobalStyle`
     --border-color: #e0e0e0;
     --border-hover-color: #999999;
     --border-focus-color: var(--accent-color);
+    --banner-background: #ebf2ff;
   }
 
   :root[data-theme="dark"] {
@@ -47,6 +48,7 @@ export const GlobalStyle = createGlobalStyle`
     --border-color: #404040;
     --border-hover-color: #666666;
     --border-focus-color: var(--accent-color);
+    --banner-background: #313c52;
   }
 
   body {

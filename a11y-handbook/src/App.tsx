@@ -22,6 +22,7 @@ import { Support } from './pages/Support/Support';
 import { AdminFeedbackList } from './pages/Admin/FeedbackList';
 import { ResourceSection } from './pages/ResourcePage/config';
 import { Footer } from './components/Footer/Footer';
+import { StartBanner } from './components/StartBanner/StartBanner';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -42,7 +43,22 @@ const MainContainer = styled.div`
   }
 `;
 
+const TitleSection = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 2rem 0 3rem;
+  padding: 0 2rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    margin: 1.5rem 0 2rem;
+    padding: 0;
+  }
+`;
+
 const TitleContainer = styled.div`
+  margin-top: -1rem;
   margin: 2rem 0 3rem;
   padding: 0 2rem;
 
@@ -160,10 +176,13 @@ function App() {
                   <Routes>
                     <Route path="/" element={
                       <>
-                        <TitleContainer>
-                          <Title>ALLY WIKI</Title>
-                          <Subtitle>справочник цифровой доступности</Subtitle>
-                        </TitleContainer>
+                        <TitleSection>
+                          <TitleContainer>
+                            <Title>ALLY WIKI</Title>
+                            <Subtitle>справочник цифровой доступности</Subtitle>
+                          </TitleContainer>
+                          <StartBanner />
+                        </TitleSection>
                         {loading ? (
                           <LoadingSpinner />
                         ) : error ? (
