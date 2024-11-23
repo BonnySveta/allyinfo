@@ -130,10 +130,15 @@ function App() {
   useEffect(() => {
     const fetchResources = async () => {
       try {
+        setLoading(true);
+        
+        // Загружаем все одобренные материалы (без пагинации)
         const params = new URLSearchParams({
           status: 'approved',
           sortBy: 'date',
-          order: 'desc'
+          order: 'desc',
+          limit: '100', 
+          page: '1'
         });
 
         const response = await fetch(`http://localhost:3001/api/suggestions?${params}`);
