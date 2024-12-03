@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { Resource } from '../../types/resource';
+import { NewBadge } from '../NewBadge/NewBadge';
 
 interface CardProps {
   title: string;
@@ -46,20 +47,6 @@ const CardTitle = styled.h2`
   @media (max-width: 768px) {
     font-size: 1.25rem;
   }
-`;
-
-const NewBadge = styled.span`
-  background: var(--accent-color);
-  color: white;
-  padding: 0 0.3rem 0.1rem;
-  border-radius: 7px;
-  font-size: 0.7rem;
-  font-weight: 500;
-  white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  margin-left: 0.5rem;
-  vertical-align: middle;
 `;
 
 const CardContent = styled.div`
@@ -141,15 +128,6 @@ const ViewAllLink = styled(Link)`
   }
 `;
 
-const isNew = (date: string): boolean => {
-  console.log('Date in isNew:', date);
-  const resourceDate = new Date(date);
-  const currentDate = new Date();
-  const diffTime = Math.abs(currentDate.getTime() - resourceDate.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays <= 3;
-};
-
 export function Card({ title, path, resources = [] }: CardProps) {
   const sortedResources = [...resources].sort((a, b) => 
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -188,9 +166,7 @@ export function Card({ title, path, resources = [] }: CardProps) {
                 )}
                 <ResourceContent>
                   {resource.preview?.title}
-                  {isNew(resource.createdAt) && (
-                    <NewBadge aria-label="Новый материал">New</NewBadge>
-                  )}
+                  {/* <NewBadge createdAt={resource.createdAt} /> */}
                 </ResourceContent>
               </ResourceItem>
             ))}

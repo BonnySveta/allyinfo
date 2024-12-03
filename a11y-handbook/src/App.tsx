@@ -24,6 +24,7 @@ import { ResourceSection } from './pages/ResourcePage/config';
 import { Footer } from './components/Footer/Footer';
 import { StartBanner } from './components/StartBanner/StartBanner';
 import { Admin } from './pages/Admin/Admin';
+import { GettingStarted } from './pages/GettingStarted/GettingStarted';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -235,6 +236,7 @@ function App() {
                     <Route path="/support" element={<Support />} />
                     <Route path="/admin/feedback-list" element={<AdminFeedbackList />} />
                     <Route path="/admin" element={<Admin />} />
+                    <Route path="/getting-started" element={<GettingStarted />} />
                   </Routes>
                 </main>
               </MainContainer>
