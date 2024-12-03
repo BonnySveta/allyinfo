@@ -38,17 +38,32 @@ export const PaymentLink = styled.a`
   justify-content: center;
   gap: 0.5rem;
   background: var(--accent-color);
-  color: white;
+  color: white !important;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   text-decoration: none;
   font-weight: 500;
   width: 330px;
   max-width: 100%;
+  transition: all 0.2s ease-in-out;
   
   &:hover {
-    opacity: 0.9;
+    background: var(--accent-color-hover, #0056b3);
+    color: white !important;
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    color: white !important;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    color: white !important;
   }
 `;
 
@@ -58,11 +73,6 @@ export const QRCode = styled.img`
   padding: 1rem;
   background: white;
   border-radius: 12px;
-  transition: transform 0.2s ease-in-out;
-
-  &:hover {
-    transform: scale(1.02);
-  }
 
   @media (max-width: 768px) {
     display: none;

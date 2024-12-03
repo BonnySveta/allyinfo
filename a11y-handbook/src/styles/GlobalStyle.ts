@@ -8,7 +8,7 @@ export const GlobalStyle = createGlobalStyle`
     --link-hover-color: #0056b3;
     --nav-background: #f8f9fa;
     --nav-hover-background: rgba(0, 0, 0, 0.05);
-    --accent-color: #0066cc;
+    --accent-color: #0070f3;
     --button-hover-background: rgba(0, 0, 0, 0.05);
     --focus-ring-color: rgba(0, 123, 255, 0.5);
     --interactive-element-hover: #f0f0f0;
@@ -26,6 +26,7 @@ export const GlobalStyle = createGlobalStyle`
     --border-hover-color: #999999;
     --border-focus-color: var(--accent-color);
     --banner-background: #ebf2ff;
+    --accent-color-hover: #0056b3;
   }
 
   :root[data-theme="dark"] {
@@ -49,6 +50,7 @@ export const GlobalStyle = createGlobalStyle`
     --border-hover-color: #666666;
     --border-focus-color: var(--accent-color);
     --banner-background: #323a49;
+    --accent-color-hover: #0056b3;
   }
 
   body {

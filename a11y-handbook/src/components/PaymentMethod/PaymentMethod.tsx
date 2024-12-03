@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { AnimatedHearts } from '../AnimatedHearts/AnimatedHearts';
 import {
   PaymentMethodContainer,
@@ -24,9 +25,14 @@ export function PaymentMethod({
   linkText,
   heartsCount = 4
 }: PaymentMethodProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
-    <PaymentMethodContainer>
-      <AnimatedHearts count={heartsCount} />
+    <PaymentMethodContainer 
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <AnimatedHearts count={heartsCount} isVisible={isHovered} />
       <PaymentMethodTitle>{title}</PaymentMethodTitle>
       <PaymentSection>
         <PaymentLink 
