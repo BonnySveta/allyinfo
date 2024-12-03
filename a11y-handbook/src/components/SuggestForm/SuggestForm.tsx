@@ -29,7 +29,11 @@ interface FormData {
 
 const DRAFT_KEY = 'suggest-form-draft';
 
-export function SuggestForm() {
+interface SuggestFormProps {
+  getPreview?: (url: string, section: string) => Promise<PreviewData>;
+}
+
+export function SuggestForm({ getPreview }: SuggestFormProps) {
   const [section, setSection] = useState('');
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
@@ -49,12 +53,14 @@ export function SuggestForm() {
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    console.log('URL changed:', value);
     setUrl(value);
     setPreviewDescription(null);
     setIsPreviewLoading(true);
   };
 
   const handlePreviewLoad = (data: PreviewData) => {
+    console.log('Preview loaded:', data);
     setIsPreviewLoading(false);
     if (data.description) {
       setPreviewDescription(data.description);
@@ -92,7 +98,7 @@ export function SuggestForm() {
         body: JSON.stringify({
           url,
           section,
-          description: previewData?.description || description || null
+          description: previewData?.description || null
         })
       });
 
@@ -189,6 +195,8 @@ export function SuggestForm() {
             <LinkPreview 
               url={url} 
               onLoad={handlePreviewLoad}
+              getPreview={getPreview}
+              section={section}
             />
           )}
           {urlError && (
@@ -197,26 +205,6 @@ export function SuggestForm() {
             </ErrorMessage>
           )}
         </FormGroup>
-
-        {url && !previewDescription && !isPreviewLoading && (
-          <FormGroup>
-            <Label htmlFor="description">
-              <LabelText>
-                Описание материала
-              </LabelText>
-            </Label>
-            <TextArea
-              id="description"
-              value={description}
-              onChange={handleDescriptionChange}
-              placeholder="Краткое описание материала..."
-              aria-describedby="description-hint"
-            />
-            <HintText id="description-hint">
-              Опционально: добавьте краткое описание материала
-            </HintText>
-          </FormGroup>
-        )}
 
         {error && (
           <ErrorMessage role="alert" aria-live="polite">

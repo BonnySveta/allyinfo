@@ -1,30 +1,25 @@
-const API_URL = 'http://localhost:3001/api/preview';
-
-export async function fetchPreview(url: string) {
+export const fetchPreview = async (url: string) => {
+  console.log('Fetching preview for URL:', url);
+  
   try {
-    console.log('Trying to fetch preview for:', url);
-    
-    const response = await fetch(API_URL, {
+    const response = await fetch('http://localhost:3001/api/preview', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
       },
       body: JSON.stringify({ url })
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Server response error:', response.status, errorText);
-      throw new Error(`Server error: ${response.status}`);
+      console.error('Preview fetch failed:', response.status, response.statusText);
+      throw new Error('Failed to fetch preview');
     }
 
-    return await response.json();
+    const data = await response.json();
+    console.log('Preview data:', data);
+    return data;
   } catch (error) {
-    console.error('Preview fetch error:', error);
-    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-      throw new Error('Сервер недоступен. Убедитесь, что сервер запущен на порту 3001');
-    }
+    console.error('Error fetching preview:', error);
     throw error;
   }
-} 
+}; 

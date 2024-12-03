@@ -3,6 +3,24 @@ import { queries, updateSuggestion, deleteSuggestion, db } from '../db';
 import { searchController } from '../controllers/search';
 import fetch from 'node-fetch';
 
+// Добавляем интерфейс для ответа превью
+interface PreviewResponse {
+  title: string;
+  description: string;
+  image: string;
+  favicon: string;
+  domain: string;
+  error?: string;
+}
+
+// Добавляем интерфейс для ответа YouTube
+interface YouTubePreviewResponse {
+  title?: string;
+  description?: string;
+  image?: string;
+  error?: string;
+}
+
 const router = express.Router();
 
 // Получение всех предложений
@@ -23,24 +41,110 @@ router.get('/suggestions/all', (_req, res) => {
 });
 
 // Поиск предложений
-router.get('/suggestions', searchController(db));
+router.get('/suggestions', async (req, res) => {
+  try {
+    console.log('Getting suggestions with params:', req.query);
+    const { limit = 100, page = 1 } = req.query;
+    
+    const offset = (Number(page) - 1) * Number(limit);
+    
+    // Проверяем подключение к БД
+    if (!db) {
+      throw new Error('Database connection not established');
+    }
+
+    console.log('Executing count query...');
+    const query = db.prepare(`
+      SELECT COUNT(*) as total FROM suggestions
+      WHERE status = 'approved'
+    `);
+    
+    const total = query.get() as { total: number };
+    console.log('Total approved suggestions:', total);
+
+    console.log('Executing select query...');
+    const suggestions = db.prepare(`
+      SELECT * FROM suggestions
+      WHERE status = 'approved'
+      ORDER BY created_at DESC
+      LIMIT ? OFFSET ?
+    `).all(Number(limit), offset);
+
+    console.log(`Found ${suggestions.length} suggestions`);
+    
+    const response = {
+      items: suggestions,
+      total: total.total,
+      page: Number(page),
+      limit: Number(limit)
+    };
+
+    console.log('Sending response:', response);
+    res.json(response);
+  } catch (error) {
+    console.error('Error getting suggestions:', error);
+    res.status(500).json({ 
+      error: 'Failed to get suggestions',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
 
 // Создание нового предложения
 router.post('/suggestions', async (req, res) => {
   try {
     const { url, section, description } = req.body;
 
-    // Получаем превью
-    const preview = await fetch(`http://localhost:3001/api/preview`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ url })
-    }).then(res => res.json());
+    let preview: PreviewResponse;
+    
+    // Проверяем, является ли это YouTube ссылкой или выбран раздел YouTube
+    const isYouTube = section === '/youtube' || url.includes('youtu.be') || url.includes('youtube.com');
+    
+    if (isYouTube) {
+      // Пытаемся получить данные с YouTube
+      try {
+        const response = await fetch(`http://localhost:3001/api/preview`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ url })
+        });
 
-    if (preview.error) {
-      throw new Error(preview.error);
+        const youtubeData = await response.json() as YouTubePreviewResponse;
+
+        preview = {
+          title: youtubeData.title || 'YouTube видео',
+          description: youtubeData.description || description || '',
+          image: youtubeData.image || `https://i.ytimg.com/vi/${url.split('/').pop()}/maxresdefault.jpg`,
+          favicon: 'https://www.youtube.com/favicon.ico',
+          domain: 'youtube.com'
+        };
+      } catch (error) {
+        // Если не удалось получить данные, используем базовые
+        preview = {
+          title: 'YouTube видео',
+          description: description || '',
+          image: `https://i.ytimg.com/vi/${url.split('/').pop()}/maxresdefault.jpg`,
+          favicon: 'https://www.youtube.com/favicon.ico',
+          domain: 'youtube.com'
+        };
+      }
+    } else {
+      // Для остальных ссылок получаем превью как обычно
+      const response = await fetch(`http://localhost:3001/api/preview`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url })
+      });
+
+      preview = await response.json() as PreviewResponse;
+
+      if (preview.error) {
+        throw new Error(preview.error);
+      }
     }
 
     // Сохраняем в БД

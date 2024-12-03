@@ -197,7 +197,10 @@ export function SuggestionsList() {
             </StatusTag>
           </div>
 
-          <LinkPreview url={suggestion.url} />
+          <LinkPreview 
+            url={suggestion.url} 
+            onLoad={() => {}}
+          />
 
           {suggestion.description && (
             <Description>{suggestion.description}</Description>

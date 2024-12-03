@@ -132,47 +132,54 @@ function App() {
     const fetchResources = async () => {
       try {
         setLoading(true);
+        const response = await fetch('http://localhost:3001/api/suggestions?limit=100&page=1');
         
-        // Загружаем все одобренные материалы (без пагинации)
-        const params = new URLSearchParams({
-          status: 'approved',
-          sortBy: 'date',
-          order: 'desc',
-          limit: '100', 
-          page: '1'
-        });
-
-        const response = await fetch(`http://localhost:3001/api/suggestions?${params}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
-        
-        const transformedData = data.items.map((item: any) => ({
-          id: item.id,
-          url: item.url,
-          section: item.section,
-          description: item.description,
-          createdAt: item.created_at,
-          preview: {
-            title: item.preview_title,
-            description: item.preview_description,
-            image: item.preview_image,
-            favicon: item.preview_favicon,
-            domain: item.preview_domain
-          }
-        }));
+        console.log('Raw data:', data); // Для отладки
 
-        const grouped = transformedData.reduce((acc: ResourcesBySection, item: Resource) => {
-          if (!acc[item.section]) {
-            acc[item.section] = [];
+        // Фильтруем только одобренные материалы
+        const approvedItems = data.items.filter((item: any) => item.status === 'approved');
+        console.log('Approved items:', approvedItems); // Для отладки
+
+        // Группируем по разделам, убирая слэш из начала пути
+        const grouped = approvedItems.reduce((acc: ResourcesBySection, item: any) => {
+          // Убираем слэш из начала пути и используем это как ключ
+          const sectionKey = item.section.replace('/', '');
+          console.log('Processing section:', sectionKey); // Для отладки
+          
+          if (!acc[sectionKey]) {
+            acc[sectionKey] = [];
           }
-          acc[item.section].push(item);
+
+          acc[sectionKey].push({
+            id: item.id,
+            url: item.url,
+            section: sectionKey, // Используем ключ без слэша
+            description: item.description || '',
+            createdAt: item.created_at,
+            preview: {
+              title: item.preview_title || '',
+              description: item.preview_description || '',
+              image: item.preview_image || '',
+              favicon: item.preview_favicon || '',
+              domain: item.preview_domain || ''
+            }
+          });
+
           return acc;
         }, {});
 
+        console.log('Grouped resources:', grouped); // Для отладки
         setResources(grouped);
-        setLoading(false);
-      } catch (err) {
+        setError('');
+      } catch (error) {
+        console.error('Error fetching resources:', error);
         setError('Не удалось загрузить ресурсы');
-        console.error(err);
+      } finally {
         setLoading(false);
       }
     };
@@ -206,14 +213,17 @@ function App() {
                           <ErrorMessage>{error}</ErrorMessage>
                         ) : (
                           <CardsGrid>
-                            {navigationConfig.map((item) => (
-                              <Card
-                                key={item.path}
-                                title={item.title}
-                                path={item.path}
-                                resources={resources[item.section] || []}
-                              />
-                            ))}
+                            {navigationConfig.map((item) => {
+                              const sectionKey = item.path.replace('/', '');
+                              return (
+                                <Card
+                                  key={item.path}
+                                  title={item.title}
+                                  path={item.path}
+                                  resources={resources[sectionKey] || []}
+                                />
+                              );
+                            })}
                           </CardsGrid>
                         )}
                       </>

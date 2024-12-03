@@ -1,31 +1,35 @@
 import styled, { keyframes } from 'styled-components';
 
 const spin = keyframes`
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 `;
 
-const SpinnerWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  color: var(--text-color);
+const SpinnerContainer = styled.div`
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-left: 8px;
+  vertical-align: middle;
 `;
 
 const Spinner = styled.div`
-  width: 40px;
-  height: 40px;
-  border: 4px solid var(--nav-background);
-  border-top: 4px solid var(--accent-color);
+  width: 100%;
+  height: 100%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
   border-radius: 50%;
-  animation: ${spin} 1s linear infinite;
+  animation: ${spin} 0.8s linear infinite;
 `;
 
-export const LoadingSpinner = () => (
-  <SpinnerWrapper>
-    <Spinner role="status">
-      <span className="sr-only">Загрузка...</span>
-    </Spinner>
-  </SpinnerWrapper>
-); 
+export function LoadingSpinner() {
+  return (
+    <SpinnerContainer>
+      <Spinner aria-hidden="true" />
+    </SpinnerContainer>
+  );
+} 

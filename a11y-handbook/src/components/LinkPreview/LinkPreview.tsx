@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { fetchPreview } from '../../api/preview';
 import { PreviewData } from '../../types/preview';
 import { usePreviewCache } from '../../hooks/usePreviewCache';
+import debounce from 'lodash/debounce';
 
 // Анимации
 const fadeIn = keyframes`
@@ -146,58 +147,84 @@ const ErrorContainer = styled.div`
 // Компонент
 interface LinkPreviewProps {
   url: string;
-  onLoad?: (data: PreviewData) => void;
+  onLoad: (data: PreviewData) => void;
+  getPreview?: (url: string, section: string) => Promise<PreviewData>;
+  section?: string;
 }
 
-export function LinkPreview({ url, onLoad }: LinkPreviewProps) {
+export function LinkPreview({ url, onLoad, getPreview, section }: LinkPreviewProps) {
   const [loading, setLoading] = useState(false);
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [error, setError] = useState('');
   const previewCache = usePreviewCache();
+  const mountedRef = useRef(true);
+
+  // Сохраняем зависимости в ref
+  const propsRef = useRef({ url, onLoad, getPreview, section, previewCache });
+  useEffect(() => {
+    propsRef.current = { url, onLoad, getPreview, section, previewCache };
+  }, [url, onLoad, getPreview, section, previewCache]);
+
+  const fetchPreview = useCallback(async () => {
+    const { url, onLoad, getPreview, section, previewCache } = propsRef.current;
+    if (!url) return;
+    
+    setLoading(true);
+    setError('');
+    
+    try {
+      const cachedData = previewCache.get(url);
+      if (cachedData) {
+        setPreviewData(cachedData);
+        onLoad(cachedData);
+        setLoading(false);
+        return;
+      }
+
+      let data: PreviewData;
+      if (getPreview && section) {
+        data = await getPreview(url, section);
+      } else {
+        const response = await fetch('http://localhost:3001/api/preview', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ url })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch preview');
+        }
+
+        data = await response.json();
+      }
+
+      if (mountedRef.current) {
+        setPreviewData(data);
+        previewCache.set(url, data);
+        onLoad(data);
+      }
+    } catch (err) {
+      if (mountedRef.current) {
+        setError('Не удалось загрузить предпросмотр');
+      }
+    } finally {
+      if (mountedRef.current) {
+        setLoading(false);
+      }
+    }
+  }, []); // Пустой массив зависимостей, так как все зависимости в ref
 
   useEffect(() => {
-    if (!url) return;
-
-    let timeoutId: NodeJS.Timeout;
-    let isMounted = true;
-
-    const getPreview = async () => {
-      setLoading(true);
-      setError('');
-      
-      try {
-        const cachedData = previewCache.get(url);
-        if (cachedData) {
-          setPreviewData(cachedData);
-          onLoad?.(cachedData);
-          setLoading(false);
-          return;
-        }
-
-        const data = await fetchPreview(url);
-        if (isMounted) {
-          setPreviewData(data);
-          previewCache.set(url, data);
-          onLoad?.(data);
-        }
-      } catch (err) {
-        if (isMounted) {
-          setError('Не удалось загрузить предпросмотр');
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    timeoutId = setTimeout(getPreview, 500);
-
+    mountedRef.current = true;
+    const timeoutId = setTimeout(fetchPreview, 500);
+    
     return () => {
-      isMounted = false;
+      mountedRef.current = false;
       clearTimeout(timeoutId);
     };
-  }, [url, onLoad]);
+  }, [url, fetchPreview]);
 
   if (loading) {
     return <LoadingContainer aria-label="Загрузка предпросмотра..." />;
@@ -232,12 +259,10 @@ export function LinkPreview({ url, onLoad }: LinkPreviewProps) {
               src={previewData.favicon} 
               alt=""
               onError={(e) => {
-                // Если не удалось загрузить фавикон, пробуем загрузить стандартный favicon.ico
                 const target = e.target as HTMLImageElement;
                 if (!target.src.endsWith('/favicon.ico')) {
                   target.src = `https://${previewData.domain}/favicon.ico`;
                 } else {
-                  // Если и стандартный favicon.ico не загрузился, скрываем элемент
                   target.style.display = 'none';
                 }
               }}
