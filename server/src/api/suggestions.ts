@@ -79,7 +79,6 @@ router.get('/suggestions', async (req, res) => {
       limit: Number(limit)
     };
 
-    console.log('Sending response:', response);
     res.json(response);
   } catch (error) {
     console.error('Error getting suggestions:', error);
@@ -280,7 +279,6 @@ router.get('/sections', (_req, res) => {
     const rows = query.all() as { section: string }[];
     const sections = rows.map(row => row.section);
     
-    console.log('Found sections:', sections);
     res.json(sections);
   } catch (error) {
     console.error('Error fetching sections:', error);

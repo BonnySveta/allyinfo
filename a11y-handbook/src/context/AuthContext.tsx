@@ -15,19 +15,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (credentials: { username: string; password: string }) => {
     try {
-      const response = await fetch('/api/login', {
+      const response = await fetch('http://localhost:3001/api/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(credentials)
       });
       
-      if (!response.ok) throw new Error('Ошибка авторизации');
+      if (!response.ok) {
+        throw new Error('Ошибка авторизации');
+      }
       
       const { token } = await response.json();
       localStorage.setItem('authToken', token);
       setIsAdmin(true);
     } catch (error) {
-      console.error(error);
+      console.error('Login error:', error);
       throw error;
     }
   };
