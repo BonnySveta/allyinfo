@@ -1,5 +1,7 @@
 import Database from 'better-sqlite3';
+import bcryptjs from 'bcryptjs';
 import path from 'path';
+import { config } from '../config';
 
 // Создаем подключение к БД
 const db = new Database(path.join(__dirname, '../../data/suggestions.db'), {
@@ -28,7 +30,57 @@ db.exec(`
     status TEXT DEFAULT 'new',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE TABLE IF NOT EXISTS admins (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_login DATETIME
+  );
 `);
+
+// Функция для инициализации первого админа
+export async function initializeAdmin() {
+  console.log('\n=== Initializing Admin ===');
+  const adminUsername = config.admin.username;
+  const adminPassword = config.admin.password;
+
+  if (!adminUsername || !adminPassword) {
+    console.warn('Initial admin credentials not provided in config');
+    return;
+  }
+
+  try {
+    console.log('Checking for existing admin...');
+    const existingAdmin = db.prepare('SELECT id FROM admins WHERE username = ?').get(adminUsername);
+
+    if (!existingAdmin) {
+      console.log('No admin found, creating new admin account...');
+      const saltRounds = 10;
+      const passwordHash = await bcryptjs.hash(adminPassword, saltRounds);
+
+      db.prepare(
+        'INSERT INTO admins (username, password_hash) VALUES (?, ?)'
+      ).run(adminUsername, passwordHash);
+
+      console.log('Initial admin account created successfully');
+    } else {
+      console.log('Admin account already exists');
+    }
+  } catch (error) {
+    console.error('Error initializing admin:', error);
+    throw error; // Пробрасываем ошибку дальше
+  }
+  console.log('======================\n');
+}
+
+// Добавляем методы для работы с админами
+export const adminQueries = {
+  findByUsername: db.prepare<string>('SELECT * FROM admins WHERE username = ?'),
+  updateLastLogin: db.prepare<number>('UPDATE admins SET last_login = CURRENT_TIMESTAMP WHERE id = ?'),
+  findById: db.prepare<number>('SELECT id FROM admins WHERE id = ?')
+};
 
 // Подготавливаем запросы
 export const queries = {

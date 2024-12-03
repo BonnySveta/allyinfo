@@ -2,38 +2,73 @@ import { createContext, useContext, useState, ReactNode, useEffect } from 'react
 
 interface AuthContextType {
   isAdmin: boolean;
-  login: () => void;
+  isLoading: boolean;
+  login: (credentials: { username: string; password: string }) => Promise<void>;
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAdmin, setIsAdmin] = useState(() => {
-    return localStorage.getItem('isAdmin') === 'true';
-  });
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = () => {
-    setIsAdmin(true);
-    localStorage.setItem('isAdmin', 'true');
+  const login = async (credentials: { username: string; password: string }) => {
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials)
+      });
+      
+      if (!response.ok) throw new Error('Ошибка авторизации');
+      
+      const { token } = await response.json();
+      localStorage.setItem('authToken', token);
+      setIsAdmin(true);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   };
 
   const logout = () => {
+    localStorage.removeItem('authToken');
     setIsAdmin(false);
-    localStorage.removeItem('isAdmin');
   };
 
-  // Добавляем утилиты в window для доступа из консоли
   useEffect(() => {
-    (window as any).adminUtils = {
-      login,
-      logout,
-      isAdmin: () => isAdmin
+    const verifyToken = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          setIsLoading(false);
+          return;
+        }
+
+        const response = await fetch('/api/verify-token', {
+          headers: { 
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          setIsAdmin(true);
+        } else {
+          localStorage.removeItem('authToken');
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
     };
-  }, [isAdmin]);
+
+    verifyToken();
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ isAdmin, login, logout }}>
+    <AuthContext.Provider value={{ isAdmin, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

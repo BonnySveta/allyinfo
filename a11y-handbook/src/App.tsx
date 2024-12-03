@@ -25,6 +25,8 @@ import { Footer } from './components/Footer/Footer';
 import { StartBanner } from './components/StartBanner/StartBanner';
 import { Admin } from './pages/Admin/Admin';
 import { GettingStarted } from './pages/GettingStarted/GettingStarted';
+import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
+import { Login } from './pages/Login/Login';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -241,11 +243,26 @@ function App() {
                     ))}
                     <Route path="/feedback" element={<Feedback />} />
                     <Route path="/suggest" element={<Suggest />} />
-                    <Route path="/admin/suggestions" element={<Suggestions />} />
+                    <Route 
+                      path="/admin/suggestions" 
+                      element={
+                        <ProtectedRoute showError>
+                          <Suggestions />
+                        </ProtectedRoute>
+                      } 
+                    />
                     <Route path="/admin/approved" element={<ApprovedList />} />
                     <Route path="/support" element={<Support />} />
                     <Route path="/admin/feedback-list" element={<AdminFeedbackList />} />
-                    <Route path="/admin" element={<Admin />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route 
+                      path="/admin/*" 
+                      element={
+                        <ProtectedRoute>
+                          <Admin />
+                        </ProtectedRoute>
+                      } 
+                    />
                     <Route path="/getting-started" element={<GettingStarted />} />
                   </Routes>
                 </main>
