@@ -5,6 +5,7 @@ import { db, initializeAdmin } from './db';
 import suggestionsRouter from './api/suggestions';
 import feedbackRouter from './api/feedback';
 import previewRouter from './api/preview';
+import approvedRouter from './api/approved';
 import { login, verifyToken } from './middleware/auth';
 import path from 'path';
 
@@ -108,6 +109,130 @@ app.get('/api/verify-token', verifyToken);
 app.use('/api', suggestionsRouter);
 app.use('/api', feedbackRouter);
 app.use('/api', previewRouter);
+app.use('/api', approvedRouter);
+
+// Добавим интерфейсы для типизации
+interface Section {
+  section: string;
+}
+
+interface QueryParams {
+  search?: string;
+  section?: string;
+  sortBy?: string;
+  order?: string;
+  page?: string | number;
+  limit?: string | number;
+  status?: string;
+}
+
+interface TotalCount {
+  total: number;
+}
+
+interface DBSuggestion {
+  id: number;
+  url: string;
+  section: string;
+  description: string | null;
+  preview_title: string;
+  preview_description: string | null;
+  preview_image: string | null;
+  preview_favicon: string;
+  preview_domain: string;
+  status: string;
+  created_at: string;
+}
+
+// Обновим роуты с правильной типизацией
+app.get('/api/sections', async (req, res) => {
+  try {
+    const sections = db.prepare('SELECT DISTINCT section FROM suggestions WHERE status = "approved"').all() as Section[];
+    res.json(sections.map(s => s.section));
+  } catch (error) {
+    console.error('Error fetching sections:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/api/suggestions', async (req, res) => {
+  try {
+    const { 
+      search, 
+      section, 
+      sortBy, 
+      order, 
+      page = 1, 
+      limit = 10, 
+      status 
+    } = req.query as QueryParams;
+    
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+    
+    let query = db.prepare(`
+      SELECT * FROM suggestions 
+      WHERE status = ?
+      ${search ? 'AND (preview_title LIKE ? OR preview_domain LIKE ?)' : ''}
+      ${section ? 'AND section = ?' : ''}
+      ORDER BY ${sortBy === 'title' ? 'preview_title' : sortBy === 'section' ? 'section' : 'created_at'} ${order === 'asc' ? 'ASC' : 'DESC'}
+      LIMIT ? OFFSET ?
+    `);
+
+    const params = [
+      status || 'approved',
+      ...(search ? [`%${search}%`, `%${search}%`] : []),
+      ...(section ? [section] : []),
+      limitNum,
+      (pageNum - 1) * limitNum
+    ];
+
+    const items = query.all(params) as DBSuggestion[];
+    
+    const totalQuery = db.prepare(`
+      SELECT COUNT(*) as total FROM suggestions 
+      WHERE status = ?
+      ${search ? 'AND (preview_title LIKE ? OR preview_domain LIKE ?)' : ''}
+      ${section ? 'AND section = ?' : ''}
+    `);
+
+    const { total } = totalQuery.get([
+      status || 'approved',
+      ...(search ? [`%${search}%`, `%${search}%`] : []),
+      ...(section ? [section] : [])
+    ]) as TotalCount;
+
+    const response = {
+      items: items.map(item => ({
+        id: item.id,
+        url: item.url,
+        section: item.section,
+        description: item.description,
+        preview_title: item.preview_title,
+        preview_description: item.preview_description,
+        preview_image: item.preview_image,
+        preview_favicon: item.preview_favicon,
+        preview_domain: item.preview_domain,
+        status: item.status,
+        created_at: item.created_at
+      })),
+      pagination: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum)
+      }
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error fetching suggestions:', error);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
 
 // Проверка работоспособности API
 app.get('/api/health', (_req, res) => {

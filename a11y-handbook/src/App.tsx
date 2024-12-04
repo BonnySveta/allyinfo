@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
 import { BrowserRouter, Link, Routes, Route } from 'react-router-dom';
 import styled from 'styled-components';
 import { navigationConfig } from './config/navigation';
@@ -14,7 +14,7 @@ import { Card } from './components/Card/Card';
 import { CardsGrid } from './components/CardsGrid/CardsGrid';
 import { LoadingSpinner } from './components/LoadingSpinner/LoadingSpinner';
 import { Suggestions } from './pages/Admin/Suggestions';
-import { ApprovedList } from './components/ApprovedList/ApprovedList';
+import { ApprovedList } from './pages/Admin/ApprovedList';
 import { AuthProvider } from './context/AuthContext';
 import { useState, useEffect } from 'react';
 import { Resource, ResourcesBySection } from './types/resource';
@@ -27,6 +27,9 @@ import { Admin } from './pages/Admin/Admin';
 import { GettingStarted } from './pages/GettingStarted/GettingStarted';
 import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
 import { Login } from './pages/Login/Login';
+import { CategoryChips } from './components/CategoryChips/CategoryChips';
+import { CATEGORIES, CategoryId } from './types/category';
+import { CategoryChipsPanel } from './components/CategoryChipsPanel/CategoryChipsPanel';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -58,6 +61,7 @@ const TitleSection = styled.div`
     flex-direction: column;
     margin: 1.5rem 0 2rem;
     padding: 0;
+    align-items: flex-start;
   }
 `;
 
@@ -104,6 +108,14 @@ const ErrorMessage = styled.div`
   margin: 2rem 0;
 `;
 
+const CardsContainer = styled.section`
+  padding: 0 2rem 3rem;
+
+  @media (max-width: 768px) {
+    padding: 0 0 3rem;
+  }
+`;
+
 interface ApiResponse {
   items: Resource[];
   pagination: {
@@ -129,6 +141,7 @@ function App() {
   const [resources, setResources] = useState<ResourcesBySection>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState<CategoryId[]>([]);
 
   useEffect(() => {
     const fetchResources = async () => {
@@ -149,9 +162,7 @@ function App() {
 
         // Группируем по разделам, убирая слэш из начала пути
         const grouped = approvedItems.reduce((acc: ResourcesBySection, item: any) => {
-          // Убираем слэш из начала пути и используем это как ключ
           const sectionKey = item.section.replace('/', '');
-          console.log('Processing section:', sectionKey); // Для отладки
           
           if (!acc[sectionKey]) {
             acc[sectionKey] = [];
@@ -160,9 +171,10 @@ function App() {
           acc[sectionKey].push({
             id: item.id,
             url: item.url,
-            section: sectionKey, // Используем ключ без слэша
+            section: sectionKey,
             description: item.description || '',
             createdAt: item.created_at,
+            categories: ['general'],
             preview: {
               title: item.preview_title || '',
               description: item.preview_description || '',
@@ -189,6 +201,20 @@ function App() {
     fetchResources();
   }, []);
 
+  // Фильтруем ресурсы по выбранным категориям
+  const filteredResources = useMemo(() => {
+    if (selectedCategories.length === 0) return resources;
+    
+    return Object.fromEntries(
+      Object.entries(resources).map(([section, items]) => [
+        section,
+        items.filter(item => 
+          item.categories?.some(cat => selectedCategories.includes(cat))
+        )
+      ])
+    );
+  }, [resources, selectedCategories]);
+
   return (
     <AuthProvider>
       <ThemeProvider>
@@ -209,24 +235,30 @@ function App() {
                           </TitleContainer>
                           <StartBanner />
                         </TitleSection>
+                        <CategoryChipsPanel
+                          selectedCategories={selectedCategories}
+                          onChange={setSelectedCategories}
+                        />
                         {loading ? (
                           <LoadingSpinner />
                         ) : error ? (
                           <ErrorMessage>{error}</ErrorMessage>
                         ) : (
-                          <CardsGrid>
-                            {navigationConfig.map((item) => {
-                              const sectionKey = item.path.replace('/', '');
-                              return (
-                                <Card
-                                  key={item.path}
-                                  title={item.title}
-                                  path={item.path}
-                                  resources={resources[sectionKey] || []}
-                                />
-                              );
-                            })}
-                          </CardsGrid>
+                          <CardsContainer>
+                            <CardsGrid>
+                              {navigationConfig.map((item) => {
+                                const sectionKey = item.path.replace('/', '');
+                                return (
+                                  <Card
+                                    key={item.path}
+                                    title={item.title}
+                                    path={item.path}
+                                    resources={filteredResources[sectionKey] || []}
+                                  />
+                                );
+                              })}
+                            </CardsGrid>
+                          </CardsContainer>
                         )}
                       </>
                     } />
@@ -251,7 +283,14 @@ function App() {
                         </ProtectedRoute>
                       } 
                     />
-                    <Route path="/admin/approved" element={<ApprovedList />} />
+                    <Route 
+                      path="/admin/approved" 
+                      element={
+                        <ProtectedRoute>
+                          <ApprovedList />
+                        </ProtectedRoute>
+                      } 
+                    />
                     <Route path="/support" element={<Support />} />
                     <Route path="/admin/feedback-list" element={<AdminFeedbackList />} />
                     <Route path="/login" element={<Login />} />

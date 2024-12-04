@@ -215,13 +215,18 @@ export function ApprovedList() {
       params.append('limit', String(limit));
       params.append('status', 'approved');
 
-      const response = await fetch(`http://localhost:3001/api/suggestions?${params}`);
+      const response = await fetch(`http://localhost:3001/api/approved?${params}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
       const data = await response.json();
+      console.log('Response data:', data);
+
+      if (!data || !data.items || !data.pagination) {
+        throw new Error('Invalid response format');
+      }
 
       const transformedItems = data.items.map((item: any) => ({
         id: item.id,
@@ -386,7 +391,7 @@ export function ApprovedList() {
                 <Th>Название</Th>
                 <Th>Домен</Th>
                 <Th>Описание</Th>
-                <Th>Дата добавления</Th>
+                <Th>Даа добавления</Th>
                 <Th>Действия</Th>
               </tr>
             </thead>
