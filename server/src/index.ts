@@ -109,7 +109,7 @@ app.get('/api/verify-token', verifyToken);
 app.use('/api', suggestionsRouter);
 app.use('/api', feedbackRouter);
 app.use('/api', previewRouter);
-app.use('/api', approvedRouter);
+app.use('/api/approved', approvedRouter);
 
 // Добавим интерфейсы для типизации
 interface Section {

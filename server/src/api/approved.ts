@@ -23,7 +23,7 @@ router.get('/sections', (req, res) => {
 });
 
 // Получение списка одобренных материалов
-router.get('/approved', (req, res) => {
+router.get('/', (req, res) => {
   try {
     const { search, section, sortBy, order, page = '1', limit = '10' } = req.query;
     
@@ -76,7 +76,7 @@ router.get('/approved', (req, res) => {
 });
 
 // Обновление одобренного материала
-router.put('/approved/:id', (req, res) => {
+router.put('/:id', (req, res) => {
   try {
     const { id } = req.params;
     const { section, description, preview } = req.body;
@@ -111,19 +111,27 @@ router.put('/approved/:id', (req, res) => {
 });
 
 // Удаление одобренного материала
-router.delete('/approved/:id', (req, res) => {
+router.delete('/:id', (req, res) => {
   try {
     const { id } = req.params;
-    const result = db.prepare('DELETE FROM suggestions WHERE id = ? AND status = "approved"').run(id);
+    
+    console.log(`Attempting to delete item with id: ${id}`);
+    
+    const result = db.prepare('DELETE FROM suggestions WHERE id = ? AND status = ?').run(id, 'approved');
 
     if (result.changes === 0) {
-      return res.status(404).json({ error: 'Item not found' });
+      console.log('No item found or not authorized to delete');
+      return res.status(404).json({ error: 'Item not found or not authorized to delete' });
     }
 
+    console.log('Item successfully deleted');
     res.json({ success: true });
   } catch (error) {
     console.error('Error deleting item:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ 
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 });
 
