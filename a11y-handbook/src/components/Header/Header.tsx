@@ -298,7 +298,7 @@ export function Header() {
       // Фокус на первый элемент меню
       firstFocusable.focus();
 
-      // Запр��щаем скролл body
+      // Запрщаем скролл body
       document.body.style.overflow = 'hidden';
 
       return () => {
@@ -358,9 +358,9 @@ export function Header() {
             )}
             <FocusButton
               onClick={handleFocusToggle}
-              aria-label="Включить режим фокуса"
+              aria-label="Включить имитацию скринридера"
             >
-              👁️ Фокус
+              Имитация скринридера
             </FocusButton>
             <ThemeToggle />
           </Controls>
