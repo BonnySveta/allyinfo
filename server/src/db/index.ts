@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import bcryptjs from 'bcryptjs';
 import path from 'path';
+import fs from 'fs';
 import { config } from '../config';
 
 // Создаем подключение к БД
@@ -198,6 +199,35 @@ export const updateFeedbackStatus = (id: number, status: string) => {
 
 export const deleteFeedback = (id: number) => {
   return queries.deleteFeedback.run({ id });
+};
+
+export const runMigrations = () => {
+  console.log('Running migrations...');
+  
+  const migrationFiles = [
+    'add_resource_categories.sql'
+  ];
+
+  migrationFiles.forEach(filename => {
+    const filePath = path.join(__dirname, 'migrations', filename);
+    const migration = fs.readFileSync(filePath, 'utf8');
+    
+    console.log(`Executing migration: ${filename}`);
+    const statements = migration.split(';').filter(stmt => stmt.trim());
+    
+    statements.forEach(statement => {
+      if (statement.trim()) {
+        try {
+          db.exec(statement);
+        } catch (error) {
+          console.error(`Error executing statement: ${statement}`);
+          throw error;
+        }
+      }
+    });
+  });
+
+  console.log('Migrations completed');
 };
 
 export { db }; 

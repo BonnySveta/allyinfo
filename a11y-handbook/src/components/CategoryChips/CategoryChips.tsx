@@ -5,7 +5,7 @@ const ChipsContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin: 1rem 2rem;
+  margin: 0;
 
   @media (max-width: 768px) {
     margin: 0.5rem 0;

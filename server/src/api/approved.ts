@@ -11,6 +11,27 @@ interface TotalCount {
   total: number;
 }
 
+interface DBItem {
+  id: number;
+  section: string;
+  description: string | null;
+  preview_title: string;
+  preview_description: string | null;
+  preview_image: string | null;
+  preview_favicon: string;
+  preview_domain: string;
+  status: string;
+  created_at: string;
+}
+
+interface CategoryRow {
+  category_id: string;
+}
+
+interface ItemWithCategories extends DBItem {
+  categories: string[];
+}
+
 // Получение списка разделов
 router.get('/sections', (req, res) => {
   try {
@@ -46,7 +67,7 @@ router.get('/', (req, res) => {
       (pageNum - 1) * limitNum
     ];
 
-    const items = query.all(params);
+    const items = query.all(params) as DBItem[];
     
     const totalQuery = db.prepare(`
       SELECT COUNT(*) as total FROM suggestions 
@@ -60,8 +81,21 @@ router.get('/', (req, res) => {
       ...(section ? [section] : [])
     ]) as TotalCount;
 
+    // Получаем категории для каждого материала
+    const itemsWithCategories = items.map(item => {
+      const categoryRows = db.prepare(`
+        SELECT category_id FROM resource_categories 
+        WHERE resource_id = ?
+      `).all(item.id) as CategoryRow[];
+
+      return {
+        ...item,
+        categories: categoryRows.map(row => row.category_id)
+      } as ItemWithCategories;
+    });
+
     res.json({
-      items,
+      items: itemsWithCategories,
       pagination: {
         total: result.total,
         page: pageNum,
@@ -79,29 +113,53 @@ router.get('/', (req, res) => {
 router.put('/:id', (req, res) => {
   try {
     const { id } = req.params;
-    const { section, description, preview } = req.body;
+    const { section, description, preview, categories }: {
+      section: string;
+      description: string | null;
+      preview: {
+        title: string;
+        description: string;
+        image: string | null;
+        favicon: string;
+        domain: string;
+      };
+      categories: string[];
+    } = req.body;
 
-    const result = db.prepare(`
-      UPDATE suggestions 
-      SET section = ?, description = ?, 
-          preview_title = ?, preview_description = ?,
-          preview_image = ?, preview_favicon = ?,
-          preview_domain = ?
-      WHERE id = ? AND status = 'approved'
-    `).run(
-      section,
-      description,
-      preview.title,
-      preview.description,
-      preview.image,
-      preview.favicon,
-      preview.domain,
-      id
-    );
+    db.transaction(() => {
+      // Обновляем основные данные
+      db.prepare(`
+        UPDATE suggestions 
+        SET section = ?, description = ?, 
+            preview_title = ?, preview_description = ?,
+            preview_image = ?, preview_favicon = ?,
+            preview_domain = ?
+        WHERE id = ? AND status = 'approved'
+      `).run(
+        section,
+        description,
+        preview.title,
+        preview.description,
+        preview.image,
+        preview.favicon,
+        preview.domain,
+        id
+      );
 
-    if (result.changes === 0) {
-      return res.status(404).json({ error: 'Item not found' });
-    }
+      // Удаляем старые категории
+      db.prepare('DELETE FROM resource_categories WHERE resource_id = ?').run(id);
+
+      // Добавляем новые категории
+      if (categories && categories.length > 0) {
+        const insertCategory = db.prepare(
+          'INSERT INTO resource_categories (resource_id, category_id) VALUES (?, ?)'
+        );
+        
+        categories.forEach(categoryId => {
+          insertCategory.run(id, categoryId);
+        });
+      }
+    })();
 
     res.json({ success: true });
   } catch (error) {

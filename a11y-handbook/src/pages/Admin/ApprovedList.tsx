@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Resource } from '../../types/resource';
+import { CategoryId, CATEGORIES } from '../../types/category';
+import { CategoryChips } from '../../components/CategoryChips/CategoryChips';
 
 const Table = styled.table`
   width: 100%;
@@ -156,6 +158,7 @@ const Button = styled.button`
 interface EditFormData {
   section?: string;
   description?: string | null;
+  categories?: CategoryId[];
   preview?: {
     title: string;
     description?: string;
@@ -272,6 +275,7 @@ export function ApprovedList() {
       const updateData = {
         section: editForm.section,
         description: editForm.description ?? null,
+        categories: editForm.categories || [],
         preview: {
           title: editForm.preview.title,
           description: editForm.preview.description || '',
@@ -313,6 +317,7 @@ export function ApprovedList() {
             ...item,
             section: updateData.section,
             description: updateData.description,
+            categories: updateData.categories,
             preview: updateData.preview
           } as Resource;
         }
@@ -390,8 +395,9 @@ export function ApprovedList() {
                 <Th>Раздел</Th>
                 <Th>Название</Th>
                 <Th>Домен</Th>
+                <Th>Категории</Th>
                 <Th>Описание</Th>
-                <Th>Даа добавления</Th>
+                <Th>Дата добавления</Th>
                 <Th>Действия</Th>
               </tr>
             </thead>
@@ -406,6 +412,11 @@ export function ApprovedList() {
                     </Link>
                   </Td>
                   <Td>{item.preview.domain}</Td>
+                  <Td>
+                    {item.categories?.map(catId => 
+                      CATEGORIES.find(c => c.id === catId)?.label
+                    ).join(', ') || '—'}
+                  </Td>
                   <Td>{item.description || '—'}</Td>
                   <Td>{new Date(item.createdAt).toLocaleDateString('ru-RU')}</Td>
                   <Td>
@@ -470,6 +481,15 @@ export function ApprovedList() {
                   <TextArea
                     value={editForm.description || ''}
                     onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  />
+                </FormGroup>
+
+                <FormGroup>
+                  <Label>Категории</Label>
+                  <CategoryChips
+                    categories={CATEGORIES}
+                    selectedCategories={editForm.categories || []}
+                    onChange={(categories: CategoryId[]) => setEditForm({ ...editForm, categories })}
                   />
                 </FormGroup>
 

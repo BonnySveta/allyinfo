@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { db, initializeAdmin } from './db';
+import { db, initializeAdmin, runMigrations } from './db';
 import suggestionsRouter from './api/suggestions';
 import feedbackRouter from './api/feedback';
 import previewRouter from './api/preview';
@@ -272,6 +272,7 @@ async function startServer() {
     console.log('Database Path:', path.join(__dirname, '../../data/suggestions.db'));
     
     await initializeAdmin();
+    runMigrations();
     
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
