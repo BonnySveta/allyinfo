@@ -85,8 +85,13 @@ router.get('/', (req, res) => {
     const itemsWithCategories = items.map(item => {
       const categoryRows = db.prepare(`
         SELECT category_id FROM resource_categories 
-        WHERE resource_id = ?
+        WHERE resource_id = CAST(? AS INTEGER)
       `).all(item.id) as CategoryRow[];
+
+      console.log(`Fetching categories for item ${item.id}:`, {
+        itemId: item.id,
+        categoryRows: categoryRows
+      });
 
       return {
         ...item,
@@ -94,7 +99,7 @@ router.get('/', (req, res) => {
       } as ItemWithCategories;
     });
 
-    res.json({
+    const response = {
       items: itemsWithCategories,
       pagination: {
         total: result.total,
@@ -102,7 +107,10 @@ router.get('/', (req, res) => {
         limit: limitNum,
         totalPages: Math.ceil(result.total / limitNum)
       }
-    });
+    };
+
+    console.log('API Response:', JSON.stringify(response, null, 2));
+    res.json(response);
   } catch (error) {
     console.error('Error fetching approved items:', error);
     res.status(500).json({ error: 'Internal server error' });

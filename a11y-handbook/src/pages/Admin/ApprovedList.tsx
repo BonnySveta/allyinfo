@@ -244,7 +244,8 @@ export function ApprovedList() {
           domain: item.preview_domain
         },
         status: item.status,
-        createdAt: item.created_at
+        createdAt: item.created_at,
+        categories: item.categories
       }));
 
       setItems(transformedItems);
@@ -329,7 +330,7 @@ export function ApprovedList() {
       setEditForm({});
     } catch (err) {
       console.error('Save error:', err);
-      setError(err instanceof Error ? err.message : 'Ошибка при обновлении записи');
+      setError(err instanceof Error ? err.message : 'Ошибка при обновлении з��писи');
     }
   };
 
@@ -371,7 +372,7 @@ export function ApprovedList() {
         <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
           <option value="date">По дате</option>
           <option value="title">По названию</option>
-          <option value="section">По разделу</option>
+          <option value="section">По раз��елу</option>
         </Select>
 
         <Select value={order} onChange={(e) => setOrder(e.target.value)}>

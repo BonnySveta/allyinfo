@@ -147,21 +147,16 @@ function App() {
     const fetchResources = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:3001/api/suggestions?limit=100&page=1');
+        const response = await fetch('http://localhost:3001/api/approved?limit=100&page=1&status=approved');
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
-        console.log('Raw data:', data); // Для отладки
+        console.log('Raw data from API:', data.items[0]);
 
-        // Фильтруем только одобренные материалы
-        const approvedItems = data.items.filter((item: any) => item.status === 'approved');
-        console.log('Approved items:', approvedItems); // Для отладки
-
-        // Группируем по разделам, убирая слэш из начала пути
-        const grouped = approvedItems.reduce((acc: ResourcesBySection, item: any) => {
+        const grouped = data.items.reduce((acc: ResourcesBySection, item: any) => {
           const sectionKey = item.section.replace('/', '');
           
           if (!acc[sectionKey]) {
@@ -174,7 +169,7 @@ function App() {
             section: sectionKey,
             description: item.description || '',
             createdAt: item.created_at,
-            categories: ['general'],
+            categories: item.categories || [],
             preview: {
               title: item.preview_title || '',
               description: item.preview_description || '',
@@ -187,7 +182,7 @@ function App() {
           return acc;
         }, {});
 
-        console.log('Grouped resources:', grouped); // Для отладки
+        console.log('Final grouped resources:', grouped);
         setResources(grouped);
         setError('');
       } catch (error) {
