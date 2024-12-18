@@ -59,6 +59,31 @@ const State = styled.span`
   margin-left: 6px;
 `;
 
+const Position = styled(State)`
+  background: rgba(255, 255, 255, 0.3);
+`;
+
+const ShortcutInfo = styled.div`
+  margin-top: 4px;
+  font-size: 12px;
+  opacity: 0.9;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 4px;
+`;
+
+const Shortcut = styled.span`
+  background: rgba(255, 255, 255, 0.15);
+  padding: 2px 4px;
+  border-radius: 3px;
+  margin-right: 8px;
+  font-family: monospace;
+`;
+
+const LandmarkInfo = styled(State)`
+  background: rgba(var(--accent-color-rgb), 0.3);
+  font-style: italic;
+`;
+
 interface SpotlightPosition {
   top: number;
   left: number;
@@ -77,6 +102,16 @@ interface ElementDetails {
   checked?: boolean;
   required?: boolean;
   current?: boolean | string;
+  shortcuts?: string[];
+  tabIndex?: number;
+  isInteractive: boolean;
+  position?: {
+    current: number;
+    total: number;
+  };
+  landmark?: string;
+  region?: string;
+  parentLandmarks?: string[];
 }
 
 function getElementInfo(element: Element): ElementDetails {
@@ -113,7 +148,8 @@ function getElementInfo(element: Element): ElementDetails {
   // Собираем информацию об элементе
   const info: ElementDetails = { 
     role,
-    states: []
+    states: [],
+    isInteractive: false
   };
 
   // Определяем уровень заголовка
@@ -178,6 +214,169 @@ function getElementInfo(element: Element): ElementDetails {
     info.states.push(`current ${current === 'true' ? 'item' : current}`);
   }
 
+  // Проверяем интерактивность и доступность с клавиатуры
+  if (element instanceof HTMLElement) {
+    // Проверяем tabIndex
+    const tabIndex = element.tabIndex;
+    if (tabIndex !== undefined) {
+      info.tabIndex = tabIndex;
+      if (tabIndex >= 0) {
+        info.isInteractive = true;
+      }
+    }
+
+    // Проверяем accesskey
+    const accessKey = element.accessKey;
+    if (accessKey) {
+      info.shortcuts = [`Alt + ${accessKey.toUpperCase()}`];
+    }
+
+    // Добавляем информацию о навигации в зависимости от роли
+    switch (info.role) {
+      case 'button':
+        info.shortcuts = [...(info.shortcuts || []), 'Space/Enter: activate'];
+        break;
+      case 'link':
+        info.shortcuts = [...(info.shortcuts || []), 'Enter: follow link'];
+        break;
+      case 'checkbox':
+        info.shortcuts = [...(info.shortcuts || []), 'Space: toggle'];
+        break;
+      case 'radio':
+        info.shortcuts = [...(info.shortcuts || []), '↑/↓: select'];
+        break;
+      case 'combobox':
+      case 'listbox':
+        info.shortcuts = [...(info.shortcuts || []), '↑/↓: navigate', 'Enter: select'];
+        break;
+      case 'slider':
+        info.shortcuts = [...(info.shortcuts || []), '←/→: adjust value'];
+        break;
+      case 'tablist':
+        info.shortcuts = [...(info.shortcuts || []), '←/→: switch tabs'];
+        break;
+    }
+
+    // Проверяем роль в навигации
+    if (element.matches('nav a, nav button, [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]')) {
+      info.shortcuts = [...(info.shortcuts || []), '↑/↓: navigate menu'];
+    }
+  }
+
+  // Добавляем ��роверку позиции в списке
+  if (element.matches('li, [role="listitem"], [role="menuitem"], [role="option"], [role="tab"]')) {
+    const parent = element.parentElement;
+    if (parent) {
+      const items = Array.from(parent.children).filter(child => 
+        child.matches('li, [role="listitem"], [role="menuitem"], [role="option"], [role="tab"]')
+      );
+      const currentIndex = items.indexOf(element);
+      if (currentIndex !== -1) {
+        info.position = {
+          current: currentIndex + 1,
+          total: items.length
+        };
+        info.states.push(`${currentIndex + 1} of ${items.length}`);
+      }
+    }
+  }
+
+  // Также проверяем вложенные списки для определения уровня вложенности
+  let parentList = element.closest('ul, ol, [role="list"], [role="menu"], [role="listbox"], [role="tablist"]');
+  let nestingLevel = 0;
+  
+  while (parentList) {
+    nestingLevel++;
+    const parent = parentList.parentElement;
+    parentList = parent ? parent.closest('ul, ol, [role="list"], [role="menu"], [role="listbox"], [role="tablist"]') : null;
+  }
+
+  if (nestingLevel > 1) {
+    info.states.push(`level ${nestingLevel}`);
+  }
+
+  // Определяем landmarks и regions
+  const landmarkRoles = {
+    banner: 'header',
+    complementary: 'complementary content',
+    contentinfo: 'footer',
+    form: 'form',
+    main: 'main content',
+    navigation: 'navigation',
+    region: 'region',
+    search: 'search',
+  };
+
+  // Проверяем роль элемента как landmark
+  if (landmarkRoles[role as keyof typeof landmarkRoles]) {
+    info.landmark = landmarkRoles[role as keyof typeof landmarkRoles];
+    info.states.push(`landmark: ${info.landmark}`);
+  }
+
+  // Проверяем aria-label для региона
+  const regionLabel = element.getAttribute('aria-label');
+  if (regionLabel && (role === 'region' || element.tagName.toLowerCase() === 'section')) {
+    info.region = regionLabel;
+    info.states.push(`region: ${regionLabel}`);
+  }
+
+  // Собираем информацию о родительских landmarks
+  let parent = element.parentElement;
+  const parentLandmarks: string[] = [];
+  
+  while (parent) {
+    const parentRole = parent.getAttribute('role');
+    const parentTag = parent.tagName.toLowerCase();
+    
+    if (parentRole && landmarkRoles[parentRole as keyof typeof landmarkRoles]) {
+      const label = parent.getAttribute('aria-label');
+      parentLandmarks.push(label ? 
+        `${landmarkRoles[parentRole as keyof typeof landmarkRoles]} "${label}"` : 
+        landmarkRoles[parentRole as keyof typeof landmarkRoles]
+      );
+    } else if (parentTag in landmarkRoles) {
+      const label = parent.getAttribute('aria-label');
+      parentLandmarks.push(label ? 
+        `${landmarkRoles[parentTag as keyof typeof landmarkRoles]} "${label}"` : 
+        landmarkRoles[parentTag as keyof typeof landmarkRoles]
+      );
+    }
+    
+    parent = parent.parentElement;
+  }
+
+  if (parentLandmarks.length > 0) {
+    info.parentLandmarks = parentLandmarks;
+    info.states.push(`in ${parentLandmarks.join(' > ')}`);
+  }
+
+  // Проверяем дополнительные атрибуты для улучшения контекста
+  const labelledBy = element.getAttribute('aria-labelledby');
+  if (labelledBy) {
+    const labelElements = labelledBy.split(' ')
+      .map(id => document.getElementById(id))
+      .filter(el => el)
+      .map(el => el!.textContent)
+      .filter(text => text);
+    
+    if (labelElements.length > 0) {
+      info.states.push(`labelled by: ${labelElements.join(' ')}`);
+    }
+  }
+
+  const describedBy = element.getAttribute('aria-describedby');
+  if (describedBy) {
+    const descElements = describedBy.split(' ')
+      .map(id => document.getElementById(id))
+      .filter(el => el)
+      .map(el => el!.textContent)
+      .filter(text => text);
+    
+    if (descElements.length > 0) {
+      info.states.push(`described by: ${descElements.join(' ')}`);
+    }
+  }
+
   return info;
 }
 
@@ -190,6 +389,7 @@ export function FocusOverlay() {
     height: 0
   });
   const [elementInfo, setElementInfo] = useState<ElementDetails | null>(null);
+  const [lastScrollPosition, setLastScrollPosition] = useState(0);
 
   useEffect(() => {
     const handleFocusChange = () => {
@@ -198,6 +398,34 @@ export function FocusOverlay() {
       if (focusedElement && isActive && focusedElement !== document.body) {
         const rect = focusedElement.getBoundingClientRect();
         const padding = 4;
+
+        // Получаем высоту видимой области
+        const viewportHeight = window.innerHeight;
+        // Получаем текущую позицию скролла
+        const currentScroll = document.body.style.top ? 
+          parseInt(document.body.style.top) * -1 : 
+          window.scrollY;
+
+        // Проверяем, виден ли элемент полностью
+        const elementTop = rect.top + currentScroll;
+        const elementBottom = elementTop + rect.height;
+
+        // Определяем оптимальную позицию скролла
+        let newScrollY = currentScroll;
+
+        // Если элемент выходит за нижнюю границу
+        if (rect.bottom > viewportHeight - 100) { // 100px отступ снизу
+          newScrollY = elementBottom - viewportHeight + 100;
+        }
+        // Если элемент выходит за верхнюю границу
+        else if (rect.top < 100) { // 100px отступ сверху
+          newScrollY = elementTop - 100;
+        }
+
+        // Обновляем позицию скролла и стили body
+        if (newScrollY !== currentScroll) {
+          document.body.style.top = `-${newScrollY}px`;
+        }
 
         setSpotlightPosition({
           top: rect.top - padding,
@@ -213,14 +441,38 @@ export function FocusOverlay() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isActive) {
         setIsActive(false);
+        // Восстанавливаем скролл при выходе по Escape
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        window.scrollTo(0, lastScrollPosition);
       }
     };
 
     const handleToggleOverlay = () => {
-      setIsActive(prev => !prev);
-      if (!isActive) {
-        handleFocusChange();
-      }
+      setIsActive(prev => {
+        const newState = !prev;
+        
+        if (newState) {
+          // Сохраняем текущую позицию скролла
+          const scrollY = window.scrollY;
+          setLastScrollPosition(scrollY);
+          document.body.style.position = 'fixed';
+          document.body.style.top = `-${scrollY}px`;
+          document.body.style.width = '100%';
+        } else {
+          // Восстанавливаем позицию скролла
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.width = '';
+          window.scrollTo(0, lastScrollPosition);
+        }
+        
+        if (!prev) {
+          handleFocusChange();
+        }
+        return newState;
+      });
     };
 
     // Создаем MutationObserver для отслеживания изменений атрибутов
@@ -253,12 +505,18 @@ export function FocusOverlay() {
     document.addEventListener('toggleFocusOverlay', handleToggleOverlay);
 
     return () => {
+      // Очищаем стили и восстанавливаем скролл при размонтировании
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      window.scrollTo(0, lastScrollPosition);
+      
       document.removeEventListener('focusin', handleFocusChange);
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('toggleFocusOverlay', handleToggleOverlay);
       observer.disconnect();
     };
-  }, [isActive]);
+  }, [isActive, lastScrollPosition]);
 
   return (
     <Overlay $isActive={isActive}>
@@ -276,9 +534,27 @@ export function FocusOverlay() {
                   {elementInfo.description && ` (${elementInfo.description})`}
                 </Attributes>
               )}
-              {elementInfo.states?.length > 0 && elementInfo.states.map((state, index) => (
-                <State key={index}>{state}</State>
-              ))}
+              {elementInfo.states?.length > 0 && elementInfo.states.map((state, index) => {
+                if (state.includes(' of ')) {
+                  return <Position key={index}>{state}</Position>;
+                }
+                if (state.startsWith('landmark:') || state.startsWith('region:') || state.startsWith('in ')) {
+                  return <LandmarkInfo key={index}>{state}</LandmarkInfo>;
+                }
+                return <State key={index}>{state}</State>;
+              })}
+              {elementInfo.isInteractive && (
+                <ShortcutInfo>
+                  <div>
+                    {elementInfo.tabIndex !== undefined && elementInfo.tabIndex >= 0 && (
+                      <Shortcut>Tab: navigate</Shortcut>
+                    )}
+                    {elementInfo.shortcuts?.map((shortcut, index) => (
+                      <Shortcut key={index}>{shortcut}</Shortcut>
+                    ))}
+                  </div>
+                </ShortcutInfo>
+              )}
             </ElementInfo>
           )}
         </Spotlight>
