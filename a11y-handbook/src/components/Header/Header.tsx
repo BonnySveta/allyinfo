@@ -3,6 +3,7 @@ import { NavLink as RouterNavLink } from 'react-router-dom';
 import { ThemeToggle } from '../ThemeToggle/ThemeToggle';
 import styled from 'styled-components';
 import { useAuth } from '../../context/AuthContext';
+import { FocusOverlay } from '../FocusOverlay/FocusOverlay';
 
 const HeaderWrapper = styled.div`
   width: 100%;
@@ -227,6 +228,17 @@ const BurgerLine = styled.span<{ $isOpen: boolean }>`
   }
 `;
 
+const FocusButton = styled(AuthButton)`
+  background: var(--accent-color);
+  color: white;
+  border: none;
+
+  &:hover {
+    opacity: 0.9;
+    background: var(--accent-color);
+  }
+`;
+
 export function Header() {
   const { isAdmin } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -239,6 +251,11 @@ export function Header() {
 
   const closeMenu = () => {
     setIsMenuOpen(false);
+  };
+
+  const handleFocusToggle = () => {
+    const event = new CustomEvent('toggleFocusOverlay');
+    document.dispatchEvent(event);
   };
 
   useEffect(() => {
@@ -281,7 +298,7 @@ export function Header() {
       // Фокус на первый элемент меню
       firstFocusable.focus();
 
-      // Запрещаем скролл body
+      // Запр��щаем скролл body
       document.body.style.overflow = 'hidden';
 
       return () => {
@@ -339,10 +356,17 @@ export function Header() {
                 Админ-панель
               </AdminLink>
             )}
+            <FocusButton
+              onClick={handleFocusToggle}
+              aria-label="Включить режим фокуса"
+            >
+              👁️ Фокус
+            </FocusButton>
             <ThemeToggle />
           </Controls>
         </Nav>
       </HeaderContainer>
+      <FocusOverlay />
     </HeaderWrapper>
   );
 }
