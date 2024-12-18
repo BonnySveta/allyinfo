@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import { ResourceSection, pageConfig } from '../../pages/ResourcePage/config';
 import { useResources } from '../../hooks/useResources';
 import { ResourceItem } from '../ResourceItem/ResourceItem';
+import { Resource } from '../../types/resource';
 
 interface ResourcePageProps {
   section: ResourceSection;
@@ -68,7 +69,7 @@ const EmptyState = styled.div`
 `;
 
 export function ResourcePage({ section }: ResourcePageProps) {
-  const { resources, loading, error } = useResources(section);
+  const { resources = [], loading, error } = useResources(section);
   const { title, description } = pageConfig[section];
 
   if (loading) {
@@ -85,7 +86,7 @@ export function ResourcePage({ section }: ResourcePageProps) {
       <Description>{description}</Description>
       {resources.length > 0 ? (
         <ResourcesList>
-          {resources.map(resource => (
+          {resources.map((resource: Resource) => (
             <ResourceItem 
               key={resource.id}
               resource={resource}

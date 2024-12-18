@@ -1,57 +1,102 @@
-import { useState, useEffect } from 'react';
-import { Resource } from '../types/resource';
+import { useState, useEffect, useMemo } from 'react';
+import { Resource, ResourcesBySection } from '../types/resource';
+import { CategoryId } from '../types/category';
 import { ResourceSection } from '../pages/ResourcePage/config';
 
-interface UseResourcesResult {
-  resources: Resource[];
+interface UseResourcesBaseResult {
   loading: boolean;
-  error: string | null;
+  error: string;
 }
 
-export function useResources(section: ResourceSection): UseResourcesResult {
-  const [resources, setResources] = useState<Resource[]>([]);
+export interface UseResourcesHomeResult extends UseResourcesBaseResult {
+  selectedCategories: CategoryId[];
+  setSelectedCategories: (categories: CategoryId[]) => void;
+  filteredResources: ResourcesBySection;
+}
+
+export interface UseResourcesSectionResult extends UseResourcesBaseResult {
+  resources: Resource[];
+}
+
+type UseResourcesReturn<T> = T extends ResourceSection 
+  ? UseResourcesSectionResult 
+  : UseResourcesHomeResult;
+
+export function useResources<T extends ResourceSection | undefined = undefined>(
+  section?: T
+): UseResourcesReturn<T> {
+  const [resources, setResources] = useState<ResourcesBySection | Resource[]>(section ? [] : {});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState<CategoryId[]>([]);
 
   useEffect(() => {
     const fetchResources = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:3001/api/suggestions/all');
+        const response = await fetch('http://localhost:3001/api/approved?limit=100&page=1&status=approved');
         
         if (!response.ok) {
-          throw new Error('Failed to fetch resources');
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-
-        const data = await response.json();
         
-        const filteredData = data.filter((item: any) => 
-          item.section.replace(/^\//, '') === section && 
-          item.status === 'approved'
-        );
+        const data = await response.json();
 
-        console.log('Filtered data:', filteredData);
+        if (section) {
+          // Для страницы конкретной секции
+          const sectionResources = data.items
+            .filter((item: any) => item.section.replace('/', '') === section)
+            .map((item: any) => ({
+              id: item.id,
+              url: item.url,
+              section: item.section.replace('/', ''),
+              description: item.description || '',
+              createdAt: item.created_at,
+              categories: item.categories || [],
+              preview: {
+                title: item.preview_title || '',
+                description: item.preview_description || '',
+                image: item.preview_image || '',
+                favicon: item.preview_favicon || '',
+                domain: item.preview_domain || ''
+              }
+            }));
+          setResources(sectionResources);
+        } else {
+          // Для главной страницы
+          const grouped = data.items.reduce((acc: ResourcesBySection, item: any) => {
+            const sectionKey = item.section.replace('/', '');
+            
+            if (!acc[sectionKey]) {
+              acc[sectionKey] = [];
+            }
 
-        const transformedData = filteredData.map((item: any) => ({
-          id: item.id,
-          url: item.url,
-          section: item.section,
-          description: item.description,
-          createdAt: item.created_at,
-          preview: {
-            title: item.preview_title || '',
-            description: item.preview_description || '',
-            image: item.preview_image || '',
-            favicon: item.preview_favicon || '',
-            domain: item.preview_domain || ''
-          }
-        }));
+            acc[sectionKey].push({
+              id: item.id,
+              url: item.url,
+              section: sectionKey,
+              description: item.description || '',
+              createdAt: item.created_at,
+              categories: item.categories || [],
+              preview: {
+                title: item.preview_title || '',
+                description: item.preview_description || '',
+                image: item.preview_image || '',
+                favicon: item.preview_favicon || '',
+                domain: item.preview_domain || ''
+              }
+            });
 
-        setResources(transformedData);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching resources:', err);
-        setError('Не удалось загрузить материалы');
+            return acc;
+          }, {});
+
+          setResources(grouped);
+        }
+        
+        setError('');
+      } catch (error) {
+        console.error('Error fetching resources:', error);
+        setError('Не удалось загрузить ресурсы');
       } finally {
         setLoading(false);
       }
@@ -60,5 +105,30 @@ export function useResources(section: ResourceSection): UseResourcesResult {
     fetchResources();
   }, [section]);
 
-  return { resources, loading, error };
+  const filteredResources = useMemo(() => {
+    if (!section && selectedCategories.length > 0) {
+      const grouped = resources as ResourcesBySection;
+      return Object.fromEntries(
+        Object.entries(grouped).map(([section, items]) => [
+          section,
+          items.filter(item => 
+            item.categories?.some(cat => selectedCategories.includes(cat))
+          )
+        ])
+      );
+    }
+    return resources;
+  }, [resources, selectedCategories, section]);
+
+  return (section ? {
+    resources: resources as Resource[],
+    loading,
+    error
+  } : {
+    loading,
+    error,
+    selectedCategories,
+    setSelectedCategories,
+    filteredResources: filteredResources as ResourcesBySection
+  }) as UseResourcesReturn<T>;
 } 
