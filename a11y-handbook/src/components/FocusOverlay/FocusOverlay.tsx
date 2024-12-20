@@ -66,6 +66,61 @@ export function FocusOverlay() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isActive) return;
 
+      // Обработка Tab/Shift+Tab для навигации
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        
+        // Получаем все интерактивные элементы в правильном порядке документа
+        const interactiveElements = Array.from(document.querySelectorAll(
+          'a, button, input, select, textarea, [tabindex="0"], nav, ul'
+        )).filter(el => {
+          // Фильтруем только видимые элементы
+          const style = window.getComputedStyle(el);
+          return style.display !== 'none' && style.visibility !== 'hidden';
+        });
+
+        const currentElement = virtualFocus || document.activeElement;
+        let currentIndex = interactiveElements.indexOf(currentElement as Element);
+        
+        // Если мы начинаем с кнопки "Имитация скринридера" и идем назад
+        if (currentIndex === -1 && e.shiftKey) {
+          // Находим последний элемент в навигации
+          const lastNavItem = interactiveElements[interactiveElements.length - 1];
+          setVirtualFocus(lastNavItem);
+          handleFocusChange();
+          return;
+        }
+
+        // Обычная навигация
+        let nextIndex: number;
+        if (e.shiftKey) {
+          nextIndex = currentIndex === -1 ? interactiveElements.length - 1 : 
+            (currentIndex - 1 + interactiveElements.length) % interactiveElements.length;
+        } else {
+          nextIndex = currentIndex === -1 ? 0 : 
+            (currentIndex + 1) % interactiveElements.length;
+        }
+
+        const nextElement = interactiveElements[nextIndex];
+
+        // Если следующий элемент нативно фокусируемый - используем реальный фокус
+        if (nextElement instanceof HTMLElement && 
+            (nextElement.tagName === 'A' || 
+             nextElement.tagName === 'BUTTON' || 
+             nextElement.tagName === 'INPUT' || 
+             nextElement.tagName === 'SELECT' || 
+             nextElement.tagName === 'TEXTAREA' ||
+             nextElement.hasAttribute('tabindex'))) {
+          setVirtualFocus(null);
+          nextElement.focus();
+        } else {
+          // Иначе используем виртуальный фокус
+          setVirtualFocus(nextElement);
+        }
+        
+        handleFocusChange();
+      }
+
       // Переключение режима навигации
       if (e.key === 'F6') {
         e.preventDefault();
@@ -121,7 +176,7 @@ export function FocusOverlay() {
         return;
       }
 
-      // Навигация по уровням заголовков
+      // Н��вигация по уровням заголовков
       const headingLevel = parseInt(e.key);
       if (headingLevel >= 1 && headingLevel <= 6) {
         e.preventDefault();
@@ -134,6 +189,28 @@ export function FocusOverlay() {
           (currentIndex + 1) % headings.length;
 
         setVirtualFocus(headings[nextIndex]);
+        handleFocusChange();
+      }
+
+      // Добавим навигацию по спискам
+      if (e.key === 'l') {
+        e.preventDefault();
+        const lists = Array.from(document.querySelectorAll('ul, ol, [role="list"]'));
+        if (lists.length === 0) return;
+
+        const currentElement = virtualFocus || document.activeElement;
+        const currentIndex = lists.indexOf(currentElement as Element);
+        let nextIndex: number;
+
+        if (e.shiftKey) {
+          nextIndex = currentIndex === -1 ? lists.length - 1 : 
+            (currentIndex - 1 + lists.length) % lists.length;
+        } else {
+          nextIndex = currentIndex === -1 ? 0 : 
+            (currentIndex + 1) % lists.length;
+        }
+
+        setVirtualFocus(lists[nextIndex]);
         handleFocusChange();
       }
     };

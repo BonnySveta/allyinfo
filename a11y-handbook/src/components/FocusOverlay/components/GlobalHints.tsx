@@ -52,6 +52,12 @@ export function GlobalHints({ navigationMode, isCollapsed, onToggleCollapse }: G
             <Shortcut>Shift + H: предыдущий заголовок</Shortcut>
             <Shortcut>1-6: заголовок определенного уровня</Shortcut>
           </HintsSection>
+
+          <HintsSection>
+            <HintsTitle>Навигация по спискам</HintsTitle>
+            <Shortcut>L: следующий список</Shortcut>
+            <Shortcut>Shift + L: предыдущий список</Shortcut>
+          </HintsSection>
         </>
       )}
     </GlobalHintsContainer>

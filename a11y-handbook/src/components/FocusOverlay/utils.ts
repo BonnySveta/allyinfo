@@ -282,6 +282,83 @@ export function getElementInfo(element: Element): ElementDetails {
     }
   });
 
+  // Улучшенная обработка навигации
+  if (element.matches('nav, [role="navigation"]')) {
+    const lists = element.querySelectorAll('ul, ol, [role="list"]');
+    lists.forEach(list => {
+      const items = list.querySelectorAll('li, [role="listitem"]');
+      if (items.length > 0) {
+        info.states = [`список из ${items.length} элементов`];
+      }
+    });
+  }
+
+  // Улучшенная обработка списков
+  if (element.matches('ul, ol, [role="list"]')) {
+    const items = element.querySelectorAll('li, [role="listitem"]');
+    if (items.length > 0) {
+      info.states = [`список из ${items.length} элементов`];
+    }
+  }
+
+  // Улучшенная обработка элементов списка
+  if (element.matches('li, [role="listitem"]')) {
+    const list = element.closest('ul, ol, [role="list"]');
+    if (list) {
+      const items = list.querySelectorAll('li, [role="listitem"]');
+      const index = Array.from(items).indexOf(element) + 1;
+      info.states = [`элемент ${index} из ${items.length}`];
+    }
+  }
+
+  // Проверяем, является ли элемент частью списка
+  if (element.matches('a, button, [role="menuitem"]')) {
+    const listItem = element.closest('li, [role="listitem"]');
+    const list = listItem?.closest('ul, ol, [role="list"]');
+    
+    if (list) {
+      const items = list.querySelectorAll('li, [role="listitem"]');
+      const index = Array.from(items).indexOf(listItem as Element) + 1;
+      
+      // Начинаем описание
+      let description = '';
+      
+      // Добавляем информацию о списке только для первого и последнего элемента
+      if (index === 1 || index === items.length) {
+        description = `список из ${items.length} элементов `;
+      }
+      
+      // Добавляем текст ссылки
+      if (element.textContent) {
+        description += `"${element.textContent.trim()}"`;
+      }
+
+      // Добавляем информацию о состоянии ссылки
+      if (element instanceof HTMLAnchorElement) {
+        const computedStyle = getComputedStyle(element);
+        const color = computedStyle.getPropertyValue('color');
+        const visitedColor = document.createElement('a').style.getPropertyValue('color');
+        
+        if (color !== visitedColor) {
+          description += ', посещенная ссылка';
+        }
+
+        // Проверяем, является ли это текущей страницей
+        const currentPath = window.location.pathname;
+        const linkPath = element.pathname;
+        
+        if (currentPath === linkPath || 
+            (currentPath === '/' && linkPath === '/home') || 
+            (currentPath === '/home' && linkPath === '/')) {
+          description += ', текущая страница';
+        }
+      }
+
+      // Устанавливаем описание как состояние
+      info.states = [description.trim()];
+    }
+  }
+
   return info;
 }
 
