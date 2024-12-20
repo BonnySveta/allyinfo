@@ -10,11 +10,7 @@ function isVisitedLink(element: HTMLAnchorElement): boolean {
 }
 
 function isCurrentPage(element: HTMLAnchorElement): boolean {
-  const currentPath = window.location.pathname;
-  const linkPath = element.pathname;
-  return currentPath === linkPath || 
-         (currentPath === '/' && linkPath === '/home') || 
-         (currentPath === '/home' && linkPath === '/');
+  return element.getAttribute('aria-current') === 'page';
 }
 
 // Функция для получения информации о списке
@@ -54,7 +50,7 @@ function handleList(element: Element): ElementDetails {
       let screenReaderText = `список из ${count} элементов ${firstLink.textContent?.trim()}`;
 
       if (firstLink instanceof HTMLAnchorElement) {
-        // Добавляем информацию о состоянии ссылки
+        // Добавляем ин��ормацию о состоянии ссылки
         if (isVisitedLink(firstLink)) {
           screenReaderText += ', посещенная ссылка';
         }
@@ -94,19 +90,7 @@ function handleList(element: Element): ElementDetails {
 // Обработка ссылок
 function handleLink(element: HTMLAnchorElement): ElementDetails {
   const baseInfo = getBaseElementInfo(element);
-  const listItem = element.closest('li, [role="listitem"]');
-  const list = listItem?.closest('ul, ol, [role="list"]');
   let screenReaderText = element.textContent?.trim() || '';
-
-  if (list) {
-    const { count, items } = getListInfo(list);
-    const index = items.indexOf(listItem as Element);
-    
-    // Для первой ссылки в списке добавляем информацию о списке
-    if (index === 0) {
-      screenReaderText = `список из ${count} элементов ${screenReaderText}`;
-    }
-  }
 
   screenReaderText = buildScreenReaderText(screenReaderText, {
     isVisited: isVisitedLink(element),
@@ -311,7 +295,7 @@ function getBaseElementInfo(element: Element): ElementDetails {
     search: 'search',
   };
 
-  // Проверяем роль элемента как landmark
+  // Проверяем роль элемента ��ак landmark
   if (landmarkRoles[role as keyof typeof landmarkRoles]) {
     info.landmark = landmarkRoles[role as keyof typeof landmarkRoles];
     info.states.push(`landmark: ${info.landmark}`);
@@ -408,6 +392,19 @@ function getBaseElementInfo(element: Element): ElementDetails {
 }
 
 export function getElementInfo(element: Element): ElementDetails {
+  // Проверяем, является ли элемент ссылкой в первом элементе списка
+  if (element.matches('a')) {
+    const listItem = element.closest('li, [role="listitem"]');
+    const list = listItem?.closest('ul, ol, [role="list"]');
+    
+    if (list && listItem) {
+      const items = Array.from(list.querySelectorAll('li, [role="listitem"]'));
+      if (items[0] === listItem) {
+        return handleList(list);
+      }
+    }
+  }
+
   // Обработка списков
   if (element.matches('ul, ol, [role="list"]')) {
     return handleList(element);
