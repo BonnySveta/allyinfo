@@ -40,6 +40,8 @@ function buildScreenReaderText(base: string, options: {
 // Обработка списков
 function handleList(element: Element): ElementDetails {
   const { count, items } = getListInfo(element);
+  const baseInfo = getBaseElementInfo(element);
+  
   if (count > 0) {
     // Получаем первую ссылку в списке
     const firstItem = items[0];
@@ -50,40 +52,41 @@ function handleList(element: Element): ElementDetails {
       let screenReaderText = `список из ${count} элементов ${firstLink.textContent?.trim()}`;
 
       if (firstLink instanceof HTMLAnchorElement) {
-        // Добавляем ин��ормацию о состоянии ссылки
         if (isVisitedLink(firstLink)) {
           screenReaderText += ', посещенная ссылка';
         }
-
-        // Добавляем информацию о текущей странице для навигации
         if (element.closest('nav, [role="navigation"]') && isCurrentPage(firstLink)) {
           screenReaderText += ', текущая страница';
         }
       }
 
       return {
-        ...getBaseElementInfo(element),
+        ...baseInfo,
         role: 'list',
         screenReaderText,
         states: [screenReaderText],
-        isInteractive: false
+        isInteractive: true,
+        shortcuts: ['↑/↓: navigate menu', '1/↵: navigate menu']
       };
     }
 
     // Если нет ссылки, показываем только информацию о списке
     return { 
-      ...getBaseElementInfo(element),
+      ...baseInfo,
       role: 'list',
       screenReaderText: `список из ${count} элементов`,
       states: [`список из ${count} элементов`],
-      isInteractive: false 
+      isInteractive: true,
+      shortcuts: ['↑/↓: navigate menu']
     };
   }
+
   return { 
-    ...getBaseElementInfo(element),
+    ...baseInfo,
     role: 'list', 
     states: [],
-    isInteractive: false 
+    isInteractive: true,
+    shortcuts: ['↑/↓: navigate menu']
   };
 }
 
@@ -295,7 +298,7 @@ function getBaseElementInfo(element: Element): ElementDetails {
     search: 'search',
   };
 
-  // Проверяем роль элемента ��ак landmark
+  // Проверяем роль элемента как landmark
   if (landmarkRoles[role as keyof typeof landmarkRoles]) {
     info.landmark = landmarkRoles[role as keyof typeof landmarkRoles];
     info.states.push(`landmark: ${info.landmark}`);
