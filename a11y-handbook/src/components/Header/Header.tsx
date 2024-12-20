@@ -4,6 +4,7 @@ import { ThemeToggle } from '../ThemeToggle/ThemeToggle';
 import styled from 'styled-components';
 import { useAuth } from '../../context/AuthContext';
 import { FocusOverlay } from '../FocusOverlay/FocusOverlay';
+import { useFocusOverlay } from '../../context/FocusOverlayContext';
 
 const HeaderWrapper = styled.div`
   width: 100%;
@@ -244,6 +245,7 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const burgerButtonRef = useRef<HTMLButtonElement>(null);
+  const { toggleOverlay } = useFocusOverlay();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -292,7 +294,7 @@ export function Header() {
 
     if (isMenuOpen) {
       document.addEventListener('keydown', handleKeyDown);
-      // Сохраняем последний активный элемент перед открытием меню
+      // Со��раняем последний активный элемент перед открытием меню
       const lastActiveElement = document.activeElement;
       
       // Фокус на первый элемент меню
@@ -357,8 +359,8 @@ export function Header() {
               </AdminLink>
             )}
             <FocusButton
-              onClick={handleFocusToggle}
-              aria-label="Включить имитацию скринридера"
+              onClick={toggleOverlay}
+              aria-label="Имитация скринридера"
             >
               Имитация скринридера
             </FocusButton>

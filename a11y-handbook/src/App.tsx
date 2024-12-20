@@ -26,6 +26,7 @@ import { CategoryChips } from './components/CategoryChips/CategoryChips';
 import { CATEGORIES, CategoryId } from './types/category';
 import { CategoryChipsPanel } from './components/CategoryChipsPanel/CategoryChipsPanel';
 import { ResourceSection } from './pages/ResourcePage/config';
+import { FocusOverlayProvider } from './context/FocusOverlayContext';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -67,78 +68,80 @@ function App() {
   } = result as UseResourcesHomeResult;
 
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <GlobalStyle />
-        <BrowserRouter>
-          <Suspense fallback={<LoadingSpinner />}>
-            <PageContainer>
-              <Header />
-              <MainContainer>
-                <main>
-                  <Routes>
-                    <Route 
-                      path="/" 
-                      element={
-                        <Home
-                          loading={loading}
-                          error={error}
-                          selectedCategories={selectedCategories}
-                          setSelectedCategories={setSelectedCategories}
-                          filteredResources={filteredResources}
-                        />
-                      } 
-                    />
-                    {Object.entries(pageConfig).map(([key, config]) => (
+    <FocusOverlayProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <GlobalStyle />
+          <BrowserRouter>
+            <Suspense fallback={<LoadingSpinner />}>
+              <PageContainer>
+                <Header />
+                <MainContainer>
+                  <main>
+                    <Routes>
                       <Route 
-                        key={config.path}
-                        path={config.path}
+                        path="/" 
                         element={
-                          <ResourcePage 
-                            section={key as ResourceSection}
+                          <Home
+                            loading={loading}
+                            error={error}
+                            selectedCategories={selectedCategories}
+                            setSelectedCategories={setSelectedCategories}
+                            filteredResources={filteredResources}
                           />
-                        }
+                        } 
                       />
-                    ))}
-                    <Route path="/feedback" element={<Feedback />} />
-                    <Route path="/suggest" element={<Suggest />} />
-                    <Route 
-                      path="/admin/suggestions" 
-                      element={
-                        <ProtectedRoute showError>
-                          <Suggestions />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/admin/approved" 
-                      element={
-                        <ProtectedRoute>
-                          <ApprovedList />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route path="/support" element={<Support />} />
-                    <Route path="/admin/feedback-list" element={<AdminFeedbackList />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route 
-                      path="/admin/*" 
-                      element={
-                        <ProtectedRoute>
-                          <Admin />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route path="/getting-started" element={<GettingStarted />} />
-                  </Routes>
-                </main>
-              </MainContainer>
-              <Footer />
-            </PageContainer>
-          </Suspense>
-        </BrowserRouter>
-      </ThemeProvider>
-    </AuthProvider>
+                      {Object.entries(pageConfig).map(([key, config]) => (
+                        <Route 
+                          key={config.path}
+                          path={config.path}
+                          element={
+                            <ResourcePage 
+                              section={key as ResourceSection}
+                            />
+                          }
+                        />
+                      ))}
+                      <Route path="/feedback" element={<Feedback />} />
+                      <Route path="/suggest" element={<Suggest />} />
+                      <Route 
+                        path="/admin/suggestions" 
+                        element={
+                          <ProtectedRoute showError>
+                            <Suggestions />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/admin/approved" 
+                        element={
+                          <ProtectedRoute>
+                            <ApprovedList />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route path="/support" element={<Support />} />
+                      <Route path="/admin/feedback-list" element={<AdminFeedbackList />} />
+                      <Route path="/login" element={<Login />} />
+                      <Route 
+                        path="/admin/*" 
+                        element={
+                          <ProtectedRoute>
+                            <Admin />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route path="/getting-started" element={<GettingStarted />} />
+                    </Routes>
+                  </main>
+                </MainContainer>
+                <Footer />
+              </PageContainer>
+            </Suspense>
+          </BrowserRouter>
+        </ThemeProvider>
+      </AuthProvider>
+    </FocusOverlayProvider>
   );
 }
 
