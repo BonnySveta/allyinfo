@@ -79,7 +79,7 @@ export function getElementInfo(element: Element): ElementDetails {
     }
   }
 
-  // Прове��яем ARIA-атрибуты
+  // Проверяем ARIA-атрибуты
   const expanded = element.getAttribute('aria-expanded');
   if (expanded !== null) {
     info.expanded = expanded === 'true';
@@ -295,19 +295,11 @@ export function getElementInfo(element: Element): ElementDetails {
 
   // Обработка списков
   if (element.matches('ul, ol, [role="list"]')) {
-    console.log('element', element);
+    const items = element.querySelectorAll('li, [role="listitem"]');
     
-    // Сначала проверяем li элементы
-    let items = element.querySelectorAll('li, [role="listitem"]');
-    
-    // Если li нет, считаем прямые ссылки
-    if (items.length === 0) {
-      items = element.querySelectorAll('a');
-    }
-
     if (items.length > 0) {
-      // Получаем первую ссылку (либо внутри li, либо прямую)
-      const firstLink = items[0].matches('a') ? items[0] : items[0].querySelector('a');
+      // Получаем первую ссылку в списке
+      const firstLink = items[0].querySelector('a');
       
       if (firstLink) {
         // Формируем текст в формате "список из X элементов Название_первой_ссылки"
@@ -324,7 +316,6 @@ export function getElementInfo(element: Element): ElementDetails {
           }
         }
 
-        // Устанавливаем текст для скринридера и состояния
         info.screenReaderText = screenReaderText;
         info.states = [screenReaderText];
       } else {
