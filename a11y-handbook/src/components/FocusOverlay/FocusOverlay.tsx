@@ -7,7 +7,7 @@ import { ElementInfoDisplay } from './components/ElementInfoDisplay';
 import { useFocusOverlay } from '../../context/FocusOverlayContext';
 
 export function FocusOverlay() {
-  const { isActive } = useFocusOverlay();
+  const { isActive, setIsActive } = useFocusOverlay();
   const [spotlightPosition, setSpotlightPosition] = useState<SpotlightPosition>({
     top: 0,
     left: 0,
@@ -65,6 +65,18 @@ export function FocusOverlay() {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isActive) return;
+
+      // Добавляем выход по Esc
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setIsActive(false);
+        // Возвращаем фокус на кнопку включения режима, если она существует
+        const toggleButton = document.querySelector('[aria-label="Имитация скринридера"]');
+        if (toggleButton instanceof HTMLElement) {
+          toggleButton.focus();
+        }
+        return;
+      }
 
       // Обработка Tab/Shift+Tab для навигации
       if (e.key === 'Tab') {
@@ -176,7 +188,7 @@ export function FocusOverlay() {
         return;
       }
 
-      // Н��вигация по уровням заголовков
+      // Нвигация по уровням заголовков
       const headingLevel = parseInt(e.key);
       if (headingLevel >= 1 && headingLevel <= 6) {
         e.preventDefault();
@@ -246,7 +258,7 @@ export function FocusOverlay() {
       document.removeEventListener('keydown', handleKeyDown);
       observer.disconnect();
     };
-  }, [isActive, lastScrollPosition, virtualFocus, navigationMode]);
+  }, [isActive, lastScrollPosition, virtualFocus, navigationMode, setIsActive]);
 
   return (
     <Overlay $isActive={isActive}>

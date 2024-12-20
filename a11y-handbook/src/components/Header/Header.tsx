@@ -245,7 +245,7 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const burgerButtonRef = useRef<HTMLButtonElement>(null);
-  const { toggleOverlay } = useFocusOverlay();
+  const { isActive, setIsActive } = useFocusOverlay();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -255,9 +255,8 @@ export function Header() {
     setIsMenuOpen(false);
   };
 
-  const handleFocusToggle = () => {
-    const event = new CustomEvent('toggleFocusOverlay');
-    document.dispatchEvent(event);
+  const toggleOverlay = () => {
+    setIsActive(!isActive);
   };
 
   useEffect(() => {
@@ -294,7 +293,7 @@ export function Header() {
 
     if (isMenuOpen) {
       document.addEventListener('keydown', handleKeyDown);
-      // Со��раняем последний активный элемент перед открытием меню
+      // Сораняем последний активный элемент перед открытием меню
       const lastActiveElement = document.activeElement;
       
       // Фокус на первый элемент меню
@@ -361,6 +360,7 @@ export function Header() {
             <FocusButton
               onClick={toggleOverlay}
               aria-label="Имитация скринридера"
+              aria-pressed={isActive}
             >
               Имитация скринридера
             </FocusButton>
