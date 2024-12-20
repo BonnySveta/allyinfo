@@ -359,6 +359,56 @@ export function getElementInfo(element: Element): ElementDetails {
     }
   }
 
+  // Обработка всех ссылок
+  if (element.matches('a')) {
+    let screenReaderText = '';
+    
+    // Проверяем, является ли элемент частью списка
+    const listItem = element.closest('li, [role="listitem"]');
+    const list = listItem?.closest('ul, ol, [role="list"]');
+    
+    if (list) {
+      const items = list.querySelectorAll('li, [role="listitem"]');
+      const index = Array.from(items).indexOf(listItem as Element) + 1;
+      
+      // Добавляем информацию о списке только для первого и последнего элемента
+      if (index === 1 || index === items.length) {
+        screenReaderText = `список из ${items.length} элементов `;
+      }
+    }
+    
+    // Добавляем текст ссылки
+    if (element.textContent) {
+      screenReaderText += `"${element.textContent.trim()}"`;
+    }
+
+    // Проверяем состояние ссылки
+    if (element instanceof HTMLAnchorElement) {
+      const computedStyle = getComputedStyle(element);
+      const color = computedStyle.getPropertyValue('color');
+      const visitedColor = document.createElement('a').style.getPropertyValue('color');
+      
+      if (color !== visitedColor) {
+        screenReaderText += ', посещенная ссылка';
+      }
+
+      // Проверяем, является ли это текущей страницей
+      const currentPath = window.location.pathname;
+      const linkPath = element.pathname;
+      
+      if (currentPath === linkPath || 
+          (currentPath === '/' && linkPath === '/home') || 
+          (currentPath === '/home' && linkPath === '/')) {
+        screenReaderText += ', текущая страница';
+      }
+    }
+
+    // Устанавливаем текст для скринридера
+    info.screenReaderText = screenReaderText.trim();
+    info.states = [screenReaderText.trim()]; // Пока оставляем и в states для совместимости
+    return info;
+  }
+
   return info;
 }
 

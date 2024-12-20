@@ -37,6 +37,8 @@ export interface ElementDetails {
   landmark?: string;
   region?: string;
   parentLandmarks?: string[];
+  
+  screenReaderText?: string;
 }
 
 export type NavigationMode = 'landmarks' | 'elements'; 
