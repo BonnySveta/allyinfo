@@ -62,10 +62,14 @@ const ResourcesList = styled.ul`
   gap: 0.75rem;
 `;
 
-const ResourceItem = styled.a`
+const ResourceListItem = styled.li`
+  margin: 0;
+  padding: 0;
+`;
+
+const ResourceLink = styled.a`
   display: flex;
   align-items: flex-start;
-  margin: 0;
   padding: 0.75rem;
   background: var(--nav-background);
   border-radius: 8px;
@@ -149,26 +153,26 @@ export function Card({ title, path, resources = [] }: CardProps) {
         {resources.length > 0 ? (
           <ResourcesList>
             {sortedResources.slice(0, 3).map(resource => (
-              <ResourceItem 
-                key={resource.id}
-                href={resource.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {resource.preview && (
-                  <ResourceIcon 
-                    src={resource.preview.favicon}
-                    alt=""
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                )}
-                <ResourceContent>
-                  {resource.preview?.title}
-                  {/* <NewBadge createdAt={resource.createdAt} /> */}
-                </ResourceContent>
-              </ResourceItem>
+              <ResourceListItem key={resource.id}>
+                <ResourceLink 
+                  href={resource.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {resource.preview && (
+                    <ResourceIcon 
+                      src={resource.preview.favicon}
+                      alt=""
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  )}
+                  <ResourceContent>
+                    {resource.preview?.title}
+                  </ResourceContent>
+                </ResourceLink>
+              </ResourceListItem>
             ))}
           </ResourcesList>
         ) : (

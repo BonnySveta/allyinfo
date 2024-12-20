@@ -79,7 +79,7 @@ export function getElementInfo(element: Element): ElementDetails {
     }
   }
 
-  // Проверяем ARIA-атрибуты
+  // Прове��яем ARIA-атрибуты
   const expanded = element.getAttribute('aria-expanded');
   if (expanded !== null) {
     info.expanded = expanded === 'true';
@@ -293,96 +293,54 @@ export function getElementInfo(element: Element): ElementDetails {
     });
   }
 
-  // Улучшенная обработка списков
+  // Обработка списков
   if (element.matches('ul, ol, [role="list"]')) {
-    const items = element.querySelectorAll('li, [role="listitem"]');
+    console.log('element', element);
+    
+    // Сначала проверяем li элементы
+    let items = element.querySelectorAll('li, [role="listitem"]');
+    
+    // Если li нет, считаем прямые ссылки
+    if (items.length === 0) {
+      items = element.querySelectorAll('a');
+    }
+
     if (items.length > 0) {
-      info.states = [`список из ${items.length} элементов`];
-    }
-  }
-
-  // Улучшенная обработка элементов списка
-  if (element.matches('li, [role="listitem"]')) {
-    const list = element.closest('ul, ol, [role="list"]');
-    if (list) {
-      const items = list.querySelectorAll('li, [role="listitem"]');
-      const index = Array.from(items).indexOf(element) + 1;
-      info.states = [`элемент ${index} из ${items.length}`];
-    }
-  }
-
-  // Проверяем, является ли элемент частью списка
-  if (element.matches('a, button, [role="menuitem"]')) {
-    const listItem = element.closest('li, [role="listitem"]');
-    const list = listItem?.closest('ul, ol, [role="list"]');
-    
-    if (list) {
-      const items = list.querySelectorAll('li, [role="listitem"]');
-      const index = Array.from(items).indexOf(listItem as Element) + 1;
+      // Получаем первую ссылку (либо внутри li, либо прямую)
+      const firstLink = items[0].matches('a') ? items[0] : items[0].querySelector('a');
       
-      // Начинаем описание
-      let description = '';
-      
-      // Добавляем информацию о списке только для первого и последнего элемента
-      if (index === 1 || index === items.length) {
-        description = `список из ${items.length} элементов `;
-      }
-      
-      // Добавляем текст ссылки
-      if (element.textContent) {
-        description += `"${element.textContent.trim()}"`;
-      }
+      if (firstLink) {
+        // Формируем текст в формате "список из X элементов Название_первой_ссылки"
+        let screenReaderText = `список из ${items.length} элементов ${firstLink.textContent?.trim()}`;
 
-      // Добавляем информацию о состоянии ссылки
-      if (element instanceof HTMLAnchorElement) {
-        const computedStyle = getComputedStyle(element);
-        const color = computedStyle.getPropertyValue('color');
-        const visitedColor = document.createElement('a').style.getPropertyValue('color');
-        
-        if (color !== visitedColor) {
-          description += ', посещенная ссылка';
+        // Добавляем информацию о посещенной ссылке, если это применимо
+        if (firstLink instanceof HTMLAnchorElement) {
+          const computedStyle = getComputedStyle(firstLink);
+          const color = computedStyle.getPropertyValue('color');
+          const visitedColor = document.createElement('a').style.getPropertyValue('color');
+          
+          if (color !== visitedColor) {
+            screenReaderText += ', посещенная ссылка';
+          }
         }
 
-        // Проверяем, является ли это текущей страницей
-        const currentPath = window.location.pathname;
-        const linkPath = element.pathname;
-        
-        if (currentPath === linkPath || 
-            (currentPath === '/' && linkPath === '/home') || 
-            (currentPath === '/home' && linkPath === '/')) {
-          description += ', текущая страница';
-        }
+        // Устанавливаем текст для скринридера и состояния
+        info.screenReaderText = screenReaderText;
+        info.states = [screenReaderText];
+      } else {
+        // Если нет ссылки, просто показываем количество элементов
+        const screenReaderText = `список из ${items.length} элементов`;
+        info.screenReaderText = screenReaderText;
+        info.states = [screenReaderText];
       }
-
-      // Устанавливаем описание как состояние
-      info.states = [description.trim()];
     }
+    return info;
   }
 
-  // Обработка всех ссылок
+  // Обработка ссылок
   if (element.matches('a')) {
-    let screenReaderText = '';
-    
-    // Проверяем, является ли элемент частью списка
-    const listItem = element.closest('li, [role="listitem"]');
-    const list = listItem?.closest('ul, ol, [role="list"]');
-    
-    if (list) {
-      const items = list.querySelectorAll('li, [role="listitem"]');
-      const index = Array.from(items).indexOf(listItem as Element) + 1;
-      
-      // Добавляем информацию о списке только для первого и последнего элемента
-      if (index === 1 || index === items.length) {
-        screenReaderText = `список из ${items.length} элементов `;
-      }
-    }
-    
-    // Добавляем текст ссылки
-    if (element.textContent) {
-      screenReaderText += `"${element.textContent.trim()}"`;
-    }
+    let screenReaderText = element.textContent?.trim() || '';
 
-    // Проверяем состояние ссылки
     if (element instanceof HTMLAnchorElement) {
       const computedStyle = getComputedStyle(element);
       const color = computedStyle.getPropertyValue('color');
@@ -391,21 +349,10 @@ export function getElementInfo(element: Element): ElementDetails {
       if (color !== visitedColor) {
         screenReaderText += ', посещенная ссылка';
       }
-
-      // Проверяем, является ли это текущей страницей
-      const currentPath = window.location.pathname;
-      const linkPath = element.pathname;
-      
-      if (currentPath === linkPath || 
-          (currentPath === '/' && linkPath === '/home') || 
-          (currentPath === '/home' && linkPath === '/')) {
-        screenReaderText += ', текущая страница';
-      }
     }
 
-    // Устанавливаем текст для скринридера
-    info.screenReaderText = screenReaderText.trim();
-    info.states = [screenReaderText.trim()]; // Пока оставляем и в states для совместимости
+    info.screenReaderText = screenReaderText;
+    info.states = [screenReaderText];
     return info;
   }
 
