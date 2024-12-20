@@ -1,7 +1,130 @@
 // Вспомогательные функции
 import { ElementDetails } from './types';
 
-export function getElementInfo(element: Element): ElementDetails {
+// Вспомогательные функции для проверки состояний ссылок
+function isVisitedLink(element: HTMLAnchorElement): boolean {
+  const computedStyle = getComputedStyle(element);
+  const color = computedStyle.getPropertyValue('color');
+  const visitedColor = document.createElement('a').style.getPropertyValue('color');
+  return color !== visitedColor;
+}
+
+function isCurrentPage(element: HTMLAnchorElement): boolean {
+  const currentPath = window.location.pathname;
+  const linkPath = element.pathname;
+  return currentPath === linkPath || 
+         (currentPath === '/' && linkPath === '/home') || 
+         (currentPath === '/home' && linkPath === '/');
+}
+
+// Функция для получения информации о списке
+function getListInfo(list: Element) {
+  const items = list.querySelectorAll('li, [role="listitem"]');
+  return {
+    count: items.length,
+    items: Array.from(items)
+  };
+}
+
+// Функция для формирования текста для скринридера
+function buildScreenReaderText(base: string, options: {
+  isVisited?: boolean;
+  isCurrentPage?: boolean;
+}): string {
+  let text = base;
+  if (options.isVisited) {
+    text += ', посещенная ссылка';
+  }
+  if (options.isCurrentPage) {
+    text += ', текущая страница';
+  }
+  return text;
+}
+
+// Обработка списков
+function handleList(element: Element): ElementDetails {
+  const { count, items } = getListInfo(element);
+  if (count > 0) {
+    // Получаем первую ссылку в списке
+    const firstItem = items[0];
+    const firstLink = firstItem.querySelector('a');
+
+    if (firstLink) {
+      // Формируем полный текст с информацией о списке и первой ссылке
+      let screenReaderText = `список из ${count} элементов ${firstLink.textContent?.trim()}`;
+
+      if (firstLink instanceof HTMLAnchorElement) {
+        // Добавляем информацию о состоянии ссылки
+        if (isVisitedLink(firstLink)) {
+          screenReaderText += ', посещенная ссылка';
+        }
+
+        // Добавляем информацию о текущей странице для навигации
+        if (element.closest('nav, [role="navigation"]') && isCurrentPage(firstLink)) {
+          screenReaderText += ', текущая страница';
+        }
+      }
+
+      return {
+        ...getBaseElementInfo(element),
+        role: 'list',
+        screenReaderText,
+        states: [screenReaderText],
+        isInteractive: false
+      };
+    }
+
+    // Если нет ссылки, показываем только информацию о списке
+    return { 
+      ...getBaseElementInfo(element),
+      role: 'list',
+      screenReaderText: `список из ${count} элементов`,
+      states: [`список из ${count} элементов`],
+      isInteractive: false 
+    };
+  }
+  return { 
+    ...getBaseElementInfo(element),
+    role: 'list', 
+    states: [],
+    isInteractive: false 
+  };
+}
+
+// Обработка ссылок
+function handleLink(element: HTMLAnchorElement): ElementDetails {
+  const baseInfo = getBaseElementInfo(element);
+  const listItem = element.closest('li, [role="listitem"]');
+  const list = listItem?.closest('ul, ol, [role="list"]');
+  let screenReaderText = element.textContent?.trim() || '';
+
+  if (list) {
+    const { count, items } = getListInfo(list);
+    const index = items.indexOf(listItem as Element);
+    
+    // Для первой ссылки в списке добавляем информацию о списке
+    if (index === 0) {
+      screenReaderText = `список из ${count} элементов ${screenReaderText}`;
+    }
+  }
+
+  screenReaderText = buildScreenReaderText(screenReaderText, {
+    isVisited: isVisitedLink(element),
+    isCurrentPage: element.closest('nav, [role="navigation"]') ? isCurrentPage(element) : false
+  });
+
+  return {
+    ...baseInfo,
+    role: 'link',
+    screenReaderText,
+    states: [...baseInfo.states, screenReaderText],
+    isInteractive: true,
+    shortcuts: [...(baseInfo.shortcuts || []), 'Enter: follow link']
+  };
+}
+
+// Получение базовой информации об элементе
+function getBaseElementInfo(element: Element): ElementDetails {
   // Определяем роль элемента
   let role = element.tagName.toLowerCase();
   const ariaRole = element.getAttribute('role');
@@ -32,7 +155,6 @@ export function getElementInfo(element: Element): ElementDetails {
     role = roleMap[role] || role;
   }
 
-  // Собираем информацию об элементе
   const info: ElementDetails = { 
     role,
     states: [],
@@ -79,7 +201,7 @@ export function getElementInfo(element: Element): ElementDetails {
     }
   }
 
-  // Прове��ем ARIA-атрибуты
+  // Проверяем ARIA-атрибуты
   const expanded = element.getAttribute('aria-expanded');
   if (expanded !== null) {
     info.expanded = expanded === 'true';
@@ -282,64 +404,22 @@ export function getElementInfo(element: Element): ElementDetails {
     }
   });
 
-  // Обработка списков (как в навигации, так и в карточках)
-  if (element.matches('ul, ol, [role="list"]')) {
-    const items = element.querySelectorAll('li, [role="listitem"]');
-    if (items.length > 0) {
-      let screenReaderText = `список из ${items.length} элементов`;
-      info.screenReaderText = screenReaderText;
-      info.states = [screenReaderText];
-      return info;
-    }
-  }
-
-  // Обработка ссылок в списках
-  if (element.matches('a')) {
-    let screenReaderText = element.textContent?.trim() || '';
-
-    // Проверяем, является ли ссылка частью списка
-    const listItem = element.closest('li, [role="listitem"]');
-    const list = listItem?.closest('ul, ol, [role="list"]');
-    
-    if (list) {
-      const items = list.querySelectorAll('li, [role="listitem"]');
-      const index = Array.from(items).indexOf(listItem as Element);
-      
-      // Для первой ссылки в списке добавляем информацию о количестве элементов
-      if (index === 0) {
-        screenReaderText = `список из ${items.length} элементов ${screenReaderText}`;
-      }
-    }
-
-    if (element instanceof HTMLAnchorElement) {
-      // Проверяем состояние ссылки (посещенная)
-      const computedStyle = getComputedStyle(element);
-      const color = computedStyle.getPropertyValue('color');
-      const visitedColor = document.createElement('a').style.getPropertyValue('color');
-      
-      if (color !== visitedColor) {
-        screenReaderText += ', посещенная ссылка';
-      }
-
-      // Если ссылка в навигации, проверяем текущую страницу
-      if (element.closest('nav, [role="navigation"]')) {
-        const currentPath = window.location.pathname;
-        const linkPath = element.pathname;
-        
-        if (currentPath === linkPath || 
-            (currentPath === '/' && linkPath === '/home') || 
-            (currentPath === '/home' && linkPath === '/')) {
-          screenReaderText += ', текущая страница';
-        }
-      }
-    }
-
-    info.screenReaderText = screenReaderText;
-    info.states = [screenReaderText];
-    return info;
-  }
-
   return info;
+}
+
+export function getElementInfo(element: Element): ElementDetails {
+  // Обработка списков
+  if (element.matches('ul, ol, [role="list"]')) {
+    return handleList(element);
+  }
+
+  // Обработка ссылок
+  if (element.matches('a') && element instanceof HTMLAnchorElement) {
+    return handleLink(element);
+  }
+
+  // Для всех остальных элементов используем базовую информацию
+  return getBaseElementInfo(element);
 }
 
 export const LANDMARK_SELECTORS = 
