@@ -1,104 +1,59 @@
 import styled from 'styled-components';
 import { SpotlightPosition } from './types';
 
-export const Overlay = styled.div<{ $isActive: boolean }>`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: ${props => props.$isActive ? 'auto' : 'none'};
-  z-index: 9999;
-`;
-
 export const Spotlight = styled.div<{ $position: SpotlightPosition }>`
-  position: absolute;
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85);
-  border-radius: 4px;
-  transition: all 0.3s ease;
-  pointer-events: none;
+  position: fixed;
+  top: ${props => props.$position.top}px;
+  left: ${props => props.$position.left}px;
+  width: ${props => props.$position.width}px;
+  height: ${props => props.$position.height}px;
   background: transparent;
-  outline: 2px solid var(--accent-color);
-  outline-offset: 2px;
-  ${({ $position }) => `
-    top: ${$position.top}px;
-    left: ${$position.left}px;
-    width: ${$position.width}px;
-    height: ${$position.height}px;
-  `}
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.9);
+  z-index: 9999;
+  pointer-events: none;
+  border: 2px solid #4A90E2;
+  border-radius: 4px;
 `;
 
-export const ElementInfo = styled.div<{ $position: SpotlightPosition }>`
-  position: fixed;
+export const InfoPanel = styled.div<{ $position: SpotlightPosition }>`
+  position: absolute;
   top: ${props => props.$position.top + props.$position.height + 8}px;
   left: ${props => props.$position.left}px;
-  background: var(--accent-color);
+  background: #4A90E2;
   color: white;
-  padding: 12px;
+  padding: 8px 12px;
   border-radius: 4px;
   font-size: 14px;
-  line-height: 1.4;
-  min-width: 280px;
-  max-width: 400px;
   z-index: 10000;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  white-space: pre-wrap;
-  word-break: break-word;
-  overflow-wrap: break-word;
-`;
+  max-width: 300px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 
-export const Role = styled.span`
-  font-weight: bold;
-  text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-export const HeadingLevel = styled.span`
-  background: rgba(var(--accent-color-rgb), 0.4);
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 12px;
-  margin-left: 6px;
-  font-weight: bold;
-`;
-
-export const HintsSection = styled.div`
-  margin-bottom: 16px;
-  
-  &:last-child {
-    margin-bottom: 0;
+  &::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 16px;
+    border-style: solid;
+    border-width: 0 8px 8px 8px;
+    border-color: transparent transparent #4A90E2 transparent;
   }
 `;
 
-export const HintsTitle = styled.div`
-  font-weight: bold;
-  margin-bottom: 12px;
-  color: var(--accent-color);
-  font-size: 15px;
+export const InfoText = styled.div`
+  margin: 4px 0;
+`;
+
+export const ShortcutsList = styled.div`
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 12px;
 `;
 
 export const Shortcut = styled.span`
-  background: rgba(255, 255, 255, 0.15);
-  padding: 4px 8px;
-  border-radius: 3px;
-  margin: 0 8px 8px 0;
-  font-family: monospace;
   display: inline-block;
-  white-space: nowrap;
-`;
-
-export const State = styled.span`
-  background: rgba(255, 255, 255, 0.2);
-  padding: 4px 8px;
-  border-radius: 3px;
-  font-size: 12px;
-  display: inline-block;
-  margin: 2px 4px;
+  margin-right: 12px;
+  color: rgba(255, 255, 255, 0.9);
 `;
 
 export const GlobalHintsContainer = styled.div<{ $isCollapsed: boolean }>`
@@ -133,7 +88,7 @@ export const ButtonWrapper = styled.div`
 
 export const CollapseButton = styled.div<{ $isCollapsed: boolean }>`
   background: transparent;
-  color: var(--accent-color);
+  color: #4A90E2;
   cursor: pointer;
   padding: 4px;
   display: flex;
@@ -151,45 +106,24 @@ export const CollapsedIndicator = styled.div`
   writing-mode: vertical-rl;
   text-orientation: mixed;
   transform: rotate(180deg);
-  color: var(--accent-color);
+  color: #4A90E2;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 1px;
 `;
 
-export const Attributes = styled.span`
-  opacity: 0.9;
-  display: block;
-  margin-top: 4px;
+export const HintsSection = styled.div`
+  margin-bottom: 16px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
 `;
 
-export const Position = styled(State)`
-  background: rgba(255, 255, 255, 0.3);
-`;
-
-export const LandmarkInfo = styled.span`
-  background: rgba(var(--accent-color-rgb), 0.3);
-  font-style: italic;
-`;
-
-export const AriaAttribute = styled.span`
-  background: rgba(255, 255, 255, 0.25);
-  font-family: monospace;
-`;
-
-export const ListInfo = styled.span`
-  background: rgba(0, 120, 215, 0.3);
-  font-weight: 500;
-`;
-
-export const ShortcutInfo = styled.div`
-  margin-top: 8px;
-  font-size: 12px;
-  opacity: 0.9;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  padding-top: 8px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+export const HintsTitle = styled.div`
+  font-weight: bold;
+  margin-bottom: 12px;
+  color: #4A90E2;
+  font-size: 15px;
 `;
 // ... остальные стили 

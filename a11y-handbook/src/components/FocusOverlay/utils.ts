@@ -39,25 +39,35 @@ function buildScreenReaderText(base: string, options: {
 
 // Обработка списков
 function handleList(element: Element): ElementDetails {
-  const { count, items } = getListInfo(element);
   const baseInfo = getBaseElementInfo(element);
+  return { 
+    ...baseInfo,
+    role: 'list', 
+    states: [],
+    isInteractive: false,
+    virtualOnly: true,
+    shortcuts: ['↑/↓: navigate menu']
+  };
+}
+
+// Обработка ссылок
+function handleLink(element: HTMLAnchorElement): ElementDetails {
+  const listItem = element.closest('li, [role="listitem"]');
+  const list = listItem?.closest('ul, ol, [role="list"]');
   
-  if (count > 0) {
-    // Получаем первую ссылку в списке
-    const firstItem = items[0];
-    const firstLink = firstItem.querySelector('a');
+  // Если это первая ссылка в списке, показываем информацию о списке
+  if (list && listItem) {
+    const items = Array.from(list.querySelectorAll('li, [role="listitem"]'));
+    if (items[0] === listItem) {
+      const { count } = getListInfo(list);
+      const baseInfo = getBaseElementInfo(element);
+      let screenReaderText = `список из ${count} элементов ${element.textContent?.trim()}`;
 
-    if (firstLink) {
-      // Формируем полный текст с информацией о списке и первой ссылке
-      let screenReaderText = `список из ${count} элементов ${firstLink.textContent?.trim()}`;
-
-      if (firstLink instanceof HTMLAnchorElement) {
-        if (isVisitedLink(firstLink)) {
-          screenReaderText += ', посещенная ссылка';
-        }
-        if (element.closest('nav, [role="navigation"]') && isCurrentPage(firstLink)) {
-          screenReaderText += ', текущая страница';
-        }
+      if (isVisitedLink(element)) {
+        screenReaderText += ', посещенная ссылка';
+      }
+      if (element.closest('nav, [role="navigation"]') && isCurrentPage(element)) {
+        screenReaderText += ', текущая страница';
       }
 
       return {
@@ -66,32 +76,14 @@ function handleList(element: Element): ElementDetails {
         screenReaderText,
         states: [screenReaderText],
         isInteractive: true,
+        virtualOnly: true,
+        nextFocusableElement: element as HTMLElement,
         shortcuts: ['↑/↓: navigate menu', '1/↵: navigate menu']
       };
     }
-
-    // Если нет ссылки, показываем только информацию о списке
-    return { 
-      ...baseInfo,
-      role: 'list',
-      screenReaderText: `список из ${count} элементов`,
-      states: [`список из ${count} элементов`],
-      isInteractive: true,
-      shortcuts: ['↑/↓: navigate menu']
-    };
   }
-
-  return { 
-    ...baseInfo,
-    role: 'list', 
-    states: [],
-    isInteractive: true,
-    shortcuts: ['↑/↓: navigate menu']
-  };
-}
-
-// Обработка ссылок
-function handleLink(element: HTMLAnchorElement): ElementDetails {
+  
+  // Стандартная обработка ссылки
   const baseInfo = getBaseElementInfo(element);
   let screenReaderText = element.textContent?.trim() || '';
 
@@ -219,7 +211,7 @@ function getBaseElementInfo(element: Element): ElementDetails {
     info.states.push(`current ${current === 'true' ? 'item' : current}`);
   }
 
-  // Проверяем интерактивность и доступность с клавиатуры
+  // Проверяем интерактивность и доступность с клавы
   if (element instanceof HTMLElement) {
     // Проверяем tabIndex
     const tabIndex = element.tabIndex;
@@ -395,30 +387,14 @@ function getBaseElementInfo(element: Element): ElementDetails {
 }
 
 export function getElementInfo(element: Element): ElementDetails {
-  // Проверяем, является ли элемент ссылкой в первом элементе списка
   if (element.matches('a')) {
-    const listItem = element.closest('li, [role="listitem"]');
-    const list = listItem?.closest('ul, ol, [role="list"]');
-    
-    if (list && listItem) {
-      const items = Array.from(list.querySelectorAll('li, [role="listitem"]'));
-      if (items[0] === listItem) {
-        return handleList(list);
-      }
-    }
+    return handleLink(element as HTMLAnchorElement);
   }
 
-  // Обработка списков
   if (element.matches('ul, ol, [role="list"]')) {
     return handleList(element);
   }
 
-  // Обработка ссылок
-  if (element.matches('a') && element instanceof HTMLAnchorElement) {
-    return handleLink(element);
-  }
-
-  // Для всех остальных элементов используем базовую информацию
   return getBaseElementInfo(element);
 }
 

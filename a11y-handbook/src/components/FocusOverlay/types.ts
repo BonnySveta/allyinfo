@@ -39,6 +39,37 @@ export interface ElementDetails {
   parentLandmarks?: string[];
   
   screenReaderText?: string;
+  virtualOnly?: boolean; // Элемент только для виртуального фокуса
+  nextFocusableElement?: HTMLElement; // Изменяем тип с Element на HTMLElement
 }
 
 export type NavigationMode = 'landmarks' | 'elements'; 
+
+// Типы для виртуального буфера
+export interface VirtualNode {
+  element: Element;
+  role: string;
+  level?: number;
+  children: VirtualNode[];
+  parent?: VirtualNode;
+  isInteractive: boolean;
+  isFocusable: boolean;
+  isHidden: boolean;
+  
+  // Навигационные свойства
+  next?: VirtualNode;
+  previous?: VirtualNode;
+  firstChild?: VirtualNode;
+  lastChild?: VirtualNode;
+  
+  // Информация для скринридера
+  label: string;
+  description?: string;
+  states: string[];
+}
+
+export interface VirtualBuffer {
+  root: VirtualNode;
+  currentNode: VirtualNode | null;
+  mode: 'browse' | 'focus';
+}

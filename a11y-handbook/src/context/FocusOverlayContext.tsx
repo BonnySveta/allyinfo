@@ -1,25 +1,45 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { FocusOverlayContextType } from '../types/context';
+import React, { createContext, useContext, useState, useRef, useCallback } from 'react';
+import { VirtualBuffer } from '../components/FocusOverlay/virtualBuffer';
+
+interface FocusOverlayContextType {
+  isActive: boolean;
+  setIsActive: (active: boolean) => void;
+  virtualBuffer: VirtualBuffer | null;
+  initializeBuffer: () => VirtualBuffer;
+}
 
 const FocusOverlayContext = createContext<FocusOverlayContextType>({
   isActive: false,
   setIsActive: () => {},
+  virtualBuffer: null,
+  initializeBuffer: () => { throw new Error('Not implemented') },
 });
 
-export function FocusOverlayProvider({ children }: { children: ReactNode }) {
+export function FocusOverlayProvider({ children }: { children: React.ReactNode }) {
   const [isActive, setIsActive] = useState(false);
+  const [virtualBuffer, setVirtualBuffer] = useState<VirtualBuffer | null>(null);
+
+  const initializeBuffer = useCallback(() => {
+    if (!virtualBuffer) {
+      const newBuffer = new VirtualBuffer(document);
+      setVirtualBuffer(newBuffer);
+      return newBuffer;
+    }
+    return virtualBuffer;
+  }, [virtualBuffer]);
 
   return (
-    <FocusOverlayContext.Provider value={{ isActive, setIsActive }}>
+    <FocusOverlayContext.Provider 
+      value={{ 
+        isActive, 
+        setIsActive, 
+        virtualBuffer,
+        initializeBuffer
+      }}
+    >
       {children}
     </FocusOverlayContext.Provider>
   );
 }
 
-export function useFocusOverlay() {
-  const context = useContext(FocusOverlayContext);
-  if (!context) {
-    throw new Error('useFocusOverlay must be used within a FocusOverlayProvider');
-  }
-  return context;
-} 
+export const useFocusOverlay = () => useContext(FocusOverlayContext); 
