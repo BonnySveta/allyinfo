@@ -27,7 +27,7 @@ function getRole(element: Element): string {
   const explicitRole = element.getAttribute('role');
   if (explicitRole) return explicitRole;
 
-  // Маппинг HTML элемен��ов на их роли
+  // Маппинг HTML элементов на их роли
   const roleMap: Record<string, string> = {
     'a': 'link',
     'button': 'button',
@@ -137,9 +137,9 @@ function buildScreenReaderText(element: Element, details: ElementDetails): strin
   }
 
   // Формируем основной текст скринридера
-  const screenReaderText = '🔊 ' + mainParts.join(' ');
+  const screenReaderText = mainParts.join(' ');
 
-  // Получа��м техническую информацию через getTechnicalInfo
+  // Получаем техническую информацию через getTechnicalInfo
   const technicalInfo = getTechnicalInfo(element);
 
   return [
@@ -178,7 +178,7 @@ function handleLink(element: HTMLAnchorElement): ElementDetails {
         screenReaderText += ', посещенная ссылка';
       }
       if (element.closest('nav, [role="navigation"]') && isCurrentPage(element)) {
-        screenReaderText += ', текущая страница';
+        screenReaderText += ', текущая страни��';
       }
 
       return {
@@ -268,7 +268,7 @@ function getBaseElementInfo(element: Element): ElementDetails {
   // Получаем описание
   info.description = element.getAttribute('aria-description') ?? undefined;
 
-  // Проверяем состоян��я
+  // Проверяем состояния
   if (element instanceof HTMLElement) {
     if (element.hasAttribute('disabled')) {
       info.states.push('disabled');
@@ -487,7 +487,7 @@ function getBaseElementInfo(element: Element): ElementDetails {
     }
   });
 
-  // Проверяем состоян��е ссылки
+  // Проверяем состояние ссылки
   if (element instanceof HTMLAnchorElement) {
     info.visited = isVisitedLink(element);
   }

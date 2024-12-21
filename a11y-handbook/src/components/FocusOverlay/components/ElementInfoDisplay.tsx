@@ -12,9 +12,10 @@ export function ElementInfoDisplay({ elementInfo, position }: ElementInfoDisplay
 
   return (
     <InfoPanel $position={position}>
-      <div className="screen-reader-text">
-        {screenReaderText}
-      </div>
+      <div 
+        className="screen-reader-text"
+        dangerouslySetInnerHTML={{ __html: screenReaderText || '' }}
+      />
       <div className="technical-info">
         {technicalInfo}
       </div>

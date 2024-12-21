@@ -101,6 +101,11 @@ export const InfoPanel = styled.div<{ $position: SpotlightPosition }>`
   .screen-reader-text {
     font-weight: bold;
     margin-bottom: 4px;
+
+    &::before {
+      content: '🔊';
+      margin-right: 6px;
+    }
   }
 
   .technical-info {
