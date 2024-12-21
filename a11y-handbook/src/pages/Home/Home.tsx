@@ -27,7 +27,7 @@ const TitleSection = styled.div`
 const TitleContainer = styled.div`
   margin-top: -1rem;
   margin: 2rem 0 3rem;
-  padding: 0 2rem;
+  padding: 0 2rem 0 0;
 
   @media (max-width: 768px) {
     margin: 1.5rem 0 2rem;
@@ -94,8 +94,8 @@ export const Home: FC<HomeProps> = ({
     <>
       <TitleSection>
         <TitleContainer>
-          <Title>ALLY WIKI</Title>
-          <Subtitle>справочник цифровой доступности</Subtitle>
+          <Title>ALLY.RU</Title>
+          <Subtitle>каталог материалов по цифровой доступности</Subtitle>
         </TitleContainer>
         <StartBanner />
       </TitleSection>

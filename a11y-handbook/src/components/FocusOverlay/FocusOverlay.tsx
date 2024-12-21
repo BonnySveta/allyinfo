@@ -5,9 +5,15 @@ import { getElementInfo, LANDMARK_SELECTORS } from './utils';
 import { GlobalHints } from './components/GlobalHints';
 import { ElementInfoDisplay } from './components/ElementInfoDisplay';
 import { useFocusOverlay } from '../../context/FocusOverlayContext';
+import { speechService } from '../../services/speech';
 
 export function FocusOverlay() {
-  const { isActive, setIsActive, virtualBuffer, initializeBuffer } = useFocusOverlay();
+  const { 
+    isActive, 
+    setIsActive, 
+    virtualBuffer, 
+    initializeBuffer
+  } = useFocusOverlay();
   const [spotlightPosition, setSpotlightPosition] = useState<SpotlightPosition>({
     top: 0, left: 0, width: 0, height: 0
   });
@@ -51,6 +57,8 @@ export function FocusOverlay() {
       document.body.style.top = '';
       document.body.style.width = '';
       window.scrollTo(0, lastScrollPosition);
+      // Останавливаем озвучку при выключении режима
+      speechService.stop();
     }
   }, [isActive, initializeBuffer, lastScrollPosition]);
 
@@ -68,12 +76,20 @@ export function FocusOverlay() {
       height: rect.height + 8
     };
     
-    console.log('Setting spotlight position:', position); // Для отладки
+    console.log('Setting spotlight position:', position); // Дл�� отладки
     setSpotlightPosition(position);
 
     const info = getElementInfo(element);
     console.log('Setting element info:', info); // Для отладки
     setElementInfo(info);
+
+    // Озвучиваем текст для скринридера всегда, когда режим активен
+    if (info.screenReaderText) {
+      const [screenReaderText] = info.screenReaderText.split('\n');
+      if (screenReaderText) {
+        speechService.speak(screenReaderText);
+      }
+    }
 
     // Перемещаем реальный фокус только если элемент фокусируемый
     if (info.isFocusable && element instanceof HTMLElement) {
@@ -102,7 +118,7 @@ export function FocusOverlay() {
       });
     });
 
-    // Начинаем наблюдение за всем документом
+    // Начинаем наблюдение за вем документом
     stateObserver.observe(document.body, {
       attributes: true,
       attributeFilter: ['aria-pressed'],
@@ -187,6 +203,11 @@ export function FocusOverlay() {
 
       if (nextNode) {
         updateVisualFocus(nextNode);
+        // Озвучиваем текст для скринридера
+        const [screenReaderText] = nextNode.element.getAttribute('aria-label')?.split('\n') || [];
+        if (screenReaderText) {
+          speechService.speak(screenReaderText);
+        }
       }
     };
 
