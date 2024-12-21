@@ -84,6 +84,31 @@ export function FocusOverlay() {
   useEffect(() => {
     if (!isActive || !virtualBuffer) return;
 
+    // Создаем MutationObserver для отслеживания изменений состояний
+    const stateObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && 
+            mutation.attributeName === 'aria-pressed' &&
+            mutation.target instanceof Element) {
+          
+          // Используем публичный метод getCurrentNode() вместо прямого доступа к currentNode
+          const currentNode = virtualBuffer.getCurrentNode();
+          if (currentNode?.element === mutation.target) {
+            // Обновляем информацию об элементе
+            const info = getElementInfo(currentNode.element);
+            setElementInfo(info);
+          }
+        }
+      });
+    });
+
+    // Начинаем наблюдение за всем документом
+    stateObserver.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['aria-pressed'],
+      subtree: true
+    });
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
@@ -182,6 +207,7 @@ export function FocusOverlay() {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       observer.disconnect();
+      stateObserver.disconnect();
     };
   }, [isActive, virtualBuffer, setIsActive]);
 

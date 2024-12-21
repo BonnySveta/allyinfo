@@ -76,9 +76,9 @@ export const Spotlight = styled.div<{
 `;
 
 export const InfoPanel = styled.div<{ $position: SpotlightPosition }>`
-  position: absolute;
-  top: ${props => props.$position.top + props.$position.height + 8}px;
+  position: fixed;
   left: ${props => props.$position.left}px;
+  top: ${props => props.$position.top + props.$position.height + 8}px;
   background: #4A90E2;
   color: white;
   padding: 8px 12px;
@@ -98,34 +98,13 @@ export const InfoPanel = styled.div<{ $position: SpotlightPosition }>`
     border-color: transparent transparent #4A90E2 transparent;
   }
 
-  & > div {
-    margin-bottom: 8px;
-    
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-
   .screen-reader-text {
-    margin-bottom: 8px;
-    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 4px;
   }
 
   .technical-info {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
-  }
-`;
-
-export const InfoText = styled.div`
-  margin: 4px 0;
-
-  .screen-reader-text {
-    font-size: 14px;
-    margin-bottom: 12px;
-  }
-
-  .technical-info {
+    font-family: monospace;
     font-size: 12px;
     color: rgba(255, 255, 255, 0.7);
   }
@@ -133,20 +112,17 @@ export const InfoText = styled.div`
 
 export const ShortcutsList = styled.div`
   margin-top: 8px;
-  padding: 4px 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  font-size: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 8px;
 `;
 
 export const Shortcut = styled.span`
   display: inline-block;
-  margin-right: 12px;
-  color: rgba(255, 255, 255, 0.9);
-  
-  &:last-child {
-    margin-right: 0;
-  }
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-right: 8px;
+  font-size: 12px;
 `;
 
 export const GlobalHintsContainer = styled.div<{ $isCollapsed: boolean }>`

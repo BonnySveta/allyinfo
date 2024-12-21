@@ -361,6 +361,7 @@ export function Header() {
               className="screen-reader-toggle"
               onClick={() => setIsActive(!isActive)}
               aria-pressed={isActive}
+              tabIndex={0}
             >
               Имитация скринридера
             </FocusButton>

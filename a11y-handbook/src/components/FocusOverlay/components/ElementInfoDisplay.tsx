@@ -1,5 +1,5 @@
 import { ElementDetails, SpotlightPosition } from '../types';
-import { InfoPanel, InfoText, ShortcutsList, Shortcut } from '../styles';
+import { InfoPanel, ShortcutsList, Shortcut } from '../styles';
 
 interface ElementInfoDisplayProps {
   elementInfo: ElementDetails;

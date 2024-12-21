@@ -31,6 +31,9 @@ export interface ElementDetails {
   required?: boolean;
   current?: boolean | string;
   visited?: boolean;
+  disabled?: boolean;
+  readonly?: boolean;
+  invalid?: boolean;
   
   // Навигация
   tabIndex?: number;
