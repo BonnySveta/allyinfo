@@ -27,7 +27,7 @@ function getRole(element: Element): string {
   const explicitRole = element.getAttribute('role');
   if (explicitRole) return explicitRole;
 
-  // Маппинг HTML элементов на их роли
+  // Маппинг HTML элемен��ов на их роли
   const roleMap: Record<string, string> = {
     'a': 'link',
     'button': 'button',
@@ -62,13 +62,13 @@ function getTechnicalInfo(element: Element): string {
   const role = element.getAttribute('role') || getRole(element);
   parts.push(`role: ${role}`);
 
-  // Собираем все ARIA-атрибуты
+  // Собираем все ARIA-атрибуты без префикса "ARIA:"
   const ariaAttrs = Array.from(element.attributes)
     .filter(attr => attr.name.startsWith('aria-'))
     .map(attr => `${attr.name}="${attr.value}"`);
 
   if (ariaAttrs.length > 0) {
-    parts.push(`ARIA: ${ariaAttrs.join(', ')}`);
+    parts.push(ariaAttrs.join(', '));
   }
 
   return parts.join(' | ');
@@ -139,7 +139,7 @@ function buildScreenReaderText(element: Element, details: ElementDetails): strin
   // Формируем основной текст скринридера
   const screenReaderText = '🔊 ' + mainParts.join(' ');
 
-  // Получаем техническую информацию через getTechnicalInfo
+  // Получа��м техническую информацию через getTechnicalInfo
   const technicalInfo = getTechnicalInfo(element);
 
   return [
@@ -268,7 +268,7 @@ function getBaseElementInfo(element: Element): ElementDetails {
   // Получаем описание
   info.description = element.getAttribute('aria-description') ?? undefined;
 
-  // Проверяем состояния
+  // Проверяем состоян��я
   if (element instanceof HTMLElement) {
     if (element.hasAttribute('disabled')) {
       info.states.push('disabled');
@@ -437,7 +437,7 @@ function getBaseElementInfo(element: Element): ElementDetails {
     info.states.push(`in ${parentLandmarks.join(' > ')}`);
   }
 
-  // Проверяем дополнительные атрибуты для улучшения конт��кста
+  // Проверяем дополнительные атрибуты для улучшения конткста
   const labelledBy = element.getAttribute('aria-labelledby');
   if (labelledBy) {
     const labelElements = labelledBy.split(' ')

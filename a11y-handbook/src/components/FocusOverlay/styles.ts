@@ -85,7 +85,7 @@ export const InfoPanel = styled.div<{ $position: SpotlightPosition }>`
   border-radius: 4px;
   font-size: 14px;
   z-index: 10000;
-  max-width: 300px;
+  max-width: 400px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   
   &::before {
