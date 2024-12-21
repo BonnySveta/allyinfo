@@ -22,26 +22,53 @@ function getListInfo(list: Element) {
   };
 }
 
+// Вспомогательная функция для получения роли элемента
+function getRole(element: Element): string {
+  const explicitRole = element.getAttribute('role');
+  if (explicitRole) return explicitRole;
+
+  // Маппинг HTML элемен��ов на их роли
+  const roleMap: Record<string, string> = {
+    'a': 'link',
+    'button': 'button',
+    'h1': 'heading',
+    'h2': 'heading',
+    'h3': 'heading',
+    'h4': 'heading',
+    'h5': 'heading',
+    'h6': 'heading',
+    'input': 'textbox',
+    'img': 'image',
+    'ul': 'list',
+    'ol': 'list',
+    'li': 'listitem',
+    'nav': 'navigation',
+    'main': 'main',
+    'header': 'banner',
+    'footer': 'contentinfo',
+  };
+
+  return roleMap[element.tagName.toLowerCase()] || element.tagName.toLowerCase();
+}
+
 // Функция для формирования текста для скринридера
 function getTechnicalInfo(element: Element): string {
   const parts: string[] = [];
+
+  // Добавляем тег в угловых скобках
+  parts.push(`<${element.tagName.toLowerCase()}>`);
+
+  // Добавляем роль
+  const role = element.getAttribute('role') || getRole(element);
+  parts.push(`role: ${role}`);
 
   // Собираем все ARIA-атрибуты
   const ariaAttrs = Array.from(element.attributes)
     .filter(attr => attr.name.startsWith('aria-'))
     .map(attr => `${attr.name}="${attr.value}"`);
 
-  // Добавляем тег и ARIA атрибуты в одну строку
   if (ariaAttrs.length > 0) {
-    parts.push(`${element.tagName.toLowerCase()} | ARIA: ${ariaAttrs.join(', ')}`);
-  } else {
-    parts.push(element.tagName.toLowerCase());
-  }
-
-  // Добавляем роль, если она отличается от дефолтной для тега
-  const explicitRole = element.getAttribute('role');
-  if (explicitRole) {
-    parts.push(`роль: ${explicitRole}`);
+    parts.push(`ARIA: ${ariaAttrs.join(', ')}`);
   }
 
   return parts.join(' | ');
@@ -115,23 +142,13 @@ function buildScreenReaderText(element: Element, details: ElementDetails): strin
   // Формируем основной текст скринридера
   const screenReaderText = '🔊 ' + mainParts.join(' ');
 
-  // Формируем техническую информацию
-  const tagAndAria = [];
-  tagAndAria.push(element.tagName.toLowerCase());
-
-  // Собираем все ARIA-атрибуты
-  const ariaAttrs = Array.from(element.attributes)
-    .filter(attr => attr.name.startsWith('aria-'))
-    .map(attr => `${attr.name}="${attr.value}"`);
-
-  if (ariaAttrs.length > 0) {
-    tagAndAria.push(`ARIA: ${ariaAttrs.join(', ')}`);
-  }
+  // Получаем техническую информацию через getTechnicalInfo
+  const technicalInfo = getTechnicalInfo(element);
 
   // Возвращаем два отдельных текста
   return [
-    '🔊 ' + mainParts.join(' '),
-    tagAndAria.join(' | ')
+    screenReaderText,
+    technicalInfo
   ].join('\n');
 }
 
@@ -199,7 +216,7 @@ function handleLink(element: HTMLAnchorElement): ElementDetails {
 
 // Получене базовой информации об элементе
 function getBaseElementInfo(element: Element): ElementDetails {
-  // Определяем роль элемента
+  // Определяем рль элемента
   let role = element.tagName.toLowerCase();
   const ariaRole = element.getAttribute('role');
   
