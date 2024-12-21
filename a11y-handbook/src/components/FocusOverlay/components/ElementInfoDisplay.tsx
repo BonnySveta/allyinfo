@@ -7,27 +7,21 @@ interface ElementInfoDisplayProps {
 }
 
 export function ElementInfoDisplay({ elementInfo, position }: ElementInfoDisplayProps) {
+  const [screenReaderText, technicalInfo] = elementInfo.screenReaderText?.split('\n') || [];
+  const shortcuts = elementInfo.shortcuts || [];
+
   return (
     <InfoPanel $position={position}>
-      <InfoText>
-        {elementInfo.role}
-        {elementInfo.level ? ` ${elementInfo.level}` : ''}
-        {elementInfo.label ? `: ${elementInfo.label}` : ''}
-      </InfoText>
+      <div className="screen-reader-text">
+        {screenReaderText}
+      </div>
+      <div className="technical-info">
+        {technicalInfo}
+      </div>
       
-      {elementInfo.states.length > 0 && (
-        <InfoText>
-          {elementInfo.states.join(', ')}
-        </InfoText>
-      )}
-      
-      {elementInfo.description && (
-        <InfoText>{elementInfo.description}</InfoText>
-      )}
-
-      {elementInfo.shortcuts && elementInfo.shortcuts.length > 0 && (
+      {shortcuts.length > 0 && (
         <ShortcutsList>
-          {elementInfo.shortcuts.map((shortcut, index) => (
+          {shortcuts.map((shortcut, index) => (
             <Shortcut key={index}>{shortcut}</Shortcut>
           ))}
         </ShortcutsList>

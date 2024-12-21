@@ -30,6 +30,7 @@ export interface ElementDetails {
   checked?: boolean;
   required?: boolean;
   current?: boolean | string;
+  visited?: boolean;
   
   // Навигация
   tabIndex?: number;

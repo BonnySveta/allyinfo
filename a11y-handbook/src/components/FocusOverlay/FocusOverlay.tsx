@@ -23,7 +23,7 @@ export function FocusOverlay() {
       console.log('Buffer initialized:', buffer); // Для отладки
       
       // Установим начальный элемент фокуса
-      const activeElement = document.activeElement || document.querySelector('[aria-label="Имитация скринридера"]');
+      const activeElement = document.activeElement || document.querySelector('.screen-reader-toggle');
       console.log('Initial active element:', activeElement); // Для отладки
       
       if (activeElement) {
@@ -91,7 +91,7 @@ export function FocusOverlay() {
         }
         // Если не в диалоге, выходим из режима
         setIsActive(false);
-        const toggleButton = document.querySelector('[aria-label="Имитация скринридера"]');
+        const toggleButton = document.querySelector('.screen-reader-toggle');
         if (toggleButton instanceof HTMLElement) {
           toggleButton.focus();
         }

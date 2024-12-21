@@ -23,18 +23,116 @@ function getListInfo(list: Element) {
 }
 
 // Функция для формирования текста для скринридера
-function buildScreenReaderText(base: string, options: {
-  isVisited?: boolean;
-  isCurrentPage?: boolean;
-}): string {
-  let text = base;
-  if (options.isVisited) {
-    text += ', посещенная ссылка';
+function getTechnicalInfo(element: Element): string {
+  const parts: string[] = [];
+
+  // Собираем все ARIA-атрибуты
+  const ariaAttrs = Array.from(element.attributes)
+    .filter(attr => attr.name.startsWith('aria-'))
+    .map(attr => `${attr.name}="${attr.value}"`);
+
+  // Добавляем тег и ARIA атрибуты в одну строку
+  if (ariaAttrs.length > 0) {
+    parts.push(`${element.tagName.toLowerCase()} | ARIA: ${ariaAttrs.join(', ')}`);
+  } else {
+    parts.push(element.tagName.toLowerCase());
   }
-  if (options.isCurrentPage) {
-    text += ', текущая страница';
+
+  // Добавляем роль, если она отличается от дефолтной для тега
+  const explicitRole = element.getAttribute('role');
+  if (explicitRole) {
+    parts.push(`роль: ${explicitRole}`);
   }
-  return text;
+
+  return parts.join(' | ');
+}
+
+function buildScreenReaderText(element: Element, details: ElementDetails): string {
+  const mainParts: string[] = [];
+
+  // 1. Основной текст (имя)
+  if (details.label) {
+    mainParts.push(details.label);
+  }
+
+  // 2. Роль элемента и состояние
+  switch (details.role) {
+    case 'button':
+      mainParts.push('кнопка');
+      if (element.hasAttribute('aria-pressed')) {
+        mainParts.push('переключатель');
+        mainParts.push(element.getAttribute('aria-pressed') === 'true' ? ', нажата' : ', не нажата');
+      }
+      break;
+    case 'link':
+      mainParts.push('ссылка');
+      if (details.visited) mainParts.push('посещенная');
+      break;
+    case 'heading':
+      mainParts.push(`заголовок уровня ${details.level}`);
+      break;
+    case 'checkbox':
+      mainParts.push('флажок');
+      mainParts.push(details.checked ? 'установлен' : 'не установлен');
+      break;
+    case 'radio':
+      mainParts.push('переключатель');
+      mainParts.push(details.checked ? 'выбран' : 'не выбран');
+      break;
+    case 'combobox':
+      mainParts.push('раскрывающийся список');
+      if (details.expanded !== undefined) {
+        mainParts.push(details.expanded ? 'раскрыт' : 'свёрнут');
+      }
+      break;
+  }
+
+  // 3. Состояния (без горячих клавиш)
+  if (details.required) mainParts.push('обязательное поле');
+  if (element.hasAttribute('disabled')) mainParts.push('недоступно');
+  if (details.expanded !== undefined && !['combobox'].includes(details.role)) {
+    mainParts.push(details.expanded ? 'развернуто' : 'свернуто');
+  }
+
+  // 4. Позиция в списке/группе
+  if (details.position) {
+    mainParts.push(`${details.position.current} из ${details.position.total}`);
+  }
+
+  // 5. Описание (если есть)
+  if (details.description) {
+    mainParts.push(details.description);
+  }
+
+  // 6. Контекст (если есть)
+  if (details.landmark) {
+    mainParts.push(`область: ${details.landmark}`);
+  }
+  if (details.parentLandmarks?.length) {
+    mainParts.push(`в ${details.parentLandmarks.join(' в ')}`);
+  }
+
+  // Формируем основной текст скринридера
+  const screenReaderText = '🔊 ' + mainParts.join(' ');
+
+  // Формируем техническую информацию
+  const tagAndAria = [];
+  tagAndAria.push(element.tagName.toLowerCase());
+
+  // Собираем все ARIA-атрибуты
+  const ariaAttrs = Array.from(element.attributes)
+    .filter(attr => attr.name.startsWith('aria-'))
+    .map(attr => `${attr.name}="${attr.value}"`);
+
+  if (ariaAttrs.length > 0) {
+    tagAndAria.push(`ARIA: ${ariaAttrs.join(', ')}`);
+  }
+
+  // Возвращаем два отдельных текста
+  return [
+    screenReaderText,
+    tagAndAria.join(' | ')
+  ].join('\n');
 }
 
 // Обработка списков
@@ -67,7 +165,7 @@ function handleLink(element: HTMLAnchorElement): ElementDetails {
         screenReaderText += ', посещенная ссылка';
       }
       if (element.closest('nav, [role="navigation"]') && isCurrentPage(element)) {
-        screenReaderText += ', текущая страница';
+        screenReaderText += ', текущая страниа';
       }
 
       return {
@@ -87,10 +185,7 @@ function handleLink(element: HTMLAnchorElement): ElementDetails {
   const baseInfo = getBaseElementInfo(element);
   let screenReaderText = element.textContent?.trim() || '';
 
-  screenReaderText = buildScreenReaderText(screenReaderText, {
-    isVisited: isVisitedLink(element),
-    isCurrentPage: element.closest('nav, [role="navigation"]') ? isCurrentPage(element) : false
-  });
+  screenReaderText = buildScreenReaderText(element, baseInfo);
 
   return {
     ...baseInfo,
@@ -102,7 +197,7 @@ function handleLink(element: HTMLAnchorElement): ElementDetails {
   };
 }
 
-// Получение базовой информации об элементе
+// Получене базовой информации об элементе
 function getBaseElementInfo(element: Element): ElementDetails {
   // Определяем роль элемента
   let role = element.tagName.toLowerCase();
@@ -134,32 +229,28 @@ function getBaseElementInfo(element: Element): ElementDetails {
     role = roleMap[role] || role;
   }
 
-  const info: ElementDetails = { 
+  const info: ElementDetails = {
     role,
+    label: element.getAttribute('aria-label') || element.textContent?.trim() || '',
     states: [],
     isInteractive: false
   };
+
+  // Проверяем состояние кнопки-переключателя
+  if (element.matches('button, [role="button"]')) {
+    const pressed = element.getAttribute('aria-pressed');
+    if (pressed !== null) {
+      info.pressed = pressed === 'true';
+      info.states.push(info.pressed ? 'нажата' : 'не нажата');
+    }
+  }
 
   // Определяем уровень заголовка
   if (role === 'heading') {
     const level = parseInt(element.tagName[1]);
     info.level = level;
     info.states.push(`heading level ${level}`);
-    
-    // Добавим информацию о структуре заголовков
-    const allHeadings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6'));
-    const headingIndex = allHeadings.indexOf(element) + 1;
-    if (headingIndex > 0) {
-      info.states.push(`heading ${headingIndex} of ${allHeadings.length}`);
-    }
   }
-
-  // Получаем метку элемента
-  info.label = element.getAttribute('aria-label') ?? 
-               element.getAttribute('alt') ?? 
-               element.getAttribute('title') ??
-               element.textContent?.trim() ??
-               undefined;
 
   // Получаем описание
   info.description = element.getAttribute('aria-description') ?? undefined;
@@ -187,12 +278,6 @@ function getBaseElementInfo(element: Element): ElementDetails {
     info.states.push(info.expanded ? 'expanded' : 'collapsed');
   }
 
-  const pressed = element.getAttribute('aria-pressed');
-  if (pressed !== null) {
-    info.pressed = pressed === 'true';
-    info.states.push(info.pressed ? 'pressed' : 'not pressed');
-  }
-
   const checked = element.getAttribute('aria-checked');
   if (checked !== null) {
     info.checked = checked === 'true';
@@ -211,7 +296,7 @@ function getBaseElementInfo(element: Element): ElementDetails {
     info.states.push(`current ${current === 'true' ? 'item' : current}`);
   }
 
-  // Проверяем интерактивность и доступность с клавы
+  // Проверяем интерактивность и доступность с клавиатуры
   if (element instanceof HTMLElement) {
     // Проверяем tabIndex
     const tabIndex = element.tabIndex;
@@ -291,14 +376,14 @@ function getBaseElementInfo(element: Element): ElementDetails {
   };
 
   // Проверяем роль элемента как landmark
-  if (landmarkRoles[role as keyof typeof landmarkRoles]) {
-    info.landmark = landmarkRoles[role as keyof typeof landmarkRoles];
+  if (landmarkRoles[info.role as keyof typeof landmarkRoles]) {
+    info.landmark = landmarkRoles[info.role as keyof typeof landmarkRoles];
     info.states.push(`landmark: ${info.landmark}`);
   }
 
-  // Проверяем aria-label для региона
+  // Проверяем aria-label для егиона
   const regionLabel = element.getAttribute('aria-label');
-  if (regionLabel && (role === 'region' || element.tagName.toLowerCase() === 'section')) {
+  if (regionLabel && (info.role === 'region' || element.tagName.toLowerCase() === 'section')) {
     info.region = regionLabel;
     info.states.push(`region: ${regionLabel}`);
   }
@@ -382,6 +467,13 @@ function getBaseElementInfo(element: Element): ElementDetails {
       info.states.push(`${attr}: ${value}`);
     }
   });
+
+  // Проверяем состояние ссылки
+  if (element instanceof HTMLAnchorElement) {
+    info.visited = isVisitedLink(element);
+  }
+
+  info.screenReaderText = buildScreenReaderText(element, info);
 
   return info;
 }

@@ -87,7 +87,7 @@ export const InfoPanel = styled.div<{ $position: SpotlightPosition }>`
   z-index: 10000;
   max-width: 300px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-
+  
   &::before {
     content: '';
     position: absolute;
@@ -97,16 +97,48 @@ export const InfoPanel = styled.div<{ $position: SpotlightPosition }>`
     border-width: 0 8px 8px 8px;
     border-color: transparent transparent #4A90E2 transparent;
   }
+
+  & > div {
+    margin-bottom: 8px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .screen-reader-text {
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+
+  .technical-info {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
 `;
 
 export const InfoText = styled.div`
   margin: 4px 0;
+
+  .screen-reader-text {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .technical-info {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+  }
 `;
 
 export const ShortcutsList = styled.div`
   margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
   font-size: 12px;
 `;
 
@@ -114,6 +146,10 @@ export const Shortcut = styled.span`
   display: inline-block;
   margin-right: 12px;
   color: rgba(255, 255, 255, 0.9);
+  
+  &:last-child {
+    margin-right: 0;
+  }
 `;
 
 export const GlobalHintsContainer = styled.div<{ $isCollapsed: boolean }>`

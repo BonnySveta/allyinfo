@@ -187,7 +187,7 @@ const AdminLink = styled(NavLink)`
   }
 
   &::before {
-    content: '👑';
+    content: '������';
     font-size: 1.1rem;
   }
 `;
@@ -229,10 +229,15 @@ const BurgerLine = styled.span<{ $isOpen: boolean }>`
   }
 `;
 
-const FocusButton = styled(AuthButton)`
+const FocusButton = styled.button`
   background: var(--accent-color);
   color: white;
   border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
 
   &:hover {
     opacity: 0.9;
@@ -357,9 +362,9 @@ export function Header() {
                 Админ-панель
               </AdminLink>
             )}
-            <FocusButton
-              onClick={toggleOverlay}
-              aria-label="Имитация скринридера"
+            <FocusButton 
+              className="screen-reader-toggle"
+              onClick={() => setIsActive(!isActive)}
               aria-pressed={isActive}
             >
               Имитация скринридера
