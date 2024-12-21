@@ -79,7 +79,12 @@ function buildScreenReaderText(element: Element, details: ElementDetails): strin
 
   // 1. Основной текст (имя)
   if (details.label) {
-    mainParts.push(details.label);
+    // Добавляем кавычки только для кнопок, которые не являются частью группового заголовка
+    if (details.role === 'button' && !details.label.includes('группа.')) {
+      mainParts.push(`"${details.label}"`);
+    } else {
+      mainParts.push(details.label);
+    }
   }
 
   // 2. Роль элемента и состояние
@@ -131,21 +136,12 @@ function buildScreenReaderText(element: Element, details: ElementDetails): strin
     mainParts.push(details.description);
   }
 
-  // 6. Контекст (если есть)
-  if (details.landmark) {
-    mainParts.push(`область: ${details.landmark}`);
-  }
-  if (details.parentLandmarks?.length) {
-    mainParts.push(`в ${details.parentLandmarks.join(' в ')}`);
-  }
-
   // Формируем основной текст скринридера
   const screenReaderText = '🔊 ' + mainParts.join(' ');
 
   // Получаем техническую информацию через getTechnicalInfo
   const technicalInfo = getTechnicalInfo(element);
 
-  // Возвращаем два отдельных текста
   return [
     screenReaderText,
     technicalInfo
@@ -182,7 +178,7 @@ function handleLink(element: HTMLAnchorElement): ElementDetails {
         screenReaderText += ', посещенная ссылка';
       }
       if (element.closest('nav, [role="navigation"]') && isCurrentPage(element)) {
-        screenReaderText += ', текущая страниа';
+        screenReaderText += ', текущая страница';
       }
 
       return {
@@ -198,7 +194,7 @@ function handleLink(element: HTMLAnchorElement): ElementDetails {
     }
   }
   
-  // Стандартная обработка ссылки
+  // Стандартная обработк�� ссылки
   const baseInfo = getBaseElementInfo(element);
   let screenReaderText = element.textContent?.trim() || '';
 
@@ -210,7 +206,7 @@ function handleLink(element: HTMLAnchorElement): ElementDetails {
     screenReaderText,
     states: [...baseInfo.states, screenReaderText],
     isInteractive: true,
-    shortcuts: [...(baseInfo.shortcuts || []), 'Enter: follow link']
+    shortcuts: baseInfo.shortcuts || []
   };
 }
 
@@ -386,7 +382,7 @@ function getBaseElementInfo(element: Element): ElementDetails {
     complementary: 'complementary content',
     contentinfo: 'footer',
     form: 'form',
-    main: 'main content',
+    main: '',
     navigation: 'navigation',
     region: 'region',
     search: 'search',
@@ -394,8 +390,11 @@ function getBaseElementInfo(element: Element): ElementDetails {
 
   // Проверяем роль элемента как landmark
   if (landmarkRoles[info.role as keyof typeof landmarkRoles]) {
-    info.landmark = landmarkRoles[info.role as keyof typeof landmarkRoles];
-    info.states.push(`landmark: ${info.landmark}`);
+    const landmarkText = landmarkRoles[info.role as keyof typeof landmarkRoles];
+    if (landmarkText) {
+      info.landmark = landmarkText;
+      info.states.push(`landmark: ${landmarkText}`);
+    }
   }
 
   // Проверяем aria-label для егиона
@@ -414,11 +413,14 @@ function getBaseElementInfo(element: Element): ElementDetails {
     const parentTag = parent.tagName.toLowerCase();
     
     if (parentRole && landmarkRoles[parentRole as keyof typeof landmarkRoles]) {
-      const label = parent.getAttribute('aria-label');
-      parentLandmarks.push(label ? 
-        `${landmarkRoles[parentRole as keyof typeof landmarkRoles]} "${label}"` : 
-        landmarkRoles[parentRole as keyof typeof landmarkRoles]
-      );
+      const landmarkText = landmarkRoles[parentRole as keyof typeof landmarkRoles];
+      if (landmarkText) {
+        const label = parent.getAttribute('aria-label');
+        parentLandmarks.push(label ? 
+          `${landmarkText} "${label}"` : 
+          landmarkText
+        );
+      }
     } else if (parentTag in landmarkRoles) {
       const label = parent.getAttribute('aria-label');
       parentLandmarks.push(label ? 
@@ -495,6 +497,31 @@ function getBaseElementInfo(element: Element): ElementDetails {
   return info;
 }
 
+// Обработка группы фильтров
+function handleFilterGroup(element: Element): ElementDetails {
+  const filterGroup = element.closest('[role="group"]');
+  const isFirstButton = filterGroup?.querySelector('button, [role="button"]') === element;
+  
+  if (filterGroup && isFirstButton) {
+    const baseInfo = getBaseElementInfo(element);
+    const groupLabel = filterGroup.getAttribute('aria-label') || 'Фильтр по категориям';
+    
+    // Для первой кнопки добавляем информацию о группе
+    return {
+      ...baseInfo,
+      screenReaderText: buildScreenReaderText(element, {
+        ...baseInfo,
+        label: `${groupLabel}, группа. "${baseInfo.label}"`
+      }),
+      states: [...baseInfo.states],
+      isInteractive: true
+    };
+  }
+
+  // Для остальных кнопок используем стандартную обработку
+  return getBaseElementInfo(element);
+}
+
 export function getElementInfo(element: Element): ElementDetails {
   if (element.matches('a')) {
     return handleLink(element as HTMLAnchorElement);
@@ -502,6 +529,11 @@ export function getElementInfo(element: Element): ElementDetails {
 
   if (element.matches('ul, ol, [role="list"]')) {
     return handleList(element);
+  }
+
+  // Добавляем обработку кнопок фильтра
+  if (element.matches('button, [role="button"]') && element.closest('[role="group"]')) {
+    return handleFilterGroup(element);
   }
 
   return getBaseElementInfo(element);

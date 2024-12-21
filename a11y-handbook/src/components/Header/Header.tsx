@@ -185,11 +185,6 @@ const AdminLink = styled(NavLink)`
   &:hover {
     background: var(--nav-hover-background);
   }
-
-  &::before {
-    content: '������';
-    font-size: 1.1rem;
-  }
 `;
 
 const BurgerButton = styled.button`
@@ -359,7 +354,7 @@ export function Header() {
           <Controls>
             {isAdmin && (
               <AdminLink to="/admin" onClick={closeMenu}>
-                Админ-панель
+                Админ
               </AdminLink>
             )}
             <FocusButton 
