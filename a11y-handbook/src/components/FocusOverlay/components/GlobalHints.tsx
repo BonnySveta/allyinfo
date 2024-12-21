@@ -58,6 +58,23 @@ export function GlobalHints({ navigationMode, isCollapsed, onToggleCollapse }: G
             <Shortcut>L: следующий список</Shortcut>
             <Shortcut>Shift + L: предыдущий список</Shortcut>
           </HintsSection>
+
+          <HintsSection>
+            <HintsTitle>Навигация по диалогам</HintsTitle>
+            <div>
+              <Shortcut>D: следующий диалог</Shortcut>
+              <Shortcut>Shift + D: предыдущий диалог</Shortcut>
+              <Shortcut>Escape: выход из диалога</Shortcut>
+            </div>
+          </HintsSection>
+
+          <HintsSection>
+            <HintsTitle>Дополнительная навигация</HintsTitle>
+            <div>
+              <Shortcut>F1: переход по flow-связи</Shortcut>
+              <Shortcut>Alt + →: переход по flow-связи</Shortcut>
+            </div>
+          </HintsSection>
         </>
       )}
     </GlobalHintsContainer>

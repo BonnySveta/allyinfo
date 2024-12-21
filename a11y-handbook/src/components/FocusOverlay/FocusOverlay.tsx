@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Spotlight } from './styles';
-import { SpotlightPosition, ElementDetails, NavigationMode, VirtualNode } from './types';
+import { useState, useEffect, Fragment } from 'react';
+import { Spotlight, FlowIndicator, FlowLabel } from './styles';
+import { SpotlightPosition, ElementDetails, NavigationMode, VirtualNode, FlowConnection } from './types';
 import { getElementInfo, LANDMARK_SELECTORS } from './utils';
 import { GlobalHints } from './components/GlobalHints';
 import { ElementInfoDisplay } from './components/ElementInfoDisplay';
@@ -15,19 +15,31 @@ export function FocusOverlay() {
   const [navigationMode, setNavigationMode] = useState<NavigationMode>('elements');
   const [isHintsCollapsed, setIsHintsCollapsed] = useState(false);
   const [lastScrollPosition, setLastScrollPosition] = useState(0);
+  const [flowConnections, setFlowConnections] = useState<FlowConnection[]>([]);
 
   useEffect(() => {
     if (isActive) {
       const buffer = initializeBuffer();
+      console.log('Buffer initialized:', buffer); // Для отладки
       
       // Установим начальный элемент фокуса
-      const activeElement = document.activeElement || document.body;
-      const node = buffer.setCurrentNode(activeElement);
-      if (node) {
-        updateVisualFocus(node);
+      const activeElement = document.activeElement || document.querySelector('[aria-label="Имитация скринридера"]');
+      console.log('Initial active element:', activeElement); // Для отладки
+      
+      if (activeElement) {
+        const node = buffer.setCurrentNode(activeElement);
+        console.log('Initial node:', node); // Для отладки
+        
+        if (node) {
+          updateVisualFocus(node);
+        } else {
+          console.log('Failed to set initial node'); // Для отладки
+        }
+      } else {
+        console.log('No active element found'); // Для отладки
       }
 
-      // Сохр��няем текущую позицию скролла
+      // Сохраняем текущую позицию скролла
       setLastScrollPosition(window.scrollY);
       // Блокируем скролл
       document.body.style.position = 'fixed';
@@ -43,21 +55,25 @@ export function FocusOverlay() {
   }, [isActive, initializeBuffer, lastScrollPosition]);
 
   const updateVisualFocus = (node: VirtualNode) => {
+    console.log('Updating visual focus for node:', node); // Для отладки
+    
     const element = node.element;
     const rect = element.getBoundingClientRect();
-    const padding = 4;
+    console.log('Element rect:', rect); // Для отладки
 
-    // Обновляем позицию спотлайта
-    setSpotlightPosition({
+    const padding = 4;
+    const position = {
       top: rect.top - padding,
       left: rect.left - padding,
       width: rect.width + padding * 2,
       height: rect.height + padding * 2
-    });
+    };
+    
+    console.log('Setting spotlight position:', position); // Для отладки
+    setSpotlightPosition(position);
 
-    // Получаем и устанавливаем информацию об элементе
     const info = getElementInfo(element);
-    console.log('Element info:', info); // Добавим для отладки
+    console.log('Setting element info:', info); // Для отладки
     setElementInfo(info);
   };
 
@@ -67,8 +83,14 @@ export function FocusOverlay() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
+        // Сначала пробуем обработать навигацию в диалоге
+        const dialogResult = virtualBuffer.handleDialogNavigation('Escape');
+        if (dialogResult) {
+          updateVisualFocus(dialogResult);
+          return;
+        }
+        // Если не в диалоге, выходим из режима
         setIsActive(false);
-        // Возвращаем фокус на кнопку включения режима
         const toggleButton = document.querySelector('[aria-label="Имитация скринридера"]');
         if (toggleButton instanceof HTMLElement) {
           toggleButton.focus();
@@ -81,6 +103,16 @@ export function FocusOverlay() {
         e.preventDefault();
         setNavigationMode(prev => prev === 'landmarks' ? 'elements' : 'landmarks');
         return;
+      }
+
+      // Навигация по flow-связям (F1)
+      if (e.key === 'F1') {
+        e.preventDefault();
+        const flowResult = virtualBuffer.handleDialogNavigation('F1');
+        if (flowResult) {
+          updateVisualFocus(flowResult);
+          return;
+        }
       }
 
       let nextNode: VirtualNode | null = null;
@@ -107,7 +139,21 @@ export function FocusOverlay() {
             virtualBuffer.moveToNextByRole('list');
           break;
 
-        // Добавьте другие клавиши навигации по необходимости
+        // Добавляем навигацию по диалогам
+        case 'd':
+          e.preventDefault();
+          nextNode = e.shiftKey ? 
+            virtualBuffer.moveToPreviousByRole('dialog') : 
+            virtualBuffer.moveToNextByRole('dialog');
+          break;
+
+        // Навигация по flow-связям с помощью стрелок
+        case 'ArrowRight':
+          if (e.altKey) {
+            e.preventDefault();
+            nextNode = virtualBuffer.moveToFlowTarget();
+          }
+          break;
       }
 
       if (nextNode) {
@@ -115,15 +161,47 @@ export function FocusOverlay() {
       }
     };
 
+    // Добавляем обработчик изменений для live regions
+    const observer = new MutationObserver(() => {
+      virtualBuffer.updateLiveRegions();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['aria-live', 'aria-atomic', 'aria-relevant']
+    });
+
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      observer.disconnect();
+    };
   }, [isActive, virtualBuffer, setIsActive]);
 
   return (
     <>
       {isActive && (
         <>
-          <Spotlight $position={spotlightPosition} />
+          <Spotlight 
+            $position={spotlightPosition}
+            $isModal={elementInfo?.isModal}
+            $isLive={elementInfo?.isLiveRegion}
+            $hasFlow={flowConnections.length > 0}
+          />
+          {flowConnections.map((connection, index) => (
+            <Fragment key={index}>
+              <FlowIndicator $from={connection.from} $to={connection.to} />
+              <FlowLabel style={{
+                left: (connection.from.left + connection.to.left) / 2,
+                top: (connection.from.top + connection.to.top) / 2
+              }}>
+                {connection.label}
+              </FlowLabel>
+            </Fragment>
+          ))}
           {elementInfo && (
             <ElementInfoDisplay 
               elementInfo={elementInfo} 

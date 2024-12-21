@@ -6,6 +6,12 @@ export interface SpotlightPosition {
   height: number;
 }
 
+export interface FlowConnection {
+  from: DOMRect;
+  to: DOMRect;
+  label: string;
+}
+
 export interface ElementPosition {
   current: number;
   total: number;
@@ -41,6 +47,8 @@ export interface ElementDetails {
   screenReaderText?: string;
   virtualOnly?: boolean; // Элемент только для виртуального фокуса
   nextFocusableElement?: HTMLElement; // Изменяем тип с Element на HTMLElement
+  isModal?: boolean;
+  isLiveRegion?: boolean;
 }
 
 export type NavigationMode = 'landmarks' | 'elements'; 
@@ -66,6 +74,18 @@ export interface VirtualNode {
   label: string;
   description?: string;
   states: string[];
+  isLiveRegion?: boolean;
+  liveSettings?: {
+    mode: 'polite' | 'assertive' | 'off';
+    atomic: boolean;
+    relevant: string[];
+  };
+  isModal?: boolean;
+  flowTargets?: Array<{
+    element: Element;
+    label: string;
+    node: VirtualNode | null;
+  }>;
 }
 
 export interface VirtualBuffer {
