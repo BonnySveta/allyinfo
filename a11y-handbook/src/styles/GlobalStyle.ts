@@ -28,6 +28,7 @@ export const GlobalStyle = createGlobalStyle`
     --banner-background: #ebf2ff;
     --accent-color-hover: #0056b3;
     --accent-color-rgb: 0, 122, 255;
+    --card-background: #f8f9fa;
   }
 
   :root[data-theme="dark"] {
@@ -53,6 +54,7 @@ export const GlobalStyle = createGlobalStyle`
     --banner-background: #323a49;
     --accent-color-hover: #0056b3;
     --accent-color-rgb: 10, 132, 255;
+    --card-background: #242424;
   }
 
   body {

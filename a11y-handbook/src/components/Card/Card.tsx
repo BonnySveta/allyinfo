@@ -10,10 +10,9 @@ interface CardProps {
 }
 
 const CardContainer = styled.div`
-  background: var(--nav-background);
+  background: var(--card-background);
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   animation: fadeInUp 0.5s ease forwards;
 
   @media (max-width: 768px) {

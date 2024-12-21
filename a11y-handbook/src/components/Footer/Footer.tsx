@@ -27,18 +27,42 @@ const Copyright = styled.div`
   font-size: 0.9rem;
 `;
 
-const SupportLink = styled(Link)`
+const FooterLinks = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+  }
+`;
+
+const BaseFooterLink = styled(Link)`
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-decoration-style: solid;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+  text-decoration-color: rgba(102, 102, 102, 0.5);
+
+  &:hover {
+    color: var(--link-hover-color);
+    text-decoration-color: var(--link-hover-color);
+  }
+`;
+
+const FooterLink = styled(BaseFooterLink)`
+  // Специфичные стили для FooterLink, если нужны
+`;
+
+const SupportLink = styled(BaseFooterLink)`
   display: flex;
   align-items: center;
   gap: 0.5rem;
   color: var(--text-color);
-  text-decoration: none;
-  font-size: 0.9rem;
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: var(--link-hover-color);
-  }
 
   svg {
     color: var(--accent-color);
@@ -50,11 +74,16 @@ export function Footer() {
     <FooterContainer>
       <FooterContent>
         <Copyright>
-          © 2024 A11Y Wiki. Все материалы распространяются по лицензии MIT.
+          ©  2024 A11Y Wiki. Все материалы распространяются по лицензии MIT.
         </Copyright>
-        <SupportLink to="/support">
-          Поддержать проект <FaHeart />
-        </SupportLink>
+        <FooterLinks>
+          <FooterLink to="/feedback">
+            Обратная связь
+          </FooterLink>
+          <SupportLink to="/support">
+            Поддержать проект <FaHeart />
+          </SupportLink>
+        </FooterLinks>
       </FooterContent>
     </FooterContainer>
   );

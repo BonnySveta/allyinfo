@@ -11,38 +11,42 @@ const rotate = keyframes`
   }
 `;
 
-const ToggleButton = styled.button`
-  padding: 8px;
-  border: none;
-  background: none;
-  cursor: pointer;
+const ThemeButton = styled.button`
   color: var(--text-color);
-  transition: all 0.3s ease;
+  background: var(--nav-hover-background);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  font-weight: 500;
   position: relative;
+  box-shadow: 0 2px 0 rgba(25, 60, 95, 0.3);
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   &:hover {
-    opacity: 0.8;
-    transform: scale(1.1);
+    transform: translateY(-1px);
+    background: var(--nav-hover-background);
   }
-  
+
   &:active {
-    transform: scale(0.95);
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 rgba(25, 60, 95, 0.3);
   }
-  
+
+  &[aria-pressed="true"] {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 rgba(25, 60, 95, 0.3);
+  }
+
   svg {
     width: 24px;
     height: 24px;
     transition: all 0.3s ease;
     animation: ${rotate} 0.5s ease;
-  }
-
-  &:focus {
-    outline: 2px solid var(--accent-color);
-    outline-offset: 2px;
-    border-radius: 4px;
   }
 `;
 
@@ -60,7 +64,7 @@ export const ThemeToggle: React.FC = () => {
   const buttonText = theme === 'light' ? 'Тёмная тема' : 'Светлая тема';
   
   return (
-    <ToggleButton 
+    <ThemeButton 
       onClick={toggleTheme}
       aria-label={`Переключить на ${theme === 'light' ? 'тёмную' : 'светлую'} тему`}
     >
@@ -74,6 +78,6 @@ export const ThemeToggle: React.FC = () => {
         </svg>
       )}
       <ButtonText>{buttonText}</ButtonText>
-    </ToggleButton>
+    </ThemeButton>
   );
 }; 

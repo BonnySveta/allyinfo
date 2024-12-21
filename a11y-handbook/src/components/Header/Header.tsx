@@ -228,15 +228,29 @@ const FocusButton = styled.button`
   background: var(--accent-color);
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 100px;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  position: relative;
+  box-shadow: 0 2px 0 rgba(25, 60, 95, 0.9);
 
   &:hover {
-    opacity: 0.9;
     background: var(--accent-color);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 rgba(25, 60, 95, 0.9);
+  }
+
+  &[aria-pressed="true"] {
+    background: var(--accent-color);
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 rgba(25, 60, 95, 0.9);
   }
 `;
 
@@ -338,9 +352,6 @@ export function Header() {
               <NavLink to="/getting-started" onClick={closeMenu}>Начинающим</NavLink>
             </NavItem>
             <NavItem>
-              <NavLink to="/feedback" onClick={closeMenu}>Обратная связь</NavLink>
-            </NavItem>
-            <NavItem>
               <NavLink to="/suggest" onClick={closeMenu}>Предложить материал</NavLink>
             </NavItem>
             <NavItem>
@@ -361,7 +372,6 @@ export function Header() {
               className="screen-reader-toggle"
               onClick={() => setIsActive(!isActive)}
               aria-pressed={isActive}
-              tabIndex={0}
             >
               Имитация скринридера
             </FocusButton>
