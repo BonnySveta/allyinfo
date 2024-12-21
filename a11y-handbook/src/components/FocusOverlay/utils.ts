@@ -130,7 +130,7 @@ function buildScreenReaderText(element: Element, details: ElementDetails): strin
 
   // Возвращаем два отдельных текста
   return [
-    screenReaderText,
+    '🔊 ' + mainParts.join(' '),
     tagAndAria.join(' | ')
   ].join('\n');
 }
