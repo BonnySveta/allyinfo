@@ -50,6 +50,7 @@ export interface ElementDetails {
   nextFocusableElement?: HTMLElement; // Изменяем тип с Element на HTMLElement
   isModal?: boolean;
   isLiveRegion?: boolean;
+  isFocusable?: boolean;
 }
 
 export type NavigationMode = 'landmarks' | 'elements'; 

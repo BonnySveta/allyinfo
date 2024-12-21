@@ -27,7 +27,7 @@ function getRole(element: Element): string {
   const explicitRole = element.getAttribute('role');
   if (explicitRole) return explicitRole;
 
-  // Маппинг HTML элемен��ов на их роли
+  // Маппинг HTML элементов на их роли
   const roleMap: Record<string, string> = {
     'a': 'link',
     'button': 'button',
@@ -194,7 +194,7 @@ function handleLink(element: HTMLAnchorElement): ElementDetails {
     }
   }
   
-  // Стандартная обработк�� ссылки
+  // Стандартная обработка ссылки
   const baseInfo = getBaseElementInfo(element);
   let screenReaderText = element.textContent?.trim() || '';
 
@@ -437,7 +437,7 @@ function getBaseElementInfo(element: Element): ElementDetails {
     info.states.push(`in ${parentLandmarks.join(' > ')}`);
   }
 
-  // Проверяем дополнительные атрибуты для улучшения контекста
+  // Проверяем дополнительные атрибуты для улучшения конт��кста
   const labelledBy = element.getAttribute('aria-labelledby');
   if (labelledBy) {
     const labelElements = labelledBy.split(' ')
@@ -487,7 +487,7 @@ function getBaseElementInfo(element: Element): ElementDetails {
     }
   });
 
-  // Проверяем состояние ссылки
+  // Проверяем состоян��е ссылки
   if (element instanceof HTMLAnchorElement) {
     info.visited = isVisitedLink(element);
   }
@@ -523,20 +523,28 @@ function handleFilterGroup(element: Element): ElementDetails {
 }
 
 export function getElementInfo(element: Element): ElementDetails {
+  // Определяем, является ли элемент фокусируемым
+  const isFocusable = element instanceof HTMLElement && (
+    element.matches('a[href], button, input, select, textarea, [tabindex], [contenteditable]') ||
+    element.hasAttribute('tabindex')
+  );
+
+  let info: ElementDetails;
+
   if (element.matches('a')) {
-    return handleLink(element as HTMLAnchorElement);
+    info = handleLink(element as HTMLAnchorElement);
+  } else if (element.matches('ul, ol, [role="list"]')) {
+    info = handleList(element);
+  } else if (element.matches('button, [role="button"]') && element.closest('[role="group"]')) {
+    info = handleFilterGroup(element);
+  } else {
+    info = getBaseElementInfo(element);
   }
 
-  if (element.matches('ul, ol, [role="list"]')) {
-    return handleList(element);
-  }
+  // Добавляем информацию о фокусируемости
+  info.isFocusable = isFocusable;
 
-  // Добавляем обработку кнопок фильтра
-  if (element.matches('button, [role="button"]') && element.closest('[role="group"]')) {
-    return handleFilterGroup(element);
-  }
-
-  return getBaseElementInfo(element);
+  return info;
 }
 
 export const LANDMARK_SELECTORS = 

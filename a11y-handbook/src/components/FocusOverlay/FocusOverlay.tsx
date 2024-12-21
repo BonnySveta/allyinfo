@@ -61,12 +61,11 @@ export function FocusOverlay() {
     const rect = element.getBoundingClientRect();
     console.log('Element rect:', rect); // Для отладки
 
-    const padding = 4;
     const position = {
-      top: rect.top - padding,
-      left: rect.left - padding,
-      width: rect.width + padding * 2,
-      height: rect.height + padding * 2
+      top: rect.top - 4,
+      left: rect.left - 4,
+      width: rect.width + 8,
+      height: rect.height + 8
     };
     
     console.log('Setting spotlight position:', position); // Для отладки
@@ -75,6 +74,11 @@ export function FocusOverlay() {
     const info = getElementInfo(element);
     console.log('Setting element info:', info); // Для отладки
     setElementInfo(info);
+
+    // Перемещаем реальный фокус только если элемент фокусируемый
+    if (info.isFocusable && element instanceof HTMLElement) {
+      element.focus();
+    }
   };
 
   useEffect(() => {
