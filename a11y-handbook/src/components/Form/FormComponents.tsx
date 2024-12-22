@@ -1,4 +1,5 @@
 import styled, { keyframes } from 'styled-components';
+import { forwardRef } from 'react';
 
 export const FormContainer = styled.div`
   max-width: 600px;
@@ -22,12 +23,31 @@ export const FormGroup = styled.div`
   gap: 0.5rem;
 `;
 
-export const Label = styled.label`
+interface LabelProps {
+  required?: boolean;
+  children: React.ReactNode;
+}
+
+export const Label = styled.label<LabelProps>`
   color: var(--text-color);
   font-weight: 500;
+  
+  ${props => props.required && `
+    &::after {
+      content: '*';
+      color: var(--error-color);
+      margin-left: 4px;
+      aria-hidden: true;
+    }
+  `}
 `;
 
-export const Select = styled.select`
+const SelectWrapper = styled.div`
+  position: relative;
+  margin-bottom: 1rem;
+`;
+
+const StyledSelect = styled.select`
   padding: 0.75rem;
   border: 1px solid var(--border-color);
   border-radius: 4px;
@@ -41,6 +61,35 @@ export const Select = styled.select`
     outline-offset: 2px;
   }
 `;
+
+const KeyboardHint = styled.div`
+  position: absolute;
+  bottom: -1.5rem;
+  left: 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+`;
+
+interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  error?: string;
+  required?: boolean;
+}
+
+export const Select = forwardRef<HTMLSelectElement, SelectProps>(
+  ({ error, required, children, ...props }, ref) => {
+    return (
+      <SelectWrapper>
+        <StyledSelect
+          ref={ref}
+          required={required}
+          aria-invalid={!!error}
+          {...props}
+        />
+        {error && <ErrorMessage>{error}</ErrorMessage>}
+      </SelectWrapper>
+    );
+  }
+);
 
 export const Input = styled.input`
   padding: 0.75rem;
@@ -127,7 +176,9 @@ export const ErrorMessage = styled.div`
   margin-top: 0.25rem;
 `;
 
-export const RequiredMark = styled.span`
+export const RequiredMark = styled.span.attrs({
+  'aria-hidden': 'true'
+})`
   color: var(--error-color);
   margin-left: 4px;
 `;

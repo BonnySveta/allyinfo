@@ -27,7 +27,7 @@ function getRole(element: Element): string {
   const explicitRole = element.getAttribute('role');
   if (explicitRole) return explicitRole;
 
-  // Маппинг HTML элементов на их роли
+  // Маппинг HTML элемен��ов на их роли
   const roleMap: Record<string, string> = {
     'a': 'link',
     'button': 'button',
@@ -46,6 +46,7 @@ function getRole(element: Element): string {
     'main': 'main',
     'header': 'banner',
     'footer': 'contentinfo',
+    'select': 'select',
   };
 
   return roleMap[element.tagName.toLowerCase()] || element.tagName.toLowerCase();
@@ -54,6 +55,7 @@ function getRole(element: Element): string {
 // Функция для формирования текста для скринридера
 function getTechnicalInfo(element: Element): string {
   const parts: string[] = [];
+  const shortcuts: string[] = [];
 
   // Добавляем тег в угловых скобках
   parts.push(`<${element.tagName.toLowerCase()}>`);
@@ -71,7 +73,18 @@ function getTechnicalInfo(element: Element): string {
     parts.push(ariaAttrs.join(', '));
   }
 
-  return parts.join(' | ');
+  // Добавляем информацию о клавишах навигации в зависимости от роли и тега
+  if (role === 'select' || element.tagName.toLowerCase() === 'select' || role === 'combobox' || role === 'listbox') {
+    shortcuts.push('Space/Enter: activate', '↑/↓: navigate menu');
+  }
+
+  // Объединяем основную информацию и шорткаты
+  const result = [parts.join(' | ')];
+  if (shortcuts.length > 0) {
+    result.push(shortcuts.join('    ')); // Используем несколько пробелов для разделения
+  }
+
+  return result.join('\n');
 }
 
 function buildScreenReaderText(element: Element, details: ElementDetails): string {
@@ -96,6 +109,14 @@ function buildScreenReaderText(element: Element, details: ElementDetails): strin
         mainParts.push(element.getAttribute('aria-pressed') === 'true' ? ', нажата' : ', не нажата');
       }
       break;
+    case 'select':
+    case 'combobox':
+    case 'listbox':
+      mainParts.push('раскрывающийся список');
+      if (details.expanded !== undefined) {
+        mainParts.push(details.expanded ? 'раскрыт' : 'свёрнут');
+      }
+      break;
     case 'link':
       mainParts.push('ссылка');
       if (details.visited) mainParts.push('посещенная');
@@ -110,12 +131,6 @@ function buildScreenReaderText(element: Element, details: ElementDetails): strin
     case 'radio':
       mainParts.push('переключатель');
       mainParts.push(details.checked ? 'выбран' : 'не выбран');
-      break;
-    case 'combobox':
-      mainParts.push('раскрывающийся список');
-      if (details.expanded !== undefined) {
-        mainParts.push(details.expanded ? 'раскрыт' : 'свёрнут');
-      }
       break;
   }
 
@@ -136,16 +151,19 @@ function buildScreenReaderText(element: Element, details: ElementDetails): strin
     mainParts.push(details.description);
   }
 
-  // Формируем основной текст скринридера
+  // Формируем основной текст для скринридера
   const screenReaderText = mainParts.join(' ');
 
   // Получаем техническую информацию через getTechnicalInfo
   const technicalInfo = getTechnicalInfo(element);
 
-  return [
-    screenReaderText,
-    technicalInfo
-  ].join('\n');
+  // Добавляем шорткаты в отдельную строку
+  const result = [screenReaderText, technicalInfo];
+  if (details.shortcuts && details.shortcuts.length > 0) {
+    result.push(details.shortcuts.join('    '));
+  }
+
+  return result.join('\n');
 }
 
 // Обработка списков
@@ -178,7 +196,7 @@ function handleLink(element: HTMLAnchorElement): ElementDetails {
         screenReaderText += ', посещенная ссылка';
       }
       if (element.closest('nav, [role="navigation"]') && isCurrentPage(element)) {
-        screenReaderText += ', текущая страни��';
+        screenReaderText += ', текущая страница';
       }
 
       return {
@@ -297,10 +315,10 @@ function getBaseElementInfo(element: Element): ElementDetails {
     info.states.push(info.checked ? 'checked' : 'unchecked');
   }
 
-  const required = element.getAttribute('aria-required');
-  if (required === 'true') {
+  // Заменяем проверку aria-required на проверку HTML-атрибута required
+  if (element instanceof HTMLElement && element.hasAttribute('required')) {
     info.required = true;
-    info.states.push('required');
+    info.states.push('обязательное поле');
   }
 
   const current = element.getAttribute('aria-current');
@@ -388,7 +406,7 @@ function getBaseElementInfo(element: Element): ElementDetails {
     search: 'search',
   };
 
-  // Проверяем роль элемента как landmark
+  // Поверяем роль элемента как landmark
   if (landmarkRoles[info.role as keyof typeof landmarkRoles]) {
     const landmarkText = landmarkRoles[info.role as keyof typeof landmarkRoles];
     if (landmarkText) {
@@ -490,6 +508,35 @@ function getBaseElementInfo(element: Element): ElementDetails {
   // Проверяем состояние ссылки
   if (element instanceof HTMLAnchorElement) {
     info.visited = isVisitedLink(element);
+  }
+
+  // Добавляем информацию о клавишах навигации в зависимости от роли
+  if (element.tagName.toLowerCase() === 'select' || role === 'select' || role === 'combobox' || role === 'listbox') {
+    info.shortcuts = [
+      'Space/Enter: activate',
+      '↑/↓: navigate menu'
+    ];
+  } else if (element.tagName.toLowerCase() === 'input' || role === 'textbox') {
+    const type = (element as HTMLInputElement).type;
+    switch(type) {
+      case 'text':
+      case 'email':
+      case 'password':
+      case 'url':
+      case 'tel':
+      case 'search':
+        info.shortcuts = [
+          '←/→: navigate text',
+          'Home/End: start/end of line'
+        ];
+        break;
+      case 'number':
+        info.shortcuts = [
+          '↑/↓: increase/decrease',
+          'Home/End: min/max value'
+        ];
+        break;
+    }
   }
 
   info.screenReaderText = buildScreenReaderText(element, info);

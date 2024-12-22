@@ -154,7 +154,7 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
           <Label htmlFor="section">
             <LabelText>
               Раздел
-              <RequiredMark aria-label="обязательное поле">*</RequiredMark>
+              <RequiredMark>*</RequiredMark>
             </LabelText>
           </Label>
           <Select
@@ -162,7 +162,6 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
             value={section}
             onChange={(e) => setSection(e.target.value)}
             required
-            aria-required="true"
             aria-invalid={error && !section ? "true" : "false"}
           >
             <option value="">Выберите раздел</option>
@@ -178,7 +177,7 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
           <Label htmlFor="url">
             <LabelText>
               Ссылка на материал
-              <RequiredMark aria-label="обязательное поле">*</RequiredMark>
+              <RequiredMark>*</RequiredMark>
             </LabelText>
           </Label>
           <Input
@@ -188,7 +187,6 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
             onChange={handleUrlChange}
             placeholder="https://example.com"
             required
-            aria-required="true"
             aria-invalid={Boolean(urlError)}
           />
           {url && !urlError && (

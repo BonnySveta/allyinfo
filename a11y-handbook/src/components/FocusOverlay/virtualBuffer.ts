@@ -146,7 +146,6 @@ export class VirtualBuffer {
       'aria-expanded': ['expanded', 'collapsed'],
       'aria-pressed': ['pressed', 'not pressed'],
       'aria-checked': ['checked', 'unchecked'],
-      'aria-required': ['required'],
       'aria-invalid': ['invalid'],
       'aria-disabled': ['disabled']
     };
@@ -159,6 +158,11 @@ export class VirtualBuffer {
         states.push(falseName);
       }
     });
+
+    // Добавляем проверку атрибута required
+    if (element instanceof HTMLElement && element.hasAttribute('required')) {
+      states.push('обязательное поле');
+    }
 
     return states;
   }
@@ -496,7 +500,7 @@ export class VirtualBuffer {
           };
         });
 
-        // Добавляем информацию о возможных переходах
+        // Добавляем информацию о в��зможных переходах
         const targetLabels = node.flowTargets.map(t => t.label).join(', ');
         node.states.push(`можно перейти к: ${targetLabels}`);
       }
@@ -772,7 +776,7 @@ export class VirtualBuffer {
     updateNode(this.root);
   }
 
-  // Добавляем ��етоды навигации для flowto
+  // Добавляем методы навигации для flowto
   public moveToFlowTarget(index: number = 0): VirtualNode | null {
     if (!this.currentNode?.flowTargets?.[index]) return null;
     

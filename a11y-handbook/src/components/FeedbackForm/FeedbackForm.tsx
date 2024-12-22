@@ -69,7 +69,7 @@ export function FeedbackForm() {
         <FormGroup>
           <Label htmlFor="feedback">
             Ваше сообщение
-            <RequiredMark aria-label="обязательное поле">*</RequiredMark>
+            <RequiredMark>*</RequiredMark>
           </Label>
           <TextArea
             id="feedback"
@@ -77,7 +77,6 @@ export function FeedbackForm() {
             onChange={(e) => setFeedback(e.target.value)}
             placeholder="Напишите ваше сообщение..."
             required
-            aria-required="true"
             aria-invalid={Boolean(error)}
           />
           {error && (
