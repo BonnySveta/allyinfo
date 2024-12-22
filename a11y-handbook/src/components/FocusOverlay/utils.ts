@@ -91,30 +91,31 @@ function buildScreenReaderText(element: Element, details: ElementDetails): strin
   const mainParts: string[] = [];
 
   // 1. Основной текст (имя)
-  if (details.label) {
-    // Добавляем кавычки только для кнопок, которые не являются частью группового заголовка
-    if (details.role === 'button' && !details.label.includes('группа.')) {
-      mainParts.push(`"${details.label}"`);
-    } else {
-      mainParts.push(details.label);
-    }
+  const label = element.getAttribute('aria-label') || 
+                document.querySelector(`label[for="${element.id}"]`)?.textContent?.trim() || 
+                details.label;
+  if (label) {
+    mainParts.push(`"${label}"`);
   }
 
   // 2. Роль элемента и состояние
   switch (details.role) {
+    case 'select':
+    case 'combobox':
+    case 'listbox':
+      mainParts.push('комбинированный список');
+      // Состояние развернутости
+      mainParts.push(details.expanded ? 'развернуто' : 'свёрнуто');
+      // Обязательность поля
+      if (element instanceof HTMLElement && element.hasAttribute('required')) {
+        mainParts.push('обязательно');
+      }
+      break;
     case 'button':
       mainParts.push('кнопка');
       if (element.hasAttribute('aria-pressed')) {
         mainParts.push('переключатель');
         mainParts.push(element.getAttribute('aria-pressed') === 'true' ? ', нажата' : ', не нажата');
-      }
-      break;
-    case 'select':
-    case 'combobox':
-    case 'listbox':
-      mainParts.push('раскрывающийся список');
-      if (details.expanded !== undefined) {
-        mainParts.push(details.expanded ? 'раскрыт' : 'свёрнут');
       }
       break;
     case 'link':
@@ -135,9 +136,8 @@ function buildScreenReaderText(element: Element, details: ElementDetails): strin
   }
 
   // 3. Состояния (без горячих клавиш)
-  if (details.required) mainParts.push('обязательное поле');
   if (element.hasAttribute('disabled')) mainParts.push('недоступно');
-  if (details.expanded !== undefined && !['combobox'].includes(details.role)) {
+  if (details.expanded !== undefined && !['combobox', 'select', 'listbox'].includes(details.role)) {
     mainParts.push(details.expanded ? 'развернуто' : 'свернуто');
   }
 
@@ -152,7 +152,7 @@ function buildScreenReaderText(element: Element, details: ElementDetails): strin
   }
 
   // Формируем основной текст для скринридера
-  const screenReaderText = mainParts.join(' ');
+  const screenReaderText = mainParts.join(', ');
 
   // Получаем техническую информацию через getTechnicalInfo
   const technicalInfo = getTechnicalInfo(element);
@@ -212,7 +212,7 @@ function handleLink(element: HTMLAnchorElement): ElementDetails {
     }
   }
   
-  // Стандартная обработка ссылки
+  // Стандартная обработка ссылк��
   const baseInfo = getBaseElementInfo(element);
   let screenReaderText = element.textContent?.trim() || '';
 
