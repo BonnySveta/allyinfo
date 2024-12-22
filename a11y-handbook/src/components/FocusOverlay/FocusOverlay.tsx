@@ -25,15 +25,53 @@ export function FocusOverlay() {
   const [flowConnections, setFlowConnections] = useState<FlowConnection[]>([]);
   const location = useLocation();
 
+  const getElementBounds = useCallback((element: Element) => {
+    const rect = element.getBoundingClientRect();
+    const padding = 8;
+
+    const formGroup = element.closest('.sc-edmcci');
+    
+    let bounds;
+    if (formGroup) {
+      const groupRect = formGroup.getBoundingClientRect();
+      bounds = {
+        left: groupRect.left - padding,
+        top: groupRect.top - padding,
+        width: groupRect.width + (padding * 2),
+        height: groupRect.height + (padding * 2)
+      };
+    } else {
+      bounds = {
+        left: rect.left - padding,
+        top: rect.top - padding,
+        width: rect.width + (padding * 2),
+        height: rect.height + (padding * 2)
+      };
+    }
+
+    if (element instanceof HTMLElement) {
+      const selectElement = element.tagName === 'SELECT' ? 
+        element : 
+        element.querySelector('select');
+
+      if (selectElement) {
+        const selectRect = selectElement.getBoundingClientRect();
+        bounds.height = Math.max(bounds.height, selectRect.height + (padding * 4));
+      }
+    }
+
+    return bounds;
+  }, []);
+
   const updateVisualFocus = useCallback((node: VirtualNode) => {
     const element = node.element;
-    const rect = element.getBoundingClientRect();
-
+    const bounds = getElementBounds(element);
+    
     const position = {
-      top: rect.top - 4,
-      left: rect.left - 4,
-      width: rect.width + 8,
-      height: rect.height + 8
+      top: bounds.top,
+      left: bounds.left,
+      width: bounds.width,
+      height: bounds.height
     };
     
     setSpotlightPosition(position);
@@ -41,7 +79,6 @@ export function FocusOverlay() {
     const info = getElementInfo(element);
     setElementInfo(info);
 
-    // Озвучиваем текст для скринридера всегда, когда режим активен
     if (info.screenReaderText) {
       const [screenReaderText] = info.screenReaderText.split('\n');
       if (screenReaderText) {
@@ -49,17 +86,15 @@ export function FocusOverlay() {
       }
     }
 
-    // Перемещаем реальный фокус только если элемент фокусируемый
     if (info.isFocusable && element instanceof HTMLElement) {
       element.focus();
     }
-  }, []);
+  }, [getElementBounds]);
 
   useEffect(() => {
     if (isActive) {
       const buffer = initializeBuffer();
       
-      // Установим начальный элемент фокуса
       const activeElement = document.activeElement || document.querySelector('.screen-reader-toggle');
       if (activeElement) {
         const node = buffer.setCurrentNode(activeElement);
@@ -74,14 +109,11 @@ export function FocusOverlay() {
     if (isActive) {
       const buffer = initializeBuffer();
 
-      // Сохраняем текущую позицию скролла
       setLastScrollPosition(window.scrollY);
-      // Блокируем скролл
       document.body.style.position = 'fixed';
       document.body.style.top = `-${window.scrollY}px`;
       document.body.style.width = '100%';
 
-      // Установим начальный элемент фокуса
       const activeElement = document.activeElement || document.querySelector('.screen-reader-toggle');
       if (activeElement) {
         const node = buffer.setCurrentNode(activeElement);
@@ -90,7 +122,6 @@ export function FocusOverlay() {
         }
       }
 
-      // Наблюдаем за изменениями в DOM
       const observer = new MutationObserver((mutations) => {
         const significantChange = mutations.some(mutation => 
           mutation.type === 'childList' && 
@@ -122,12 +153,10 @@ export function FocusOverlay() {
         observer.disconnect();
       };
     } else {
-      // Восстанавливаем скролл
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.width = '';
       window.scrollTo(0, lastScrollPosition);
-      // Останавливаем озвучку при выключении режима
       speechService.stop();
     }
   }, [isActive, initializeBuffer, lastScrollPosition, updateVisualFocus]);
@@ -135,17 +164,14 @@ export function FocusOverlay() {
   useEffect(() => {
     if (!isActive || !virtualBuffer) return;
 
-    // Создаем MutationObserver для отслеживания изменений состояний
     const stateObserver = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes' && 
             mutation.attributeName === 'aria-pressed' &&
             mutation.target instanceof Element) {
           
-          // Используем публичный метод getCurrentNode() вместо прямого доступа к currentNode
           const currentNode = virtualBuffer.getCurrentNode();
           if (currentNode?.element === mutation.target) {
-            // Обновляем информацию об элементе
             const info = getElementInfo(currentNode.element);
             setElementInfo(info);
           }
@@ -153,7 +179,6 @@ export function FocusOverlay() {
       });
     });
 
-    // Начинаем наблюдение за вем документом
     stateObserver.observe(document.body, {
       attributes: true,
       attributeFilter: ['aria-pressed'],
@@ -168,13 +193,11 @@ export function FocusOverlay() {
 
       if (e.key === 'Escape') {
         e.preventDefault();
-        // Сначала пробуем обработать навигацию в диалоге
         const dialogResult = virtualBuffer.handleDialogNavigation('Escape');
         if (dialogResult) {
           updateVisualFocus(dialogResult);
           return;
         }
-        // Если не в диалоге, выходим из режима
         setIsActive(false);
         const toggleButton = document.querySelector('.screen-reader-toggle');
         if (toggleButton instanceof HTMLElement) {
@@ -183,14 +206,12 @@ export function FocusOverlay() {
         return;
       }
 
-      // Переключение режима навигации
       if (e.key === 'F6') {
         e.preventDefault();
         setNavigationMode(prev => prev === 'landmarks' ? 'elements' : 'landmarks');
         return;
       }
 
-      // Навигация по flow-связям (F1)
       if (e.key === 'F1') {
         e.preventDefault();
         const flowResult = virtualBuffer.handleDialogNavigation('F1');
@@ -224,7 +245,6 @@ export function FocusOverlay() {
             virtualBuffer.moveToNextByRole('list');
           break;
 
-        // Добавляем навигацию по диалогам
         case 'd':
           e.preventDefault();
           nextNode = e.shiftKey ? 
@@ -232,7 +252,6 @@ export function FocusOverlay() {
             virtualBuffer.moveToNextByRole('dialog');
           break;
 
-        // Навигация по flow-связям с помощью стрелок
         case 'ArrowRight':
           if (e.altKey) {
             e.preventDefault();
@@ -246,7 +265,6 @@ export function FocusOverlay() {
       }
     };
 
-    // Доб��вляем обработчик изменений для live regions
     const observer = new MutationObserver(() => {
       virtualBuffer.updateLiveRegions();
     });

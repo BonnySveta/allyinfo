@@ -27,7 +27,7 @@ function getRole(element: Element): string {
   const explicitRole = element.getAttribute('role');
   if (explicitRole) return explicitRole;
 
-  // Маппинг HTML элемен��ов на их роли
+  // Маппинг HTML элементов на их роли
   const roleMap: Record<string, string> = {
     'a': 'link',
     'button': 'button',
@@ -63,6 +63,13 @@ function getTechnicalInfo(element: Element): string {
   // Добавляем роль
   const role = element.getAttribute('role') || getRole(element);
   parts.push(`role: ${role}`);
+
+  // Добавляем label, если есть
+  const label = element.getAttribute('aria-label') || 
+                document.querySelector(`label[for="${element.id}"]`)?.textContent?.trim();
+  if (label) {
+    parts.push(`label: "${label}"`);
+  }
 
   // Собираем все ARIA-атрибуты без префикса "ARIA:"
   const ariaAttrs = Array.from(element.attributes)
@@ -212,7 +219,7 @@ function handleLink(element: HTMLAnchorElement): ElementDetails {
     }
   }
   
-  // Стандартная обработка ссылк��
+  // Стандартная обработка ссылок
   const baseInfo = getBaseElementInfo(element);
   let screenReaderText = element.textContent?.trim() || '';
 
@@ -376,7 +383,7 @@ function getBaseElementInfo(element: Element): ElementDetails {
     }
   }
 
-  // Добавляем проверку позиции в списке
+  // Добавляем проверку позиции �� списке
   if (element.matches('li, [role="listitem"], [role="menuitem"], [role="option"], [role="tab"]')) {
     const parent = element.parentElement;
     if (parent) {
