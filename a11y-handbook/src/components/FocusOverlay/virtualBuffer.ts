@@ -89,7 +89,12 @@ export class VirtualBuffer {
     if (element.tabIndex >= 0) return true;
 
     // Проверяем нативно фокусируемые элементы
-    const focusableTags = ['a', 'button', 'input', 'select', 'textarea'];
+    if (element instanceof HTMLAnchorElement) {
+      // Добавляем специальную проверку для ссылок - они должны иметь href
+      return element.hasAttribute('href');
+    }
+
+    const focusableTags = ['button', 'input', 'select', 'textarea'];
     return focusableTags.includes(element.tagName.toLowerCase());
   }
 
@@ -305,16 +310,14 @@ export class VirtualBuffer {
 
       // Обновляем каждый элемент списка
       listItems.forEach((item, index) => {
-        item.label = `${index + 1} из ${count}: ${item.label}`;
-        
-        // Если элемент списка содержит ссылку, объединяем их описание
         const link = item.children.find(child => child.role === 'link');
         if (link) {
-          item.label = link.label;
-          item.isInteractive = true;
-          item.isFocusable = true;
-          // Удаляем ссылку из детей, так как её содержимое теперь часть элемента списка
-          item.children = item.children.filter(child => child !== link);
+          // Обновляем только метку элемента списка, сохраняя ссылку
+          item.label = `${index + 1} из ${count}: ${link.label}`;
+          // НЕ удаляем ссылку из детей
+          link.parent = item;
+        } else {
+          item.label = `${index + 1} из ${count}: ${item.label}`;
         }
       });
     }
@@ -349,7 +352,7 @@ export class VirtualBuffer {
           const parentLabel = element.closest('label');
           if (parentLabel) {
             labelText = parentLabel.textContent?.trim() || '';
-            // Убираем текст самого элемента из label
+            // Убираем текст самого элемента з label
             labelText = labelText.replace(element.textContent || '', '').trim();
           }
         }
@@ -428,7 +431,7 @@ export class VirtualBuffer {
       // Проверяем, является ли диалог модальным
       const ariaModal = element.getAttribute('aria-modal') === 'true';
       if (ariaModal) {
-        node.states.push('модальное окно');
+        node.states.push('мо��альное окно');
       }
 
       // Ищем элемент с описанием диалога
@@ -730,7 +733,7 @@ export class VirtualBuffer {
     while (current.parent) {
       const parent = current.parent;
       
-      // Добавляем контекст в зависимости от роли родителя
+      // Добавляем контекст в зависимост от роли родителя
       switch (parent.role) {
         case 'list':
           if (current.role === 'listitem') {
