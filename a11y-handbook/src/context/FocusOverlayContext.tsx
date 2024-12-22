@@ -20,13 +20,10 @@ export function FocusOverlayProvider({ children }: { children: React.ReactNode }
   const [virtualBuffer, setVirtualBuffer] = useState<VirtualBuffer | null>(null);
 
   const initializeBuffer = useCallback(() => {
-    if (!virtualBuffer) {
-      const newBuffer = new VirtualBuffer(document);
-      setVirtualBuffer(newBuffer);
-      return newBuffer;
-    }
-    return virtualBuffer;
-  }, [virtualBuffer]);
+    const newBuffer = new VirtualBuffer(document);
+    setVirtualBuffer(newBuffer);
+    return newBuffer;
+  }, []);
 
   return (
     <FocusOverlayContext.Provider 

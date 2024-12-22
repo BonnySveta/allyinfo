@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, Fragment, useCallback } from 'react';
 import { Spotlight, FlowIndicator, FlowLabel } from './styles';
 import { SpotlightPosition, ElementDetails, NavigationMode, VirtualNode, FlowConnection } from './types';
 import { getElementInfo, LANDMARK_SELECTORS } from './utils';
@@ -6,6 +6,7 @@ import { GlobalHints } from './components/GlobalHints';
 import { ElementInfoDisplay } from './components/ElementInfoDisplay';
 import { useFocusOverlay } from '../../context/FocusOverlayContext';
 import { speechService } from '../../services/speech';
+import { useLocation } from 'react-router-dom';
 
 export function FocusOverlay() {
   const { 
@@ -22,52 +23,11 @@ export function FocusOverlay() {
   const [isHintsCollapsed, setIsHintsCollapsed] = useState(false);
   const [lastScrollPosition, setLastScrollPosition] = useState(0);
   const [flowConnections, setFlowConnections] = useState<FlowConnection[]>([]);
+  const location = useLocation();
 
-  useEffect(() => {
-    if (isActive) {
-      const buffer = initializeBuffer();
-      console.log('Buffer initialized:', buffer); // Для отладки
-      
-      // Установим начальный элемент фокуса
-      const activeElement = document.activeElement || document.querySelector('.screen-reader-toggle');
-      console.log('Initial active element:', activeElement); // Для отладки
-      
-      if (activeElement) {
-        const node = buffer.setCurrentNode(activeElement);
-        console.log('Initial node:', node); // Для отладки
-        
-        if (node) {
-          updateVisualFocus(node);
-        } else {
-          console.log('Failed to set initial node'); // Для отладки
-        }
-      } else {
-        console.log('No active element found'); // Для отладки
-      }
-
-      // Сохраняем текущую позицию скролла
-      setLastScrollPosition(window.scrollY);
-      // Блокируем скролл
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${window.scrollY}px`;
-      document.body.style.width = '100%';
-    } else {
-      // Восстанавливаем скролл
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      window.scrollTo(0, lastScrollPosition);
-      // Останавливаем озвучку при выключении режима
-      speechService.stop();
-    }
-  }, [isActive, initializeBuffer, lastScrollPosition]);
-
-  const updateVisualFocus = (node: VirtualNode) => {
-    console.log('Updating visual focus for node:', node); // Для отладки
-    
+  const updateVisualFocus = useCallback((node: VirtualNode) => {
     const element = node.element;
     const rect = element.getBoundingClientRect();
-    console.log('Element rect:', rect); // Для отладки
 
     const position = {
       top: rect.top - 4,
@@ -76,11 +36,9 @@ export function FocusOverlay() {
       height: rect.height + 8
     };
     
-    console.log('Setting spotlight position:', position); // Для отладки
     setSpotlightPosition(position);
 
     const info = getElementInfo(element);
-    console.log('Setting element info:', info); // Для отладки
     setElementInfo(info);
 
     // Озвучиваем текст для скринридера всегда, когда режим активен
@@ -95,7 +53,84 @@ export function FocusOverlay() {
     if (info.isFocusable && element instanceof HTMLElement) {
       element.focus();
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (isActive) {
+      const buffer = initializeBuffer();
+      
+      // Установим начальный элемент фокуса
+      const activeElement = document.activeElement || document.querySelector('.screen-reader-toggle');
+      if (activeElement) {
+        const node = buffer.setCurrentNode(activeElement);
+        if (node) {
+          updateVisualFocus(node);
+        }
+      }
+    }
+  }, [location, isActive, initializeBuffer, updateVisualFocus]);
+
+  useEffect(() => {
+    if (isActive) {
+      const buffer = initializeBuffer();
+
+      // Сохраняем текущую позицию скролла
+      setLastScrollPosition(window.scrollY);
+      // Блокируем скролл
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${window.scrollY}px`;
+      document.body.style.width = '100%';
+
+      // Установим начальный элемент фокуса
+      const activeElement = document.activeElement || document.querySelector('.screen-reader-toggle');
+      if (activeElement) {
+        const node = buffer.setCurrentNode(activeElement);
+        if (node) {
+          updateVisualFocus(node);
+        }
+      }
+
+      // Наблюдаем за изменениями в DOM
+      const observer = new MutationObserver((mutations) => {
+        const significantChange = mutations.some(mutation => 
+          mutation.type === 'childList' && 
+          Array.from(mutation.addedNodes).some(node => 
+            node instanceof Element && 
+            (node.matches('main, article, section') || 
+             node.querySelector('main, article, section'))
+          )
+        );
+
+        if (significantChange) {
+          const newBuffer = initializeBuffer();
+          const activeElement = document.activeElement || document.querySelector('.screen-reader-toggle');
+          if (activeElement) {
+            const node = newBuffer.setCurrentNode(activeElement);
+            if (node) {
+              updateVisualFocus(node);
+            }
+          }
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+
+      return () => {
+        observer.disconnect();
+      };
+    } else {
+      // Восстанавливаем скролл
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      window.scrollTo(0, lastScrollPosition);
+      // Останавливаем озвучку при выключении режима
+      speechService.stop();
+    }
+  }, [isActive, initializeBuffer, lastScrollPosition, updateVisualFocus]);
 
   useEffect(() => {
     if (!isActive || !virtualBuffer) return;
@@ -107,7 +142,7 @@ export function FocusOverlay() {
             mutation.attributeName === 'aria-pressed' &&
             mutation.target instanceof Element) {
           
-          // Используем публичный метод getCurrentNode() вме��то прямого доступа к currentNode
+          // Используем публичный метод getCurrentNode() вместо прямого доступа к currentNode
           const currentNode = virtualBuffer.getCurrentNode();
           if (currentNode?.element === mutation.target) {
             // Обновляем информацию об элементе
@@ -126,6 +161,11 @@ export function FocusOverlay() {
     });
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (!virtualBuffer) {
+        console.warn('No virtual buffer available');
+        return;
+      }
+
       if (e.key === 'Escape') {
         e.preventDefault();
         // Сначала пробуем обработать навигацию в диалоге
@@ -143,7 +183,7 @@ export function FocusOverlay() {
         return;
       }
 
-      // Переключение режима нави��ации
+      // Переключение режима навигации
       if (e.key === 'F6') {
         e.preventDefault();
         setNavigationMode(prev => prev === 'landmarks' ? 'elements' : 'landmarks');
@@ -206,7 +246,7 @@ export function FocusOverlay() {
       }
     };
 
-    // Добавляем обработчик изменений для live regions
+    // Доб��вляем обработчик изменений для live regions
     const observer = new MutationObserver(() => {
       virtualBuffer.updateLiveRegions();
     });

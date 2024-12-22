@@ -431,7 +431,7 @@ export class VirtualBuffer {
       // Проверяем, является ли диалог модальным
       const ariaModal = element.getAttribute('aria-modal') === 'true';
       if (ariaModal) {
-        node.states.push('мо��альное окно');
+        node.states.push('модальное окно');
       }
 
       // Ищем элемент с описанием диалога
@@ -508,9 +508,6 @@ export class VirtualBuffer {
   }
 
   private createVirtualTree(element: Element): VirtualNode | null {
-    console.log('Creating virtual node for:', element); // Для отладки
-    console.log('Should include:', this.shouldIncludeNode(element)); // Для отладки
-
     if (!this.shouldIncludeNode(element)) {
       const children: VirtualNode[] = [];
       Array.from(element.children)
@@ -521,7 +518,6 @@ export class VirtualBuffer {
           }
         });
 
-      // Если у элемента есть включенные дети, создаем для них общий контейнер
       if (children.length === 1) {
         return children[0];
       } else if (children.length > 1) {
@@ -776,7 +772,7 @@ export class VirtualBuffer {
     updateNode(this.root);
   }
 
-  // Добавляем методы навигации для flowto
+  // Добавляем ��етоды навигации для flowto
   public moveToFlowTarget(index: number = 0): VirtualNode | null {
     if (!this.currentNode?.flowTargets?.[index]) return null;
     
