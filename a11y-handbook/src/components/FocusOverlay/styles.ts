@@ -134,7 +134,7 @@ export const GlobalHintsContainer = styled.div<{ $isCollapsed: boolean }>`
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: rgba(0, 0, 0, 0.85);
+  background: var(--hint-color);
   color: white;
   padding: ${props => props.$isCollapsed ? '12px' : '20px'};
   border-radius: 8px;

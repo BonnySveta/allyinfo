@@ -76,7 +76,7 @@ export function FocusOverlay() {
       height: rect.height + 8
     };
     
-    console.log('Setting spotlight position:', position); // Дл�� отладки
+    console.log('Setting spotlight position:', position); // Для отладки
     setSpotlightPosition(position);
 
     const info = getElementInfo(element);
@@ -107,7 +107,7 @@ export function FocusOverlay() {
             mutation.attributeName === 'aria-pressed' &&
             mutation.target instanceof Element) {
           
-          // Используем публичный метод getCurrentNode() вместо прямого доступа к currentNode
+          // Используем публичный метод getCurrentNode() вме��то прямого доступа к currentNode
           const currentNode = virtualBuffer.getCurrentNode();
           if (currentNode?.element === mutation.target) {
             // Обновляем информацию об элементе
@@ -143,7 +143,7 @@ export function FocusOverlay() {
         return;
       }
 
-      // Переключение режима навигации
+      // Переключение режима нави��ации
       if (e.key === 'F6') {
         e.preventDefault();
         setNavigationMode(prev => prev === 'landmarks' ? 'elements' : 'landmarks');
@@ -203,11 +203,6 @@ export function FocusOverlay() {
 
       if (nextNode) {
         updateVisualFocus(nextNode);
-        // Озвучиваем текст для скринридера
-        const [screenReaderText] = nextNode.element.getAttribute('aria-label')?.split('\n') || [];
-        if (screenReaderText) {
-          speechService.speak(screenReaderText);
-        }
       }
     };
 

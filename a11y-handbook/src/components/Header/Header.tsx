@@ -224,8 +224,8 @@ const BurgerLine = styled.span<{ $isOpen: boolean }>`
   }
 `;
 
-const FocusButton = styled.button`
-  background: var(--accent-color);
+const ScreenReaderButton = styled.button`
+  background: var(--screen-reader-button-color);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -238,7 +238,7 @@ const FocusButton = styled.button`
   box-shadow: 0 2px 0 rgba(25, 60, 95, 0.9);
 
   &:hover {
-    background: var(--accent-color);
+    background: var(--screen-reader-button-color);
     transform: translateY(-1px);
   }
 
@@ -248,7 +248,7 @@ const FocusButton = styled.button`
   }
 
   &[aria-pressed="true"] {
-    background: var(--accent-color);
+    background: var(--screen-reader-button-color);
     transform: translateY(1px);
     box-shadow: 0 1px 0 rgba(25, 60, 95, 0.9);
   }
@@ -368,13 +368,13 @@ export function Header() {
                 Админ
               </AdminLink>
             )}
-            <FocusButton 
+            <ScreenReaderButton 
               className="screen-reader-toggle"
               onClick={() => setIsActive(!isActive)}
               aria-pressed={isActive}
             >
               Имитация скринридера
-            </FocusButton>
+            </ScreenReaderButton>
             <ThemeToggle />
           </Controls>
         </Nav>

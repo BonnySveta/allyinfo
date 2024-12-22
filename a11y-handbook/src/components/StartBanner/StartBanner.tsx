@@ -50,7 +50,7 @@ export const StartBanner = () => {
     <BannerContainer>
       <BannerTitle>
         <span>С чего начать?</span>
-        <span role="img" aria-label="лампочка">💡</span>
+        <span role="img" aria-hidden="true">💡</span>
       </BannerTitle>
       <BannerLink 
         href="/getting-started"
