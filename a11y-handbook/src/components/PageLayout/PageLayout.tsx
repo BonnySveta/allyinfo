@@ -14,7 +14,7 @@ const Container = styled.div`
 
 const Title = styled.h1`
   font-size: 2.5rem;
-  color: var(--text-primary);
+  color: var(--text-color);
   margin-bottom: 2rem;
 
   @media (max-width: 768px) {

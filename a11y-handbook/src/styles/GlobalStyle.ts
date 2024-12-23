@@ -35,7 +35,7 @@ export const GlobalStyle = createGlobalStyle`
 
   :root[data-theme="dark"] {
     --background-color: #1a1a1a;
-    --text-color: #ffffff;
+    --text-color: #e2dddd;
     --link-color: #4dabf7;
     --link-hover-color: #74c0fc;
     --nav-background: #2d2d2d;

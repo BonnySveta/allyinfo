@@ -18,7 +18,7 @@ export const PaymentMethodContainer = styled.div`
 `;
 
 export const PaymentMethodTitle = styled.h3`
-  color: var(--text-primary);
+  color: var(--text-color);
   margin-bottom: 1.5rem;
   font-size: 1.2rem;
   text-align: center;

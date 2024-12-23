@@ -13,7 +13,7 @@ export const Container = styled.div`
 
 export const Title = styled.h1`
   margin-bottom: 2rem;
-  color: var(--text-primary);
+  color: var(--text-color);
 `;
 
 export const Section = styled.section`
@@ -21,7 +21,7 @@ export const Section = styled.section`
 `;
 
 export const SectionTitle = styled.h2`
-  color: var(--text-primary);
+  color: var(--text-color);
   margin-bottom: 1rem;
 `;
 

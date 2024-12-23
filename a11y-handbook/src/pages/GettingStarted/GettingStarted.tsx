@@ -7,7 +7,7 @@ const Section = styled.section`
 `;
 
 const SectionTitle = styled.h2`
-  color: var(--text-primary);
+  color: var(--text-color);
   margin-bottom: 1rem;
 `;
 
