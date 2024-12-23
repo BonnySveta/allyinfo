@@ -50,7 +50,7 @@ export interface ElementDetails {
   
   screenReaderText?: string;
   virtualOnly?: boolean; // Элемент только для виртуального фокуса
-  nextFocusableElement?: HTMLElement; // Изменяем тип с Element на HTMLElement
+  nextFocusableElement?: HTMLElement; // Изме��яем тип с Element на HTMLElement
   isModal?: boolean;
   isLiveRegion?: boolean;
   isFocusable?: boolean;
@@ -62,23 +62,19 @@ export type NavigationMode = 'landmarks' | 'elements';
 export interface VirtualNode {
   element: Element;
   role: string;
-  level?: number;
   children: VirtualNode[];
   parent?: VirtualNode;
-  isInteractive: boolean;
-  isFocusable: boolean;
-  isHidden: boolean;
-  
-  // Навигационные свойства
   next?: VirtualNode;
   previous?: VirtualNode;
   firstChild?: VirtualNode;
   lastChild?: VirtualNode;
-  
-  // Информация для скринридера
+  isInteractive: boolean;
+  isFocusable: boolean;
+  isHidden: boolean;
   label: string;
-  description?: string;
   states: string[];
+  screenReaderText?: string;
+  description?: string;
   isLiveRegion?: boolean;
   liveSettings?: {
     mode: 'polite' | 'assertive' | 'off';

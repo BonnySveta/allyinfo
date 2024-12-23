@@ -1,42 +1,106 @@
-import React, { createContext, useContext, useState, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { VirtualBuffer } from '../components/FocusOverlay/virtualBuffer';
+import { VirtualNode } from '../components/FocusOverlay/types';
+import { speechService } from '../services/speech';
 
-interface FocusOverlayContextType {
+interface FocusOverlayState {
   isActive: boolean;
-  setIsActive: (active: boolean) => void;
   virtualBuffer: VirtualBuffer | null;
-  initializeBuffer: () => VirtualBuffer;
+  currentNode: VirtualNode | null;
+  navigationMode: 'elements' | 'landmarks';
 }
 
-const FocusOverlayContext = createContext<FocusOverlayContextType>({
+interface FocusOverlayContextType extends FocusOverlayState {
+  setIsActive: (active: boolean) => void;
+  initializeBuffer: () => VirtualBuffer;
+  setCurrentNode: (node: VirtualNode | null) => void;
+  setNavigationMode: (mode: 'elements' | 'landmarks') => void;
+  announceElement: (node: VirtualNode) => void;
+}
+
+const initialState: FocusOverlayState = {
   isActive: false,
-  setIsActive: () => {},
   virtualBuffer: null,
+  currentNode: null,
+  navigationMode: 'elements'
+};
+
+const FocusOverlayContext = createContext<FocusOverlayContextType>({
+  ...initialState,
+  setIsActive: () => {},
   initializeBuffer: () => { throw new Error('Not implemented') },
+  setCurrentNode: () => {},
+  setNavigationMode: () => {},
+  announceElement: () => {}
 });
 
 export function FocusOverlayProvider({ children }: { children: React.ReactNode }) {
-  const [isActive, setIsActive] = useState(false);
-  const [virtualBuffer, setVirtualBuffer] = useState<VirtualBuffer | null>(null);
+  const [state, setState] = useState<FocusOverlayState>(initialState);
+
+  const setIsActive = useCallback((active: boolean) => {
+    setState(prev => ({ ...prev, isActive: active }));
+  }, []);
 
   const initializeBuffer = useCallback(() => {
     const newBuffer = new VirtualBuffer(document);
-    setVirtualBuffer(newBuffer);
+    setState(prev => ({ ...prev, virtualBuffer: newBuffer }));
     return newBuffer;
   }, []);
 
+  const setCurrentNode = useCallback((node: VirtualNode | null) => {
+    setState(prev => ({ ...prev, currentNode: node }));
+  }, []);
+
+  const setNavigationMode = useCallback((mode: 'elements' | 'landmarks') => {
+    setState(prev => ({ ...prev, navigationMode: mode }));
+  }, []);
+
+  const announceElement = useCallback((node: VirtualNode) => {
+    if (!node.screenReaderText) return;
+
+    const [mainText, technicalInfo] = node.screenReaderText.split('\n');
+    
+    // Всегда озвучиваем основной текст
+    if (mainText) {
+      speechService.speak(mainText);
+    }
+
+    // Озвучиваем техническую информацию только в режиме разработчика
+    if (process.env.NODE_ENV === 'development' && technicalInfo) {
+      setTimeout(() => {
+        speechService.speak(technicalInfo, { priority: 'low' });
+      }, 100);
+    }
+  }, []);
+
+  // Очистка при размонтировании
+  useEffect(() => {
+    return () => {
+      speechService.stop();
+      setState(initialState);
+    };
+  }, []);
+
+  const contextValue = {
+    ...state,
+    setIsActive,
+    initializeBuffer,
+    setCurrentNode,
+    setNavigationMode,
+    announceElement
+  };
+
   return (
-    <FocusOverlayContext.Provider 
-      value={{ 
-        isActive, 
-        setIsActive, 
-        virtualBuffer,
-        initializeBuffer
-      }}
-    >
+    <FocusOverlayContext.Provider value={contextValue}>
       {children}
     </FocusOverlayContext.Provider>
   );
 }
 
-export const useFocusOverlay = () => useContext(FocusOverlayContext); 
+export const useFocusOverlay = () => {
+  const context = useContext(FocusOverlayContext);
+  if (!context) {
+    throw new Error('useFocusOverlay must be used within FocusOverlayProvider');
+  }
+  return context;
+}; 
