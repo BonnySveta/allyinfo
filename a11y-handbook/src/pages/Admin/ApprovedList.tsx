@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Resource } from '../../types/resource';
 import { CategoryId, CATEGORIES } from '../../types/category';
-import { CategoryChips } from '../../components/CategoryChips/CategoryChips';
+import { FilterChipsPanel } from '../../components/FilterChips';
 
 const Table = styled.table`
   width: 100%;
@@ -330,7 +330,7 @@ export function ApprovedList() {
       setEditForm({});
     } catch (err) {
       console.error('Save error:', err);
-      setError(err instanceof Error ? err.message : 'Ошибка при обновлении з��писи');
+      setError(err instanceof Error ? err.message : 'Ошибка при обновлении записи');
     }
   };
 
@@ -372,7 +372,7 @@ export function ApprovedList() {
         <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
           <option value="date">По дате</option>
           <option value="title">По названию</option>
-          <option value="section">По раз��елу</option>
+          <option value="section">По разделу</option>
         </Select>
 
         <Select value={order} onChange={(e) => setOrder(e.target.value)}>
@@ -487,8 +487,7 @@ export function ApprovedList() {
 
                 <FormGroup>
                   <Label>Категории</Label>
-                  <CategoryChips
-                    categories={CATEGORIES}
+                  <FilterChipsPanel
                     selectedCategories={editForm.categories || []}
                     onChange={(categories: CategoryId[]) => setEditForm({ ...editForm, categories })}
                   />

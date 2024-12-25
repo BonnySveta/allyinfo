@@ -22,9 +22,6 @@ import { Login } from './pages/Login/Login';
 import { Admin } from './pages/Admin/Admin';
 import { GettingStarted } from './pages/GettingStarted/GettingStarted';
 import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
-import { CategoryChips } from './components/CategoryChips/CategoryChips';
-import { CATEGORIES, CategoryId } from './types/category';
-import { CategoryChipsPanel } from './components/CategoryChipsPanel/CategoryChipsPanel';
 import { ResourceSection } from './pages/ResourcePage/config';
 import { FocusOverlayProvider } from './context/FocusOverlayContext';
 
@@ -35,7 +32,7 @@ const PageContainer = styled.div`
   flex-direction: column;
 `;
 
-const MainContainer = styled.div`
+const MainContainer = styled.main`
   flex: 1;
   padding: 2rem;
   max-width: 1200px;
@@ -77,7 +74,6 @@ function App() {
               <PageContainer>
                 <Header />
                 <MainContainer>
-                  <main>
                     <Routes>
                       <Route 
                         path="/" 
@@ -133,7 +129,6 @@ function App() {
                       />
                       <Route path="/getting-started" element={<GettingStarted />} />
                     </Routes>
-                  </main>
                 </MainContainer>
                 <Footer />
               </PageContainer>

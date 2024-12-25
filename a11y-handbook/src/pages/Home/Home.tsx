@@ -2,7 +2,7 @@ import { FC } from 'react';
 import styled from 'styled-components';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import { StartBanner } from '../../components/StartBanner/StartBanner';
-import { CategoryChipsPanel } from '../../components/CategoryChipsPanel/CategoryChipsPanel';
+import { FilterChipsPanel } from '../../components/FilterChips';
 import { Card } from '../../components/Card/Card';
 import { CardsGrid } from '../../components/CardsGrid/CardsGrid';
 import { navigationConfig } from '../../config/navigation';
@@ -98,7 +98,7 @@ export const Home: FC<HomeProps> = ({
         </TitleContainer>
         <StartBanner />
       </TitleSection>
-      <CategoryChipsPanel
+      <FilterChipsPanel
         selectedCategories={selectedCategories}
         onChange={setSelectedCategories}
       />
