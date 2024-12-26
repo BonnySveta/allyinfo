@@ -62,9 +62,11 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   body {
-    margin: 0;
-    padding: 0;
+    min-height: 100vh;
     background-color: var(--background-color);
+    display: flex;
+    flex-direction: column;
+    margin: 0;
     color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;
   }

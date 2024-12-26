@@ -25,15 +25,8 @@ import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
 import { ResourceSection } from './pages/ResourcePage/config';
 import { FocusOverlayProvider } from './context/FocusOverlayContext';
 
-const PageContainer = styled.div`
-  min-height: 100vh;
-  background-color: var(--background-color);
-  display: flex;
-  flex-direction: column;
-`;
-
 const MainContainer = styled.main`
-  flex: 1;
+  flex: 1 0 auto;
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
@@ -71,67 +64,65 @@ function App() {
           <GlobalStyle />
           <BrowserRouter>
             <Suspense fallback={<LoadingSpinner />}>
-              <PageContainer>
-                <Header />
-                <MainContainer>
-                    <Routes>
-                      <Route 
-                        path="/" 
-                        element={
-                          <Home
-                            loading={loading}
-                            error={error}
-                            selectedCategories={selectedCategories}
-                            setSelectedCategories={setSelectedCategories}
-                            filteredResources={filteredResources}
-                          />
-                        } 
+              <Header />
+              <MainContainer>
+                <Routes>
+                  <Route 
+                    path="/" 
+                    element={
+                      <Home
+                        loading={loading}
+                        error={error}
+                        selectedCategories={selectedCategories}
+                        setSelectedCategories={setSelectedCategories}
+                        filteredResources={filteredResources}
                       />
-                      {Object.entries(pageConfig).map(([key, config]) => (
-                        <Route 
-                          key={config.path}
-                          path={config.path}
-                          element={
-                            <ResourcePage 
-                              section={key as ResourceSection}
-                            />
-                          }
+                    } 
+                  />
+                  {Object.entries(pageConfig).map(([key, config]) => (
+                    <Route 
+                      key={config.path}
+                      path={config.path}
+                      element={
+                        <ResourcePage 
+                          section={key as ResourceSection}
                         />
-                      ))}
-                      <Route path="/feedback" element={<Feedback />} />
-                      <Route path="/suggest" element={<Suggest />} />
-                      <Route 
-                        path="/admin/suggestions" 
-                        element={
-                          <ProtectedRoute showError>
-                            <Suggestions />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route 
-                        path="/admin/approved" 
-                        element={
-                          <ProtectedRoute>
-                            <ApprovedList />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route path="/support" element={<Support />} />
-                      <Route path="/admin/feedback-list" element={<AdminFeedbackList />} />
-                      <Route path="/login" element={<Login />} />
-                      <Route 
-                        path="/admin/*" 
-                        element={
-                          <ProtectedRoute>
-                            <Admin />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route path="/getting-started" element={<GettingStarted />} />
-                    </Routes>
-                </MainContainer>
-                <Footer />
-              </PageContainer>
+                      }
+                    />
+                  ))}
+                  <Route path="/feedback" element={<Feedback />} />
+                  <Route path="/suggest" element={<Suggest />} />
+                  <Route 
+                    path="/admin/suggestions" 
+                    element={
+                      <ProtectedRoute showError>
+                        <Suggestions />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/admin/approved" 
+                    element={
+                      <ProtectedRoute>
+                        <ApprovedList />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route path="/support" element={<Support />} />
+                  <Route path="/admin/feedback-list" element={<AdminFeedbackList />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route 
+                    path="/admin/*" 
+                    element={
+                      <ProtectedRoute>
+                        <Admin />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route path="/getting-started" element={<GettingStarted />} />
+                </Routes>
+              </MainContainer>
+              <Footer />
             </Suspense>
           </BrowserRouter>
         </ThemeProvider>

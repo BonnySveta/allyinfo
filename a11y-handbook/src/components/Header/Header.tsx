@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { FocusOverlay } from '../FocusOverlay/FocusOverlay';
 import { useFocusOverlay } from '../../context/FocusOverlayContext';
 
-const HeaderWrapper = styled.div<{ $isScrolled: boolean }>`
+const HeaderWrapper = styled.header<{ $isScrolled: boolean }>`
   width: 100%;
   background-color: var(--nav-background);
   border-bottom: 1px solid var(--nav-hover-background);
@@ -25,7 +25,7 @@ const HeaderWrapper = styled.div<{ $isScrolled: boolean }>`
   }
 `;
 
-const HeaderContainer = styled.header`
+const HeaderContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -263,7 +263,7 @@ export function Header() {
   const { isAdmin } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const headerRef = useRef<HTMLElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   const burgerButtonRef = useRef<HTMLButtonElement>(null);
   const { isActive, setIsActive } = useFocusOverlay();
   const ticking = useRef(false);

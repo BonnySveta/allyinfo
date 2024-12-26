@@ -2,7 +2,8 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { FaHeart } from 'react-icons/fa';
 
-const FooterContainer = styled.footer`
+const FooterWrapper = styled.footer`
+  flex-shrink: 0;
   background: var(--nav-background);
   padding: 1.5rem;
   margin-top: auto;
@@ -71,7 +72,7 @@ const SupportLink = styled(BaseFooterLink)`
 
 export function Footer() {
   return (
-    <FooterContainer>
+    <FooterWrapper>
       <FooterContent>
         <Copyright>
           ©  2024 A11Y Wiki. Все материалы распространяются по лицензии MIT.
@@ -85,6 +86,6 @@ export function Footer() {
           </SupportLink>
         </FooterLinks>
       </FooterContent>
-    </FooterContainer>
+    </FooterWrapper>
   );
 } 
