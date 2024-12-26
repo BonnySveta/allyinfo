@@ -76,33 +76,17 @@ export function FocusOverlayProvider({ children }: { children: React.ReactNode }
   }, []);
 
   const announceUpdate = useCallback((message: string) => {
-    // Если режим скринридера активен и есть виртуальный буфер
-    if (state.isActive && state.virtualBuffer) {
-      // Сначала пересоздаем буфер
-      const newBuffer = new VirtualBuffer(document);
-      setState(prev => ({ ...prev, virtualBuffer: newBuffer }));
-
-      // Обновляем текущий узел
-      const activeElement = document.activeElement || document.querySelector('.screen-reader-toggle');
-      if (activeElement) {
-        const node = newBuffer.setCurrentNode(activeElement);
-        if (node) {
-          setState(prev => ({ ...prev, currentNode: node }));
-        }
-      }
-
-      // Даем небольшую задержку перед озвучкой
-      setTimeout(() => {
-        // Останавливаем предыдущую озвучку
-        speechService.stop();
-        // Озвучиваем новое сообщение
-        speechService.speak(message, { priority: 'low' });
-      }, 100);
+    // Если режим скринридера активен
+    if (state.isActive) {
+      // Останавливаем предыдущую озвучку
+      speechService.stop();
+      // Озвучиваем новое сообщение
+      speechService.speak(message, { priority: 'low' });
     } else {
       // Если скринридер не активен, просто озвучиваем
       speechService.speak(message, { priority: 'low' });
     }
-  }, [state.isActive, state.virtualBuffer]);
+  }, [state.isActive]);
 
   // Очистка при размонтировании
   useEffect(() => {

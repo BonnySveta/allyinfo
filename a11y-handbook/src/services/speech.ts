@@ -36,20 +36,12 @@ export class SpeechService {
       return;
     }
 
-    // Всегда останавливаем предыдущую озвучку перед началом новой
-    this.speechSynthesis.cancel();
-
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.voice = this.voice;
     utterance.rate = 1;
     utterance.pitch = 1;
     utterance.volume = 1;
     utterance.lang = 'ru-RU';
-
-    // Добавляем обработку ошибок
-    utterance.onerror = (event) => {
-      console.error('Speech synthesis error:', event);
-    };
 
     this.speechSynthesis.speak(utterance);
   }
