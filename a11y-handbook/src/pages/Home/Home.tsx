@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import styled from 'styled-components';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import { StartBanner } from '../../components/StartBanner/StartBanner';
@@ -8,6 +8,8 @@ import { CardsGrid } from '../../components/CardsGrid/CardsGrid';
 import { navigationConfig } from '../../config/navigation';
 import { CategoryId } from '../../types/category';
 import { ResourcesBySection } from '../../types/resource';
+import { speechService } from '../../services/speech';
+import { useFocusOverlay } from '../../context/FocusOverlayContext';
 
 const TitleSection = styled.div`
   display: flex;
@@ -66,7 +68,9 @@ const ErrorMessage = styled.div`
   margin: 2rem 0;
 `;
 
-const CardsContainer = styled.section`
+const CardsContainer = styled.section.attrs({
+  className: 'CardsContainer'
+})`
   padding: 0 2rem 3rem;
 
   @media (max-width: 768px) {
@@ -89,6 +93,30 @@ export const Home: FC<HomeProps> = ({
   setSelectedCategories,
   filteredResources
 }) => {
+  const { announceUpdate } = useFocusOverlay();
+
+  useEffect(() => {
+    if (!loading && !error) {
+      const totalResources = Object.values(filteredResources)
+        .reduce((sum, resources) => sum + resources.length, 0);
+
+      let announcement = '';
+      if (selectedCategories.length > 0) {
+        if (totalResources === 0) {
+          announcement = 'По выбранным фильтрам ничего не найдено';
+        } else {
+          announcement = `Найдено ${totalResources} материалов`;
+        }
+      } else if (totalResources > 0) {
+        announcement = `Показаны все ${totalResources} материалов`;
+      }
+
+      if (announcement) {
+        announceUpdate(announcement);
+      }
+    }
+  }, [filteredResources, selectedCategories, loading, error, announceUpdate]);
+
   return (
     <>
       <TitleSection>

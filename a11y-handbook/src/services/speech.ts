@@ -36,10 +36,8 @@ export class SpeechService {
       return;
     }
 
-    // Останавливаем предыдущее произношение только если приоритет высокий
-    if (options.priority === 'high') {
-      this.speechSynthesis.cancel();
-    }
+    // Всегда останавливаем предыдущую озвучку перед началом новой
+    this.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.voice = this.voice;
