@@ -68,7 +68,7 @@ export function FocusOverlayProvider({ children }: { children: React.ReactNode }
     // Озвучиваем техническую информацию только в режиме разработчика
     if (process.env.NODE_ENV === 'development' && technicalInfo) {
       setTimeout(() => {
-        speechService.speak(technicalInfo, { priority: 'low' });
+        speechService.speak(technicalInfo);
       }, 100);
     }
   }, []);
