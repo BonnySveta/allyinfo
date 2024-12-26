@@ -6,17 +6,22 @@ import { useAuth } from '../../context/AuthContext';
 import { FocusOverlay } from '../FocusOverlay/FocusOverlay';
 import { useFocusOverlay } from '../../context/FocusOverlayContext';
 
-const HeaderWrapper = styled.div`
+const HeaderWrapper = styled.div<{ $isScrolled: boolean }>`
   width: 100%;
   background-color: var(--nav-background);
   border-bottom: 1px solid var(--nav-hover-background);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  
+  // Добавляем тень только когда прокручено
+  box-shadow: ${props => props.$isScrolled ? '0 2px 8px rgba(0, 0, 0, 0.1)' : 'none'};
+  transition: box-shadow 0.3s ease;
 
   @media (max-width: 768px) {
-    position: absolute;
-    top: 0;
+    position: fixed;
     left: 0;
     right: 0;
-    z-index: 1000;
   }
 `;
 
@@ -257,9 +262,30 @@ const ScreenReaderButton = styled.button`
 export function Header() {
   const { isAdmin } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const burgerButtonRef = useRef<HTMLButtonElement>(null);
   const { isActive, setIsActive } = useFocusOverlay();
+  const ticking = useRef(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!ticking.current) {
+        window.requestAnimationFrame(() => {
+          // Проверяем, прокручена ли страница
+          setIsScrolled(window.scrollY > 0);
+          ticking.current = false;
+        });
+        ticking.current = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -329,7 +355,7 @@ export function Header() {
   }, [isMenuOpen]);
 
   return (
-    <HeaderWrapper>
+    <HeaderWrapper $isScrolled={isScrolled}>
       <HeaderContainer ref={headerRef}>
         <BurgerButton 
           ref={burgerButtonRef}
