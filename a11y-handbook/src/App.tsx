@@ -24,6 +24,7 @@ import { GettingStarted } from './pages/GettingStarted/GettingStarted';
 import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
 import { ResourceSection } from './pages/ResourcePage/config';
 import { FocusOverlayProvider } from './context/FocusOverlayContext';
+import { FilterChipsPanel } from './components/FilterChips';
 
 const MainContainer = styled.main`
   flex: 1 0 auto;

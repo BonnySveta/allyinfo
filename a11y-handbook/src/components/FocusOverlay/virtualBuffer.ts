@@ -1,8 +1,17 @@
-import { VirtualNode } from './types';
+import { VirtualNode as BaseVirtualNode } from './types';
+
+// Расширяем базовый интерфейс для внутренних нужд буфера
+interface VirtualNodeInternal extends BaseVirtualNode {
+  parent?: VirtualNodeInternal;
+  firstChild?: VirtualNodeInternal;
+  lastChild?: VirtualNodeInternal;
+  previous?: VirtualNodeInternal;
+  next?: VirtualNodeInternal;
+}
 
 export class VirtualBuffer {
-  private root: VirtualNode;
-  private currentNode: VirtualNode | null = null;
+  private root: VirtualNodeInternal;
+  private currentNode: VirtualNodeInternal | null = null;
   private mode: 'browse' | 'focus' = 'browse';
 
   constructor(document: Document) {
@@ -168,7 +177,7 @@ export class VirtualBuffer {
   }
 
   private shouldIncludeNode(element: Element): boolean {
-    // Пропускаем скрытые элементы
+    // ��ропускаем скрытые элементы
     if (this.isHidden(element)) return false;
 
     // ВСЕГДА включаем активный элемент и кнопку скринридера
@@ -276,9 +285,9 @@ export class VirtualBuffer {
     return !/\S/.test(text);
   }
 
-  private mergeTextNodes(nodes: VirtualNode[]): VirtualNode[] {
-    const result: VirtualNode[] = [];
-    let currentTextNode: VirtualNode | null = null;
+  private mergeTextNodes(nodes: VirtualNodeInternal[]): VirtualNodeInternal[] {
+    const result: VirtualNodeInternal[] = [];
+    let currentTextNode: VirtualNodeInternal | null = null;
 
     nodes.forEach(node => {
       // Если это текстовый узел без специальной роли
@@ -303,7 +312,7 @@ export class VirtualBuffer {
     return result;
   }
 
-  private processListStructure(node: VirtualNode): VirtualNode {
+  private processListStructure(node: VirtualNodeInternal): VirtualNodeInternal {
     if (node.role === 'list') {
       // Получаем количество элементов списка
       const listItems = node.children.filter(child => child.role === 'listitem');
@@ -332,7 +341,7 @@ export class VirtualBuffer {
     return node;
   }
 
-  private processFormControls(node: VirtualNode): VirtualNode {
+  private processFormControls(node: VirtualNodeInternal): VirtualNodeInternal {
     // Обработка элементов формы
     if (this.isFormControl(node.element)) {
       const element = node.element as HTMLElement;
@@ -399,7 +408,7 @@ export class VirtualBuffer {
   }
 
   // Обработка ARIA Live Regions
-  private processLiveRegions(node: VirtualNode): VirtualNode {
+  private processLiveRegions(node: VirtualNodeInternal): VirtualNodeInternal {
     const element = node.element;
     const live = element.getAttribute('aria-live');
     const atomic = element.getAttribute('aria-atomic');
@@ -425,7 +434,7 @@ export class VirtualBuffer {
     return node;
   }
 
-  private processDialogs(node: VirtualNode): VirtualNode {
+  private processDialogs(node: VirtualNodeInternal): VirtualNodeInternal {
     const element = node.element;
     const role = this.getRole(element);
 
@@ -461,7 +470,7 @@ export class VirtualBuffer {
   }
 
   // Обработка ARIA-flowto и ARIA-owns
-  private processAriaRelations(node: VirtualNode): VirtualNode {
+  private processAriaRelations(node: VirtualNodeInternal): VirtualNodeInternal {
     const element = node.element;
 
     // Обработка aria-owns
@@ -475,7 +484,7 @@ export class VirtualBuffer {
         // Создаем виртуальные узлы для owned элементов и фильтруем null значения
         const ownedNodes = ownedElements
           .map(el => this.createVirtualTree(el as Element))
-          .filter((node): node is VirtualNode => node !== null);
+          .filter((node): node is VirtualNodeInternal => node !== null);
 
         // Теперь TypeScript знает, что ownedNodes - это VirtualNode[]
         node.children = [...node.children, ...ownedNodes];
@@ -500,7 +509,7 @@ export class VirtualBuffer {
           };
         });
 
-        // Добавляем информацию о в��зможных переходах
+        // Добавляем информацию о возможных переходах
         const targetLabels = node.flowTargets.map(t => t.label).join(', ');
         node.states.push(`можно перейти к: ${targetLabels}`);
       }
@@ -511,9 +520,9 @@ export class VirtualBuffer {
     return node;
   }
 
-  private createVirtualTree(element: Element): VirtualNode | null {
+  private createVirtualTree(element: Element): VirtualNodeInternal | null {
     if (!this.shouldIncludeNode(element)) {
-      const children: VirtualNode[] = [];
+      const children: VirtualNodeInternal[] = [];
       Array.from(element.children)
         .forEach(child => {
           const childNode = this.createVirtualTree(child);
@@ -539,7 +548,7 @@ export class VirtualBuffer {
       return null;
     }
 
-    let processedNode: VirtualNode = {
+    let processedNode: VirtualNodeInternal = {
       element,
       role: this.getRole(element),
       children: [],
@@ -551,7 +560,7 @@ export class VirtualBuffer {
     };
 
     // Собираем дочерние узлы
-    let children: VirtualNode[] = [];
+    let children: VirtualNodeInternal[] = [];
     Array.from(element.children).forEach(child => {
       const childNode = this.createVirtualTree(child);
       if (childNode) {
@@ -578,7 +587,7 @@ export class VirtualBuffer {
     return processedNode;
   }
 
-  private setupNavigationLinks(node: VirtualNode) {
+  private setupNavigationLinks(node: VirtualNodeInternal) {
     // Устанавливаем связи для навигации
     if (node.children.length > 0) {
       node.firstChild = node.children[0];
@@ -599,10 +608,10 @@ export class VirtualBuffer {
   }
 
   // Добавим вспомогательный метод для получения всех фокусируемых узлов
-  private getAllFocusableNodes(): VirtualNode[] {
-    const nodes: VirtualNode[] = [];
+  private getAllFocusableNodes(): VirtualNodeInternal[] {
+    const nodes: VirtualNodeInternal[] = [];
     
-    const traverse = (node: VirtualNode) => {
+    const traverse = (node: VirtualNodeInternal) => {
       if (node.isFocusable || node.isInteractive) {
         nodes.push(node);
       }
@@ -614,7 +623,7 @@ export class VirtualBuffer {
   }
 
   // Навигационные методы
-  public moveNext(): VirtualNode | null {
+  public moveNext(): VirtualNodeInternal | null {
     if (!this.currentNode) return null;
 
     const allNodes = this.getAllFocusableNodes();
@@ -638,7 +647,7 @@ export class VirtualBuffer {
     return null;
   }
 
-  public movePrevious(): VirtualNode | null {
+  public movePrevious(): VirtualNodeInternal | null {
     if (!this.currentNode) return null;
 
     const allNodes = this.getAllFocusableNodes();
@@ -662,26 +671,26 @@ export class VirtualBuffer {
     return null;
   }
 
-  public moveToFirstChild(): VirtualNode | null {
+  public moveToFirstChild(): VirtualNodeInternal | null {
     if (!this.currentNode || !this.currentNode.firstChild) return null;
     this.currentNode = this.currentNode.firstChild;
     return this.currentNode;
   }
 
-  public moveToLastChild(): VirtualNode | null {
+  public moveToLastChild(): VirtualNodeInternal | null {
     if (!this.currentNode || !this.currentNode.lastChild) return null;
     this.currentNode = this.currentNode.lastChild;
     return this.currentNode;
   }
 
-  public moveToParent(): VirtualNode | null {
+  public moveToParent(): VirtualNodeInternal | null {
     if (!this.currentNode || !this.currentNode.parent) return null;
     this.currentNode = this.currentNode.parent;
     return this.currentNode;
   }
 
   // Методы для специфической навигации
-  public moveToNextByRole(role: string): VirtualNode | null {
+  public moveToNextByRole(role: string): VirtualNodeInternal | null {
     let node = this.currentNode;
     while (node = this.moveNext()) {
       if (node.role === role) {
@@ -691,7 +700,7 @@ export class VirtualBuffer {
     return null;
   }
 
-  public moveToPreviousByRole(role: string): VirtualNode | null {
+  public moveToPreviousByRole(role: string): VirtualNodeInternal | null {
     let node = this.currentNode;
     while (node = this.movePrevious()) {
       if (node.role === role) {
@@ -702,9 +711,9 @@ export class VirtualBuffer {
   }
 
   // Добавим метод для установки текущего узла
-  public setCurrentNode(element: Element): VirtualNode | null {
+  public setCurrentNode(element: Element): VirtualNodeInternal | null {
     // Ищем узел в нашем вртуальном дереве
-    const findNode = (node: VirtualNode): VirtualNode | null => {
+    const findNode = (node: VirtualNodeInternal): VirtualNodeInternal | null => {
       if (node.element === element) return node;
       for (const child of node.children) {
         const found = findNode(child);
@@ -721,12 +730,12 @@ export class VirtualBuffer {
   }
 
   // Добавим метод для получения текущего узла
-  public getCurrentNode(): VirtualNode | null {
+  public getCurrentNode(): VirtualNodeInternal | null {
     return this.currentNode;
   }
 
   // Добавим метод для получения контекста элемента
-  private getElementContext(node: VirtualNode): string {
+  private getElementContext(node: VirtualNodeInternal): string {
     const contexts: string[] = [];
     let current = node;
 
@@ -759,7 +768,7 @@ export class VirtualBuffer {
 
   // Добавляем метод для обновления live regions
   public updateLiveRegions(): void {
-    const updateNode = (node: VirtualNode) => {
+    const updateNode = (node: VirtualNodeInternal) => {
       if (node.isLiveRegion) {
         // Обновляем содержимое live region
         const newLabel = this.getAccessibleName(node.element);
@@ -777,7 +786,7 @@ export class VirtualBuffer {
   }
 
   // Добавляем методы навигации для flowto
-  public moveToFlowTarget(index: number = 0): VirtualNode | null {
+  public moveToFlowTarget(index: number = 0): VirtualNodeInternal | null {
     if (!this.currentNode?.flowTargets?.[index]) return null;
     
     const target = this.currentNode.flowTargets[index];
@@ -789,7 +798,7 @@ export class VirtualBuffer {
   }
 
   // Обновляем обработку клавиш в FocusOverlay для поддержки новой функциональности
-  public handleDialogNavigation(key: string): VirtualNode | null {
+  public handleDialogNavigation(key: string): VirtualNodeInternal | null {
     if (!this.currentNode) return null;
 
     switch (key) {
