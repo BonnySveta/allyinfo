@@ -1,11 +1,13 @@
 import { useEffect } from 'react';
 import { VirtualBuffer } from '../virtualBuffer';
 import { VirtualNode } from '../types';
+import { speechService } from '../../../services/speech';
 
 export function useKeyboardNavigation(
   virtualBuffer: VirtualBuffer | null,
   updateVisualFocus: (node: VirtualNode) => void,
-  setIsActive: (active: boolean) => void
+  setIsActive: (active: boolean) => void,
+  announceElement: (element: Element) => void
 ) {
   useEffect(() => {
     if (!virtualBuffer) return;
@@ -16,6 +18,7 @@ export function useKeyboardNavigation(
         const dialogResult = virtualBuffer.handleDialogNavigation('Escape');
         if (dialogResult) {
           updateVisualFocus(dialogResult);
+          announceElement(dialogResult.element);
           return;
         }
         setIsActive(false);
@@ -53,10 +56,11 @@ export function useKeyboardNavigation(
 
       if (nextNode) {
         updateVisualFocus(nextNode);
+        announceElement(nextNode.element);
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [virtualBuffer, updateVisualFocus, setIsActive]);
+  }, [virtualBuffer, updateVisualFocus, setIsActive, announceElement]);
 } 

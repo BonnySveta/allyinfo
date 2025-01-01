@@ -9,6 +9,17 @@ export function useSpotlight() {
   });
   const [elementInfo, setElementInfo] = useState<ElementDetails | null>(null);
 
+  const announceElement = useCallback((element: Element) => {
+    const info = getElementInfo(element);
+    if (info.screenReaderText) {
+      const [mainText] = info.screenReaderText.split('\n');
+      if (mainText) {
+        speechService.stop();
+        speechService.speak(mainText);
+      }
+    }
+  }, []);
+
   const getElementBounds = useCallback((element: Element) => {
     const rect = element.getBoundingClientRect();
     const padding = 8;
@@ -45,21 +56,17 @@ export function useSpotlight() {
     const info = getElementInfo(element);
     setElementInfo(info);
 
-    if (info.screenReaderText) {
-      const [screenReaderText] = info.screenReaderText.split('\n');
-      if (screenReaderText) {
-        speechService.speak(screenReaderText);
-      }
-    }
+    announceElement(element);
 
     if (info.isFocusable && element instanceof HTMLElement) {
       element.focus();
     }
-  }, [getElementBounds]);
+  }, [getElementBounds, announceElement]);
 
   return {
     spotlightPosition,
     elementInfo,
-    updateVisualFocus
+    updateVisualFocus,
+    announceElement
   };
 } 

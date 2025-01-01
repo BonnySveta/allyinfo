@@ -14,14 +14,14 @@ import { speechService } from '../../services/speech';
 
 export function FocusOverlay() {
   const { isActive, setIsActive, virtualBuffer, initializeBuffer } = useFocusOverlay();
-  const { spotlightPosition, elementInfo, updateVisualFocus } = useSpotlight();
+  const { spotlightPosition, elementInfo, updateVisualFocus, announceElement } = useSpotlight();
   const [navigationMode, setNavigationMode] = useState<NavigationMode>('elements');
   const [isHintsCollapsed, setIsHintsCollapsed] = useState(false);
   const [flowConnections, setFlowConnections] = useState<FlowConnection[]>([]);
   const location = useLocation();
 
   // Используем выделенные хуки
-  useKeyboardNavigation(virtualBuffer, updateVisualFocus, setIsActive);
+  useKeyboardNavigation(virtualBuffer, updateVisualFocus, setIsActive, announceElement);
   useDOMObserver(isActive, virtualBuffer, updateVisualFocus);
   useScrollLock(isActive);
 
