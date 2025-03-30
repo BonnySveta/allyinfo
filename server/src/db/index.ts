@@ -5,9 +5,17 @@ import fs from 'fs';
 import { config } from '../config';
 
 // Создаем подключение к БД
-const db = new Database(path.join(__dirname, '../../data/suggestions.db'), {
+const dbPath = path.join(__dirname, '../../data');
+if (!fs.existsSync(dbPath)) {
+  fs.mkdirSync(dbPath, { recursive: true });
+}
+
+const db = new Database(path.join(dbPath, 'suggestions.db'), {
   verbose: console.log
 });
+// const db = new Database(path.join(__dirname, '../../data/suggestions.db'), {
+//   verbose: console.log
+// });
 
 // Создаем таблицы, если их нет
 db.exec(`
