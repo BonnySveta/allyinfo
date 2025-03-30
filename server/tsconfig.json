@@ -13,7 +13,8 @@
   },
   "include": [
     "src/**/*"
-, "../a11y-handbook/src/components/Toast/components", "../a11y-handbook/src/components/SuggestForm", "../a11y-handbook/src/components/Form", "../a11y-handbook/src/components/FeedbackForm"  ],
+// , "../a11y-handbook/src/components/Toast/components", "../a11y-handbook/src/components/SuggestForm", "../a11y-handbook/src/components/Form", "../a11y-handbook/src/components/FeedbackForm"  
+],
   "exclude": [
     "node_modules"
   ]
