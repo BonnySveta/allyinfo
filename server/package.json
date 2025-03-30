@@ -28,5 +28,8 @@
     "dev": "ts-node src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js"
+  },
+  "engines": {
+    "node": "v18.19.0"
   }
 }
