@@ -248,6 +248,27 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   next();
 });
 
+
+// Настраиваем CORS с минимальным логированием
+app.use(cors({
+  origin: (origin, callback) => {
+    const allowedOrigins = (process.env.CORS_WHITELIST || '')
+    .split(',')
+    .map(u => u.trim());
+    
+    // origin может быть undefined при прямой навигации — тоже пускаем
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 // Глобальная обработка ошибок
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('\n=== Error Handler ===');
