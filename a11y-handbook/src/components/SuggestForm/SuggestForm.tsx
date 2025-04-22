@@ -88,9 +88,9 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
     }
 
     setIsLoading(true);
-
+    const apiUrl = process.env.REACT_APP_API_URL; 
     try {
-      const response = await fetch('http://localhost:3001/api/suggestions', {
+      const response = await fetch(`${apiUrl}/api/suggestions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

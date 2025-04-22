@@ -1,8 +1,8 @@
 export const fetchPreview = async (url: string) => {
   console.log('Fetching preview for URL:', url);
-  
+  const apiUrl = process.env.REACT_APP_API_URL;
   try {
-    const response = await fetch('http://localhost:3001/api/preview', {
+    const response = await fetch(`${apiUrl}/api/preview`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

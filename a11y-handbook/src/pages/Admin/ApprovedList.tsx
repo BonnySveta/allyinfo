@@ -182,12 +182,13 @@ export function ApprovedList() {
   const [error, setError] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<EditFormData>({});
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     const loadSections = async () => {
       try {
         console.log('Loading sections...');
-        const response = await fetch('http://localhost:3001/api/sections');
+        const response = await fetch(`${apiUrl}/api/sections`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -218,7 +219,7 @@ export function ApprovedList() {
       params.append('limit', String(limit));
       params.append('status', 'approved');
 
-      const response = await fetch(`http://localhost:3001/api/approved?${params}`);
+      const response = await fetch(`${apiUrl}/api/approved?${params}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -286,10 +287,10 @@ export function ApprovedList() {
         }
       };
 
-      console.log('Sending PUT request to:', `http://localhost:3001/api/approved/${editingId}`);
+      console.log('Sending PUT request to:', `${apiUrl}/api/approved/${editingId}`);
       console.log('Update data:', updateData);
 
-      const response = await fetch(`http://localhost:3001/api/approved/${editingId}`, {
+      const response = await fetch(`${apiUrl}/api/approved/${editingId}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -338,7 +339,7 @@ export function ApprovedList() {
     if (!window.confirm('Вы уверены, что хотите удалить эту запись?')) return;
     
     try {
-      const response = await fetch(`http://localhost:3001/api/approved/${id}`, {
+      const response = await fetch(`${apiUrl}/api/approved/${id}`, {
         method: 'DELETE',
       });
       

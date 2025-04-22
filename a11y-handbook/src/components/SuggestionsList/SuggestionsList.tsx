@@ -107,10 +107,10 @@ export function SuggestionsList() {
   useEffect(() => {
     fetchSuggestions();
   }, []);
-
+  const apiUrl = process.env.REACT_APP_API_URL; 
   const fetchSuggestions = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/suggestions/all');
+      const response = await fetch(`${apiUrl}/api/suggestions/all`);
       if (!response.ok) {
         throw new Error('Failed to fetch suggestions');
       }
@@ -130,7 +130,7 @@ export function SuggestionsList() {
 
   const handleUpdateStatus = async (id: number, status: 'approved' | 'rejected') => {
     try {
-      const response = await fetch(`http://localhost:3001/api/suggestions/${id}/status`, {
+      const response = await fetch(`${apiUrl}/api/suggestions/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

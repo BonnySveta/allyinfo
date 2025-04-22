@@ -34,7 +34,8 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
     const fetchResources = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:3001/api/approved?limit=100&page=1&status=approved');
+        const apiUrl = process.env.REACT_APP_API_URL; 
+        const response = await fetch(`${apiUrl}/api/approved?limit=100&page=1&status=approved`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

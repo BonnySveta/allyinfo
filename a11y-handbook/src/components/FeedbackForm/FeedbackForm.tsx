@@ -31,9 +31,9 @@ export function FeedbackForm() {
     }
 
     setIsLoading(true);
-
+    const apiUrl = process.env.REACT_APP_API_URL; 
     try {
-      const response = await fetch('http://localhost:3001/api/feedback', {
+      const response = await fetch(`${apiUrl}/api/feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

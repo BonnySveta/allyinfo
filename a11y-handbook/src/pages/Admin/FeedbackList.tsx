@@ -54,11 +54,12 @@ export function AdminFeedbackList() {
   const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const apiUrl = process.env.REACT_APP_API_URL; 
 
   useEffect(() => {
     const fetchFeedback = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/feedback');
+        const response = await fetch(`${apiUrl}/api/feedback`);
         if (!response.ok) throw new Error('Failed to fetch feedback');
         const data = await response.json();
         setFeedback(data);
