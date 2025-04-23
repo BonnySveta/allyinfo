@@ -250,27 +250,33 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 
 
 // Настраиваем CORS с минимальным логированием
-app.use(cors({
-  origin: (origin, callback) => {
-    const allowedOrigins = (process.env.CORS_WHITELIST || '')
-    .split(',')
-    .map(u => u.trim())
-    .filter(Boolean);           // убираем пустые строки
+// app.use(cors({
+//   origin: (origin, callback) => {
+//     const allowedOrigins = (process.env.CORS_WHITELIST || '')
+//     .split(',')
+//     .map(u => u.trim())
+//     .filter(Boolean);           // убираем пустые строки
 
-  console.log('→ allowedOrigins =', allowedOrigins);
-  console.log('→ incoming Origin =', origin);
+//   console.log('→ allowedOrigins =', allowedOrigins);
+//   console.log('→ incoming Origin =', origin);
     
-    // origin может быть undefined при прямой навигации — тоже пускаем
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.warn(`CORS blocked: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization']
+//     // origin может быть undefined при прямой навигации — тоже пускаем
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       console.warn(`CORS blocked: ${origin}`);
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   credentials: true,
+//   allowedHeaders: ['Content-Type', 'Authorization']
+// }));
+app.use(cors({
+  origin: true,       // всегда отдавать Access-Control-Allow-Origin = запросный Origin
+  credentials: true,  // если нужны куки / авторизация
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization']
 }));
 
 // Глобальная обработка ошибок
