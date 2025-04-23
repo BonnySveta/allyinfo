@@ -254,7 +254,11 @@ app.use(cors({
   origin: (origin, callback) => {
     const allowedOrigins = (process.env.CORS_WHITELIST || '')
     .split(',')
-    .map(u => u.trim());
+    .map(u => u.trim())
+    .filter(Boolean);           // убираем пустые строки
+
+  console.log('→ allowedOrigins =', allowedOrigins);
+  console.log('→ incoming Origin =', origin);
     
     // origin может быть undefined при прямой навигации — тоже пускаем
     if (!origin || allowedOrigins.includes(origin)) {
