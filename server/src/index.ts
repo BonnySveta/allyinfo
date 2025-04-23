@@ -278,6 +278,13 @@ app.use(cors({
   methods: ['GET','POST','PUT','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type','Authorization']
 }));
+// Обрабатываем preflight (OPTIONS) запросы
+app.options('*', cors());
+
+//  логгеры, JSON-парсер и роуты
+app.use(logResponse);
+app.use((req, res, next) => { logRequest(req); next(); });
+app.use(express.json());
 
 // Глобальная обработка ошибок
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
