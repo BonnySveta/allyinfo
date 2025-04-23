@@ -105,22 +105,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Настраиваем CORS с минимальным логированием
-app.use(cors({
-  origin: (origin, callback) => {
-    const allowedOrigins = ['http://localhost:3000'];
-    
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.warn(`CORS blocked: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
 
 app.use(express.json());
 
