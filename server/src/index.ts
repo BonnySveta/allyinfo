@@ -75,6 +75,29 @@ const logResponse = (req: express.Request, res: express.Response, next: express.
 const app = express();
 export const PORT = 3001;
 
+// Настраиваем CORS с минимальным логированием
+app.use(cors({
+  origin: (origin, callback) => {
+    const allowedOrigins = (process.env.CORS_WHITELIST || '')
+    .split(',')
+    .map(u => u.trim())
+    .filter(Boolean);           // убираем пустые строки
+
+  console.log('→ allowedOrigins =', allowedOrigins);
+  console.log('→ incoming Origin =', origin);
+    
+    // origin может быть undefined при прямой навигации — тоже пускаем
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 // Применяем логирование
 app.use(logResponse);
 app.use((req, res, next) => {
@@ -249,42 +272,6 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 
-// Настраиваем CORS с минимальным логированием
-// app.use(cors({
-//   origin: (origin, callback) => {
-//     const allowedOrigins = (process.env.CORS_WHITELIST || '')
-//     .split(',')
-//     .map(u => u.trim())
-//     .filter(Boolean);           // убираем пустые строки
-
-//   console.log('→ allowedOrigins =', allowedOrigins);
-//   console.log('→ incoming Origin =', origin);
-    
-//     // origin может быть undefined при прямой навигации — тоже пускаем
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       console.warn(`CORS blocked: ${origin}`);
-//       callback(new Error('Not allowed by CORS'));
-//     }
-//   },
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//   credentials: true,
-//   allowedHeaders: ['Content-Type', 'Authorization']
-// }));
-app.use(cors({
-  origin: true,       // всегда отдавать Access-Control-Allow-Origin = запросный Origin
-  credentials: true,  // если нужны куки / авторизация
-  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization']
-}));
-// Обрабатываем preflight (OPTIONS) запросы
-app.options('*', cors());
-
-//  логгеры, JSON-парсер и роуты
-app.use(logResponse);
-app.use((req, res, next) => { logRequest(req); next(); });
-app.use(express.json());
 
 // Глобальная обработка ошибок
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
