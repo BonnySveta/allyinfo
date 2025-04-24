@@ -121,7 +121,7 @@ export const Home: FC<HomeProps> = ({
     <>
       <TitleSection>
         <TitleContainer>
-          <Title>ALLY.RU</Title>
+          <Title>ALLYINFO</Title>
           <Subtitle>каталог материалов по цифровой доступности</Subtitle>
         </TitleContainer>
         <StartBanner />
