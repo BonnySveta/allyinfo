@@ -57,7 +57,7 @@ const ErrorMessage = styled.div`
 `;
 
 export function LoginForm() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -70,12 +70,11 @@ export function LoginForm() {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-
     try {
-      await login({ username, password });
+      await login({ email, password });
       navigate(from);
-    } catch (err) {
-      setError('Неверные учетные данные');
+    } catch (err: any) {
+      setError(err?.message || 'Ошибка входа');
     } finally {
       setIsLoading(false);
     }
@@ -85,12 +84,12 @@ export function LoginForm() {
     <FormContainer>
       <Form onSubmit={handleSubmit}>
         <Input
-          type="text"
-          placeholder="Имя пользователя"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
-          aria-label="Имя пользователя"
+          aria-label="Email"
         />
         <Input
           type="password"

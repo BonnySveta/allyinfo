@@ -1,10 +1,12 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../services/supabase';
 
 interface AuthContextType {
   isAdmin: boolean;
   isLoading: boolean;
-  login: (credentials: { username: string; password: string }) => Promise<void>;
+  login: (credentials: { email: string; password: string }) => Promise<void>;
   logout: () => void;
+  user: any;
 }
 
 export const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -12,67 +14,62 @@ export const AuthContext = createContext<AuthContextType>({} as AuthContextType)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
 
-  const login = async (credentials: { username: string; password: string }) => {
-    try {
-      const response = await fetch('http://localhost:3001/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(credentials)
-      });
-      
-      if (!response.ok) {
-        throw new Error('Ошибка авторизации');
-      }
-      
-      const { token } = await response.json();
-      localStorage.setItem('authToken', token);
-      setIsAdmin(true);
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
+  const login = async ({ email, password }: { email: string; password: string }) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    setUser(data.user);
+    if (data.user?.email) {
+      await checkAdmin(data.user.email);
+    } else {
+      setIsAdmin(false);
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('authToken');
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
     setIsAdmin(false);
   };
 
+  const checkAdmin = async (email: string) => {
+    if (!email) {
+      setIsAdmin(false);
+      return;
+    }
+    const { data, error } = await supabase
+      .from('admins')
+      .select('email')
+      .eq('email', email)
+      .single();
+    setIsAdmin(!!data && !error);
+  };
+
   useEffect(() => {
-    const verifyToken = async () => {
-      try {
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-          setIsLoading(false);
-          return;
-        }
-
-        const response = await fetch('/api/verify-token', {
-          headers: { 
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (response.ok) {
-          setIsAdmin(true);
-        } else {
-          localStorage.removeItem('authToken');
-        }
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoading(false);
+    const getSession = async () => {
+      setIsLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      if (user?.email) {
+        await checkAdmin(user.email);
+      } else {
+        setIsAdmin(false);
       }
+      setIsLoading(false);
     };
-
-    verifyToken();
+    getSession();
+    // Подписка на изменения сессии
+    const { data: listener } = supabase.auth.onAuthStateChange(() => {
+      getSession();
+    });
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAdmin, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ isAdmin, isLoading, login, logout, user }}>
       {children}
     </AuthContext.Provider>
   );
