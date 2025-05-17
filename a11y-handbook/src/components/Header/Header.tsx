@@ -391,7 +391,7 @@ export function Header() {
           <Controls>
             {isAdmin && (
               <AdminLink to="/admin" onClick={closeMenu}>
-                Админ
+                Админка
               </AdminLink>
             )}
             <ScreenReaderButton 

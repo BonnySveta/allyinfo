@@ -1,5 +1,3 @@
-import { SuggestionsList } from '../../components/SuggestionsList/SuggestionsList';
+import MaterialsAdmin from '../../components/MaterialsAdmin/MaterialsAdmin';
 
-export function Suggestions() {
-  return <SuggestionsList />;
-} 
+export default MaterialsAdmin; 

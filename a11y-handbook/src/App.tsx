@@ -14,9 +14,6 @@ import {
   Suggest,
   ResourcePage
 } from './pages/pages';
-import { Suggestions } from './pages/Admin/Suggestions';
-import { ApprovedList } from './pages/Admin/ApprovedList';
-import { Support } from './pages/Support/Support';
 import { AdminFeedbackList } from './pages/Admin/FeedbackList';
 import { Login } from './pages/Login/Login';
 import { Admin } from './pages/Admin/Admin';
@@ -25,6 +22,8 @@ import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
 import { ResourceSection } from './pages/ResourcePage/config';
 import { FocusOverlayProvider } from './context/FocusOverlayContext';
 import { FilterChipsPanel } from './components/FilterChips';
+import MaterialsAdmin from './components/MaterialsAdmin/MaterialsAdmin';
+import { Support } from './pages/Support/Support';
 
 const MainContainer = styled.main`
   flex: 1 0 auto;
@@ -94,18 +93,10 @@ function App() {
                   <Route path="/feedback" element={<Feedback />} />
                   <Route path="/suggest" element={<Suggest />} />
                   <Route 
-                    path="/admin/suggestions" 
+                    path="/admin/materials" 
                     element={
                       <ProtectedRoute showError>
-                        <Suggestions />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/admin/approved" 
-                    element={
-                      <ProtectedRoute>
-                        <ApprovedList />
+                        <MaterialsAdmin />
                       </ProtectedRoute>
                     } 
                   />

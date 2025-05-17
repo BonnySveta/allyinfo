@@ -48,22 +48,13 @@ export function Admin() {
   return (
     <AdminContainer>
       <Title>Админ-панель</Title>
-      
       <AdminGrid>
-        <AdminCard to="/admin/suggestions">
-          <CardTitle>Модерация</CardTitle>
+        <AdminCard to="/admin/materials">
+          <CardTitle>Материалы</CardTitle>
           <CardDescription>
-            Просмотр и модерация предложенных материалов
+            Управление всеми материалами: модерация, публикация, фильтры по статусу и категориям
           </CardDescription>
         </AdminCard>
-
-        <AdminCard to="/admin/approved">
-          <CardTitle>Одобренные материалы</CardTitle>
-          <CardDescription>
-            Список одобренных материалов и их управление
-          </CardDescription>
-        </AdminCard>
-
         <AdminCard to="/admin/feedback-list">
           <CardTitle>Обратная связь</CardTitle>
           <CardDescription>
