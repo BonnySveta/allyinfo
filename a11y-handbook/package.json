@@ -54,5 +54,6 @@
     "trailingComma": "es5",
     "tabWidth": 2,
     "semi": true
-  }
+  },
+  "proxy": "http://localhost:3001"
 }

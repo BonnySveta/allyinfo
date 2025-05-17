@@ -185,7 +185,7 @@ export function LinkPreview({ url, onLoad, getPreview, section }: LinkPreviewPro
       if (getPreview && section) {
         data = await getPreview(url, section);
       } else {
-        const response = await fetch('http://localhost:3001/api/preview', {
+        const response = await fetch('/api/preview', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

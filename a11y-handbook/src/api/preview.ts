@@ -2,7 +2,7 @@ export const fetchPreview = async (url: string) => {
   console.log('Fetching preview for URL:', url);
   
   try {
-    const response = await fetch('http://localhost:3001/api/preview', {
+    const response = await fetch('/api/preview', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
