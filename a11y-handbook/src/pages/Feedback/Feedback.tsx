@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { FeedbackForm } from '../../components/FeedbackForm/FeedbackForm';
+import FeedbackForm from '../../components/FeedbackForm/FeedbackForm';
 
 const PageContainer = styled.div`
   padding: 2rem;

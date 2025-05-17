@@ -10,6 +10,7 @@ import {
   ErrorMessage,
   RequiredMark
 } from '../Form/FormComponents';
+import { addFeedback } from '../../services/supabase';
 
 export function FeedbackForm() {
   const [feedback, setFeedback] = useState('');
@@ -33,25 +34,13 @@ export function FeedbackForm() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3001/api/feedback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: feedback })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit feedback');
-      }
-
+      await addFeedback(feedback);
       setFeedback('');
       setToast({
         show: true,
         message: 'Спасибо за ваш отзыв!',
         type: 'success'
       });
-
     } catch (err) {
       setToast({
         show: true,
@@ -100,4 +89,6 @@ export function FeedbackForm() {
       )}
     </FormContainer>
   );
-} 
+}
+
+export default FeedbackForm; 

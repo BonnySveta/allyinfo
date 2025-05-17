@@ -20,6 +20,7 @@ import {
   RequiredFieldsHint,
   LoadingSpinner
 } from '../Form/FormComponents';
+import { addSuggestion } from '../../services/supabase';
 
 interface FormData {
   section: string;
@@ -90,21 +91,17 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3001/api/suggestions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          url,
-          section,
-          description: previewData?.description || null
-        })
+      await addSuggestion({
+        url,
+        section,
+        description: previewData?.description || description || null,
+        preview_title: previewData?.title || '',
+        preview_description: previewData?.description || '',
+        preview_image: previewData?.image || '',
+        preview_favicon: previewData?.favicon || '',
+        preview_domain: previewData?.domain || '',
+        status: 'pending'
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit suggestion');
-      }
 
       clearDraft();
       setSection('');
@@ -232,3 +229,5 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
     </FormContainer>
   );
 }
+
+export default SuggestForm;

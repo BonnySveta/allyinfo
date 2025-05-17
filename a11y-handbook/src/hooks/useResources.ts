@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Resource, ResourcesBySection } from '../types/resource';
 import { CategoryId } from '../types/category';
 import { ResourceSection } from '../pages/ResourcePage/config';
+import { fetchSuggestions, fetchCategories } from '../services/supabase';
 
 interface UseResourcesBaseResult {
   loading: boolean;
@@ -31,20 +32,18 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
   const [selectedCategories, setSelectedCategories] = useState<CategoryId[]>([]);
 
   useEffect(() => {
-    const fetchResources = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:3001/api/approved?limit=100&page=1&status=approved');
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
+        // Получаем все материалы со статусом approved
+        const suggestions = await fetchSuggestions('approved');
+        // Получаем все категории (для сопоставления)
+        const categories = await fetchCategories();
 
+        // Преобразуем данные в нужный формат
         if (section) {
           // Для страницы конкретной секции
-          const sectionResources = data.items
+          const sectionResources = suggestions
             .filter((item: any) => item.section.replace('/', '') === section)
             .map((item: any) => ({
               id: item.id,
@@ -63,14 +62,12 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
             }));
           setResources(sectionResources);
         } else {
-          // Для главной страницы
-          const grouped = data.items.reduce((acc: ResourcesBySection, item: any) => {
+          // Для главной страницы: группируем по секциям
+          const grouped = suggestions.reduce((acc: ResourcesBySection, item: any) => {
             const sectionKey = item.section.replace('/', '');
-            
             if (!acc[sectionKey]) {
               acc[sectionKey] = [];
             }
-
             acc[sectionKey].push({
               id: item.id,
               url: item.url,
@@ -86,13 +83,10 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
                 domain: item.preview_domain || ''
               }
             });
-
             return acc;
           }, {});
-
           setResources(grouped);
         }
-        
         setError('');
       } catch (error) {
         console.error('Error fetching resources:', error);
@@ -101,8 +95,7 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
         setLoading(false);
       }
     };
-
-    fetchResources();
+    fetchData();
   }, [section]);
 
   const filteredResources = useMemo(() => {

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { SuggestForm } from '../../components/SuggestForm/SuggestForm';
+import SuggestForm from '../../components/SuggestForm/SuggestForm';
 
 const PageContainer = styled.div`
   padding: 2rem;
