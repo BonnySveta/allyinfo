@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Resource } from '../../types/resource';
-import { fetchSuggestions, updateSuggestion, deleteSuggestion } from '../../services/supabase';
+import { fetchSuggestions, updateSuggestion, deleteSuggestion, fetchCategories } from '../../services/supabase';
 import { FilterChipsPanel } from '../FilterChips';
 
 // interface AdminResource extends Resource {
@@ -95,15 +95,56 @@ export default function MaterialsAdmin() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [editId, setEditId] = useState<string | number | null>(null);
+  const [editFields, setEditFields] = useState<{
+    title: string;
+    url: string;
+    description: string;
+    section: string;
+    preview_description: string;
+    preview_image: string;
+    preview_favicon: string;
+    preview_domain: string;
+    status: string;
+  }>({
+    title: '',
+    url: '',
+    description: '',
+    section: '',
+    preview_description: '',
+    preview_image: '',
+    preview_favicon: '',
+    preview_domain: '',
+    status: 'pending',
+  });
+  const [categories, setCategories] = useState<any[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   useEffect(() => {
     loadMaterials();
-  }, []);
+    async function loadCategories() {
+      setCategoriesLoading(true);
+      try {
+        const cats = await fetchCategories();
+        setCategories(cats);
+      } catch (e) {
+        setCategories([]);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    }
+    loadCategories();
+  }, [statusFilter]);
 
   const loadMaterials = async () => {
     setLoading(true);
     try {
-      const all = await fetchSuggestions();
+      let all;
+      if (statusFilter === 'all') {
+        all = await fetchSuggestions();
+      } else {
+        all = await fetchSuggestions(statusFilter);
+      }
       setMaterials(all as AdminResource[]);
       setError('');
     } catch (e) {
@@ -130,6 +171,63 @@ export default function MaterialsAdmin() {
     } catch (e) {
       alert('Ошибка при удалении');
     }
+  };
+
+  const handleEdit = (m: AdminResource) => {
+    setEditId(m.id);
+    setEditFields({
+      title: m.preview?.title || '',
+      url: m.url,
+      description: m.description || '',
+      section: m.section || '',
+      preview_description: m.preview?.description || '',
+      preview_image: m.preview?.image || '',
+      preview_favicon: m.preview?.favicon || '',
+      preview_domain: m.preview?.domain || '',
+      status: m.status || 'pending',
+    });
+  };
+
+  const handleEditFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setEditFields(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleEditSave = async (id: string | number) => {
+    try {
+      await updateSuggestion(String(id), {
+        url: editFields.url,
+        section: editFields.section,
+        description: editFields.description,
+        preview_title: editFields.title,
+        preview_description: editFields.preview_description,
+        preview_image: editFields.preview_image,
+        preview_favicon: editFields.preview_favicon,
+        preview_domain: editFields.preview_domain,
+        status: editFields.status,
+      });
+      setMaterials(prev => prev.map(m => String(m.id) === String(id) ? {
+        ...m,
+        url: editFields.url,
+        section: editFields.section,
+        description: editFields.description,
+        status: editFields.status,
+        preview: {
+          ...m.preview,
+          title: editFields.title,
+          description: editFields.preview_description,
+          image: editFields.preview_image,
+          favicon: editFields.preview_favicon,
+          domain: editFields.preview_domain,
+        }
+      } : m));
+      setEditId(null);
+    } catch (e) {
+      alert('Ошибка при сохранении изменений');
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditId(null);
   };
 
   const filtered = materials.filter(m =>
@@ -167,6 +265,7 @@ export default function MaterialsAdmin() {
             <tr>
               <Th>Название</Th>
               <Th>Ссылка</Th>
+              <Th>Раздел</Th>
               <Th>Статус</Th>
               <Th>Действия</Th>
             </tr>
@@ -174,22 +273,126 @@ export default function MaterialsAdmin() {
           <tbody>
             {filtered.map(m => (
               <tr key={m.id}>
-                <Td>{m.preview?.title || 'Без названия'}</Td>
-                <Td><a href={m.url} target="_blank" rel="noopener noreferrer">{m.url}</a></Td>
-                <Td><StatusBadge $status={m.status || 'pending'}>{m.status === 'approved' ? 'Опубликован' : m.status === 'pending' ? 'На модерации' : 'Отклонён'}</StatusBadge></Td>
-                <Td>
-                  {m.status !== 'approved' && (
-                    <ActionButton onClick={handleStatusChange(m.id, 'approved')}>Опубликовать</ActionButton>
-                  )}
-                  {m.status !== 'rejected' && (
-                    <ActionButton onClick={handleStatusChange(m.id, 'rejected')}>Отклонить</ActionButton>
-                  )}
-                  <ActionButton onClick={handleDelete(m.id)}>Удалить</ActionButton>
-                </Td>
+                {editId === m.id ? null : (
+                  <>
+                    <Td>{m.preview?.title || 'Без названия'}</Td>
+                    <Td><a href={m.url} target="_blank" rel="noopener noreferrer">{m.url}</a></Td>
+                    <Td>{m.section}</Td>
+                    <Td><StatusBadge $status={m.status || 'pending'}>{m.status === 'approved' ? 'Опубликован' : m.status === 'pending' ? 'На модерации' : 'Отклонён'}</StatusBadge></Td>
+                    <Td>
+                      <div style={{display:'flex', flexDirection:'column', gap:8}}>
+                        <ActionButton onClick={() => handleEdit(m)}>Редактировать</ActionButton>
+                        {m.status !== 'approved' && (
+                          <ActionButton onClick={handleStatusChange(m.id, 'approved')}>Опубликовать</ActionButton>
+                        )}
+                        {m.status !== 'rejected' && (
+                          <ActionButton onClick={handleStatusChange(m.id, 'rejected')}>Отклонить</ActionButton>
+                        )}
+                        <ActionButton onClick={handleDelete(m.id)}>Удалить</ActionButton>
+                      </div>
+                    </Td>
+                  </>
+                )}
               </tr>
             ))}
           </tbody>
         </Table>
+      )}
+      {editId && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,0,0.4)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+          onClick={handleEditCancel}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 12,
+              padding: 32,
+              minWidth: 400,
+              maxWidth: '90vw',
+              boxShadow: '0 4px 32px rgba(0,0,0,0.15)',
+              position: 'relative',
+            }}
+            onClick={e => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Редактирование материала"
+          >
+            <h2 style={{marginTop:0}}>Редактировать материал</h2>
+            <div style={{display:'flex', flexDirection:'column', gap:16}}>
+              <label>
+                Название
+                <input name="title" value={editFields.title} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
+              </label>
+              <label>
+                Ссылка
+                <input name="url" value={editFields.url} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
+              </label>
+              <label>
+                Раздел
+                <select
+                  name="section"
+                  value={editFields.section}
+                  onChange={handleEditFieldChange}
+                  style={{width:'100%',marginTop:4}}
+                  required
+                  disabled={categoriesLoading}
+                >
+                  <option value="">Выберите раздел</option>
+                  {categories.map((cat:any) => (
+                    <option key={cat.id} value={cat.id}>{cat.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Описание
+                <textarea name="description" value={editFields.description} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} rows={3} />
+              </label>
+              <label>
+                Preview Title
+                <input name="preview_title" value={editFields.title} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
+              </label>
+              <label>
+                Preview Desc
+                <textarea name="preview_description" value={editFields.preview_description} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} rows={2} />
+              </label>
+              <label>
+                Preview Image
+                <input name="preview_image" value={editFields.preview_image} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
+              </label>
+              <label>
+                Favicon
+                <input name="preview_favicon" value={editFields.preview_favicon} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
+              </label>
+              <label>
+                Domain
+                <input name="preview_domain" value={editFields.preview_domain} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
+              </label>
+              <label>
+                Статус
+                <select name="status" value={editFields.status} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}}>
+                  <option value="pending">На модерации</option>
+                  <option value="approved">Опубликован</option>
+                  <option value="rejected">Отклонён</option>
+                </select>
+              </label>
+              <div style={{display:'flex',gap:12,marginTop:16,justifyContent:'flex-end'}}>
+                <ActionButton onClick={() => handleEditSave(editId)}>Сохранить</ActionButton>
+                <ActionButton className="secondary" onClick={handleEditCancel}>Отмена</ActionButton>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </Container>
   );

@@ -20,7 +20,7 @@ import {
   RequiredFieldsHint,
   LoadingSpinner
 } from '../Form/FormComponents';
-import { addSuggestion } from '../../services/supabase';
+import { addSuggestion, fetchCategories } from '../../services/supabase';
 
 interface FormData {
   section: string;
@@ -49,8 +49,25 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
     message: string;
     type: 'success' | 'error';
   }>({ show: false, message: '', type: 'success' });
+  const [categories, setCategories] = useState<any[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   const sections = navigationConfig;
+
+  useEffect(() => {
+    async function loadCategories() {
+      setCategoriesLoading(true);
+      try {
+        const cats = await fetchCategories();
+        setCategories(cats);
+      } catch (e) {
+        setCategories([]);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    }
+    loadCategories();
+  }, []);
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -144,6 +161,9 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
 
   // ... все useEffect и функции-обработчики остаются здесь ...
 
+  // Дебаг: выводим категории перед рендером селекта
+  console.log('CATEGORIES FOR SELECT:', categories, 'LOADING:', categoriesLoading);
+
   return (
     <FormContainer>      
       <StyledForm onSubmit={handleSubmit} noValidate>
@@ -154,20 +174,21 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
               <RequiredMark>*</RequiredMark>
             </LabelText>
           </Label>
-          <Select
+          <select
             id="section"
             value={section}
             onChange={(e) => setSection(e.target.value)}
             required
             aria-invalid={error && !section ? "true" : "false"}
+            style={{ width: '100%', minHeight: 40, fontSize: 16 }}
           >
             <option value="">Выберите раздел</option>
-            {sections.map((item) => (
-              <option key={item.path} value={item.path}>
-                {item.title}
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.label}
               </option>
             ))}
-          </Select>
+          </select>
         </FormGroup>
 
         <FormGroup>
