@@ -6,22 +6,26 @@ interface FilterChipsPanelProps {
   selectedCategories: CategoryId[];
   onChange: (categories: CategoryId[]) => void;
   showCount?: boolean;
+  categories?: any[];
 }
 
 export function FilterChipsPanel({
   selectedCategories,
   onChange,
-  showCount = true
+  showCount = true,
+  categories
 }: FilterChipsPanelProps) {
   const handleClearAll = () => {
     onChange([]);
   };
 
+  const cats = categories || CATEGORIES;
+
   return (
     <Panel>
       <VisuallyHidden>Категории</VisuallyHidden>
       <FilterChips
-        categories={CATEGORIES}
+        categories={cats}
         selectedCategories={selectedCategories}
         onChange={onChange}
       />

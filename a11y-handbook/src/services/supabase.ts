@@ -20,12 +20,12 @@ export function getImageUrl(path: string) {
   return data.publicUrl;
 }
 
-// --- Работа с таблицей suggestions (материалы) ---
+// --- Работа с таблицей resources (материалы) ---
 
 // Получить все материалы (например, только approved)
 export async function fetchSuggestions(status: string = 'approved') {
   const { data, error } = await supabase
-    .from('suggestions')
+    .from('resources')
     .select('*')
     .eq('status', status)
     .order('created_at', { ascending: false });
@@ -36,7 +36,7 @@ export async function fetchSuggestions(status: string = 'approved') {
 // Добавить новый материал
 export async function addSuggestion(suggestion: Omit<any, 'id' | 'created_at'>) {
   const { data, error } = await supabase
-    .from('suggestions')
+    .from('resources')
     .insert([suggestion])
     .select();
   if (error) throw error;
@@ -46,7 +46,7 @@ export async function addSuggestion(suggestion: Omit<any, 'id' | 'created_at'>) 
 // Обновить материал по id
 export async function updateSuggestion(id: string, updates: Partial<any>) {
   const { data, error } = await supabase
-    .from('suggestions')
+    .from('resources')
     .update(updates)
     .eq('id', id)
     .select();
@@ -57,7 +57,7 @@ export async function updateSuggestion(id: string, updates: Partial<any>) {
 // Удалить материал по id
 export async function deleteSuggestion(id: string) {
   const { error } = await supabase
-    .from('suggestions')
+    .from('resources')
     .delete()
     .eq('id', id);
   if (error) throw error;
@@ -103,12 +103,13 @@ export async function deleteCategory(id: string) {
 }
 
 // --- Работа с таблицей resource_categories ---
-export async function fetchResourceCategories(resource_id?: string) {
-  let query = supabase.from('resource_categories').select('*');
-  if (resource_id) query = query.eq('resource_id', resource_id);
-  const { data, error } = await query;
+export async function fetchResourceCategories(resource_id: string) {
+  const { data, error } = await supabase
+    .from('resource_categories')
+    .select('category_id')
+    .eq('resource_id', resource_id);
   if (error) throw error;
-  return data;
+  return data?.map((row: any) => row.category_id) || [];
 }
 
 export async function addResourceCategory(resource_id: string, category_id: string) {

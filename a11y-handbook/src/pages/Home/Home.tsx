@@ -85,6 +85,7 @@ interface HomeProps {
   selectedCategories: CategoryId[];
   setSelectedCategories: (categories: CategoryId[]) => void;
   filteredResources: ResourcesBySection;
+  categories: any[];
 }
 
 export const Home: FC<HomeProps> = ({
@@ -92,7 +93,8 @@ export const Home: FC<HomeProps> = ({
   error,
   selectedCategories,
   setSelectedCategories,
-  filteredResources
+  filteredResources,
+  categories
 }) => {
   const { announceUpdate } = useFocusOverlay();
   const [sections, setSections] = useState<any[]>([]);
@@ -145,6 +147,7 @@ export const Home: FC<HomeProps> = ({
         <StartBanner />
       </TitleSection>
       <FilterChipsPanel
+        categories={categories}
         selectedCategories={selectedCategories}
         onChange={setSelectedCategories}
       />

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Resource } from '../../types/resource';
-import { fetchSuggestions, updateSuggestion, deleteSuggestion, fetchCategories, fetchSections } from '../../services/supabase';
+import { fetchSuggestions as fetchResources, updateSuggestion, deleteSuggestion, fetchCategories, fetchSections, fetchResourceCategories } from '../../services/supabase';
 import { FilterChipsPanel } from '../FilterChips';
+import { supabase } from '../../services/supabase';
 
 // interface AdminResource extends Resource {
 //   status: string;
@@ -106,7 +107,7 @@ export default function MaterialsAdmin() {
     url: string;
     description: string;
     section_id: string;
-    category_id: string;
+    categories: string[];
     image: string;
     favicon: string;
     domain: string;
@@ -116,7 +117,7 @@ export default function MaterialsAdmin() {
     url: '',
     description: '',
     section_id: '',
-    category_id: '',
+    categories: [],
     image: '',
     favicon: '',
     domain: '',
@@ -160,9 +161,9 @@ export default function MaterialsAdmin() {
     try {
       let all;
       if (statusFilter === 'all') {
-        all = await fetchSuggestions();
+        all = await fetchResources();
       } else {
-        all = await fetchSuggestions(statusFilter);
+        all = await fetchResources(statusFilter);
       }
       setMaterials(all as AdminResource[]);
       setError('');
@@ -192,14 +193,18 @@ export default function MaterialsAdmin() {
     }
   };
 
-  const handleEdit = (m: AdminResource) => {
+  const handleEdit = async (m: AdminResource) => {
     setEditId(m.id);
+    let cats: string[] = [];
+    try {
+      cats = await fetchResourceCategories(m.id as string);
+    } catch {}
     setEditFields({
       title: m.title || '',
       url: m.url,
       description: m.description || '',
       section_id: m.section_id || '',
-      category_id: m.category_id || '',
+      categories: cats,
       image: m.image || '',
       favicon: m.favicon || '',
       domain: m.domain || '',
@@ -215,7 +220,6 @@ export default function MaterialsAdmin() {
     try {
       await updateSuggestion(String(id), {
         url: editFields.url,
-        category_id: editFields.category_id,
         section_id: editFields.section_id,
         description: editFields.description,
         title: editFields.title,
@@ -224,10 +228,17 @@ export default function MaterialsAdmin() {
         domain: editFields.domain,
         status: editFields.status,
       });
+      // Обновляем связи категорий
+      // 1. Удаляем старые
+      await supabase.from('resource_categories').delete().eq('resource_id', id);
+      // 2. Добавляем новые
+      if (editFields.categories.length > 0) {
+        const inserts = editFields.categories.map(category_id => ({ resource_id: id, category_id }));
+        await supabase.from('resource_categories').insert(inserts);
+      }
       setMaterials(prev => prev.map(m => String(m.id) === String(id) ? {
         ...m,
         url: editFields.url,
-        category_id: editFields.category_id,
         section_id: editFields.section_id,
         description: editFields.description,
         title: editFields.title,
@@ -235,6 +246,7 @@ export default function MaterialsAdmin() {
         favicon: editFields.favicon,
         domain: editFields.domain,
         status: editFields.status,
+        categories: editFields.categories,
       } : m));
       setEditId(null);
     } catch (e) {
@@ -385,6 +397,15 @@ export default function MaterialsAdmin() {
               <label>
                 Domain
                 <input name="domain" value={editFields.domain || ''} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
+              </label>
+              <label>
+                Категории
+                <FilterChipsPanel
+                  categories={categories}
+                  selectedCategories={editFields.categories as any}
+                  onChange={(newCategories) => setEditFields(prev => ({ ...prev, categories: newCategories }))}
+                  showCount={false}
+                />
               </label>
               <label>
                 Статус

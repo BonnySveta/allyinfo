@@ -54,7 +54,8 @@ function App() {
     error,
     selectedCategories,
     setSelectedCategories,
-    filteredResources
+    filteredResources,
+    categories
   } = result as UseResourcesHomeResult;
 
   return (
@@ -76,6 +77,7 @@ function App() {
                         selectedCategories={selectedCategories}
                         setSelectedCategories={setSelectedCategories}
                         filteredResources={filteredResources}
+                        categories={categories}
                       />
                     } 
                   />

@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Resource, ResourcesBySection } from '../types/resource';
 import { CategoryId } from '../types/category';
 import { ResourceSection } from '../pages/ResourcePage/config';
-import { fetchSuggestions, fetchCategories, fetchSections } from '../services/supabase';
+import { fetchSuggestions as fetchResources, fetchCategories, fetchSections, fetchResourceCategories } from '../services/supabase';
 
 interface UseResourcesBaseResult {
   loading: boolean;
@@ -13,6 +13,7 @@ export interface UseResourcesHomeResult extends UseResourcesBaseResult {
   selectedCategories: CategoryId[];
   setSelectedCategories: (categories: CategoryId[]) => void;
   filteredResources: ResourcesBySection;
+  categories: any[];
 }
 
 export interface UseResourcesSectionResult extends UseResourcesBaseResult {
@@ -30,15 +31,17 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<CategoryId[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         // Получаем все материалы со статусом approved
-        const suggestions = await fetchSuggestions('approved');
+        const resourcesRaw = await fetchResources('approved');
         // Получаем все категории (для сопоставления)
-        const categories = await fetchCategories();
+        const cats = await fetchCategories();
+        setCategories(cats);
         // Получаем все секции (для сопоставления)
         const sections = await fetchSections();
 
@@ -46,41 +49,43 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
         if (section) {
           // Для страницы конкретной секции
           const sectionObj = sections.find((s: any) => s.id === section);
-          const sectionResources = suggestions
-            .filter((item: any) => item.section_id === section)
-            .map((item: any) => ({
-              id: item.id,
-              url: item.url,
-              section_id: item.section_id,
-              section: sectionObj?.label || '',
-              description: item.description || '',
-              createdAt: item.created_at,
-              categories: item.categories || [],
-              preview: {
-                title: item.title || '',
-                description: item.preview_description || '',
-                image: item.preview_image || '',
-                favicon: item.preview_favicon || '',
-                domain: item.preview_domain || ''
-              }
-            }));
+          const sectionResources = await Promise.all(
+            resourcesRaw
+              .filter((item: any) => item.section_id === section)
+              .map(async (item: any) => ({
+                id: item.id,
+                url: item.url,
+                section_id: item.section_id,
+                section: sectionObj?.label || '',
+                description: item.description || '',
+                createdAt: item.created_at,
+                categories: await fetchResourceCategories(item.id),
+                preview: {
+                  title: item.title || '',
+                  description: item.preview_description || '',
+                  image: item.preview_image || '',
+                  favicon: item.preview_favicon || '',
+                  domain: item.preview_domain || ''
+                }
+              }))
+          );
           setResources(sectionResources);
         } else {
           // Для главной страницы: группируем по section_id
-          const grouped = suggestions.reduce((acc: ResourcesBySection, item: any) => {
+          const grouped = {} as ResourcesBySection;
+          for (const item of resourcesRaw) {
             const sectionKey = item.section_id;
             const sectionObj = sections.find((s: any) => s.id === sectionKey);
-            if (!acc[sectionKey]) {
-              acc[sectionKey] = [];
-            }
-            acc[sectionKey].push({
+            const categories = await fetchResourceCategories(item.id);
+            if (!grouped[sectionKey]) grouped[sectionKey] = [];
+            grouped[sectionKey].push({
               id: item.id,
               url: item.url,
               section_id: sectionKey,
               section: sectionObj?.label || '',
               description: item.description || '',
               createdAt: item.created_at,
-              categories: item.categories || [],
+              categories,
               preview: {
                 title: item.title || '',
                 description: item.preview_description || '',
@@ -89,8 +94,7 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
                 domain: item.preview_domain || ''
               }
             });
-            return acc;
-          }, {});
+          }
           setResources(grouped);
         }
         setError('');
@@ -110,7 +114,7 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
       return Object.fromEntries(
         Object.entries(grouped).map(([section, items]) => [
           section,
-          items.filter(item => 
+          items.filter(item =>
             item.categories?.some(cat => selectedCategories.includes(cat))
           )
         ])
@@ -128,6 +132,7 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
     error,
     selectedCategories,
     setSelectedCategories,
-    filteredResources: filteredResources as ResourcesBySection
+    filteredResources: filteredResources as ResourcesBySection,
+    categories
   }) as UseResourcesReturn<T>;
 } 
