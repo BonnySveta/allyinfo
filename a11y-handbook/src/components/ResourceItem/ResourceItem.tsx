@@ -113,11 +113,23 @@ export function ResourceItem({ resource }: ResourceItemProps) {
     >
       <ResourceContent>
         <ResourceTitle>
+          {resource.title}
+        </ResourceTitle>
+        {resource.description && (
+          <ResourceDescription>
+            {resource.description}
+          </ResourceDescription>
+        )}
+        {resource.descriptionFull && (
+          <ResourceDescription>
+            {resource.descriptionFull}
+          </ResourceDescription>
+        )}
+        <DomainInfo>
           {favicon && showFavicon ? (
             <ResourceIcon 
               src={favicon}
               alt=""
-              style={{ marginRight: 8, verticalAlign: 'middle' }}
               onError={() => setShowFavicon(false)}
             />
           ) : (
@@ -125,15 +137,7 @@ export function ResourceItem({ resource }: ResourceItemProps) {
               {getDomainInitial()}
             </FallbackIcon>
           )}
-          {resource.title}
-        </ResourceTitle>
-        {resource.descriptionFull && (
-          <ResourceDescription>
-            {resource.descriptionFull}
-          </ResourceDescription>
-        )}
-        <DomainInfo>
-          {resource.domain}
+          <span>{resource.domain}</span>
         </DomainInfo>
       </ResourceContent>
     </ResourceCard>

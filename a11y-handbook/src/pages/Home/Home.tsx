@@ -11,6 +11,7 @@ import { ResourcesBySection } from '../../types/resource';
 import { speechService } from '../../services/speech';
 import { useFocusOverlay } from '../../context/FocusOverlayContext';
 import { fetchSections } from '../../services/supabase';
+import { pageConfig } from '../ResourcePage/config';
 
 const TitleSection = styled.div`
   display: flex;
@@ -164,14 +165,18 @@ export const Home: FC<HomeProps> = ({
       ) : (
         <CardsContainer>
           <CardsGrid>
-            {sections.map(section => (
-              <Card
-                key={section.id}
-                title={section.label}
-                path={"/" + section.label.toLowerCase()}
-                resources={filteredResources[section.id] || []}
-              />
-            ))}
+            {sections.map(section => {
+              const config = pageConfig[section.slug as keyof typeof pageConfig];
+              const path = config ? config.path : `/${section.slug}`;
+              return (
+                <Card
+                  key={section.id}
+                  title={section.label}
+                  path={path}
+                  resources={filteredResources[section.id] || []}
+                />
+              );
+            })}
           </CardsGrid>
         </CardsContainer>
       )}

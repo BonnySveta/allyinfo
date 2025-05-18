@@ -33,69 +33,58 @@ const Description = styled.p`
 const ResourcesList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
   animation: fadeIn 0.3s ease-in-out;
 
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  @media (max-width: 768px) {
+    gap: 1rem;
+  }
+
+  & > * {
+    width: 100%;
+    max-width: 100%;
   }
 `;
 
 const LoadingText = styled.div`
-  text-align: center;
-  padding: 2rem;
   color: var(--text-secondary);
-`;
-
-const ErrorText = styled.div`
   text-align: center;
-  padding: 2rem;
-  color: var(--error-color);
+  font-size: 1.2rem;
+  margin: 2rem 0;
 `;
 
-const EmptyState = styled.div`
-  text-align: center;
-  padding: 2rem;
-  color: var(--text-secondary);
-  background: var(--background-secondary);
-  border-radius: 12px;
-`;
-
-export function ResourcePage({ section }: ResourcePageProps) {
-  const { resources = [], loading, error } = useResources(section);
-  const { title, description } = pageConfig[section];
+export const ResourcePage: React.FC<ResourcePageProps> = ({ section }) => {
+  const { resources, loading, error } = useResources(pageConfig[section].section_id);
 
   if (loading) {
-    return <LoadingText>Загрузка материалов...</LoadingText>;
+    return (
+      <PageContainer>
+        <Title>{pageConfig[section].title}</Title>
+        <Description>{pageConfig[section].description}</Description>
+        <LoadingText>Загрузка материалов...</LoadingText>
+      </PageContainer>
+    );
   }
 
   if (error) {
-    return <ErrorText>{error}</ErrorText>;
+    return (
+      <PageContainer>
+        <Title>{pageConfig[section].title}</Title>
+        <Description>{pageConfig[section].description}</Description>
+        <LoadingText>Произошла ошибка при загрузке материалов</LoadingText>
+      </PageContainer>
+    );
   }
 
   return (
     <PageContainer>
-      <Title>{title}</Title>
-      <Description>{description}</Description>
-      {resources.length > 0 ? (
-        <ResourcesList>
-          {resources.map((resource: Resource) => (
-            <ResourceItem 
-              key={resource.id}
-              resource={resource}
-            />
-          ))}
-        </ResourcesList>
-      ) : (
-        <EmptyState>Пока нет материалов</EmptyState>
-      )}
+      <Title>{pageConfig[section].title}</Title>
+      <Description>{pageConfig[section].description}</Description>
+      <ResourcesList>
+        {resources.map((resource: Resource) => (
+          <ResourceItem key={resource.id} resource={resource} />
+        ))}
+      </ResourcesList>
     </PageContainer>
   );
-} 
+};

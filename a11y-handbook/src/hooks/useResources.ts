@@ -37,21 +37,35 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
     const fetchData = async () => {
       try {
         setLoading(true);
+        console.log('Fetching resources for section:', section);
+        
         // Получаем все материалы со статусом approved
         const resourcesRaw = await fetchResources('approved');
+        console.log('Raw resources:', resourcesRaw);
+        
         // Получаем все категории (для сопоставления)
         const cats = await fetchCategories();
         setCategories(cats);
+        
         // Получаем все секции (для сопоставления)
         const sections = await fetchSections();
+        console.log('Available sections:', sections);
 
         // Преобразуем данные в нужный формат
         if (section) {
           // Для страницы конкретной секции
-          const sectionObj = sections.find((s: any) => s.id === section);
+          const sectionObj = sections.find((s: any) => s.slug === section);
+          console.log('Found section object:', sectionObj);
+          if (!sectionObj) {
+            setResources([]);
+            setError('Секция не найдена');
+            setLoading(false);
+            return;
+          }
+          const sectionId = sectionObj.id;
           const sectionResources = await Promise.all(
             resourcesRaw
-              .filter((item: any) => item.section_id === section)
+              .filter((item: any) => item.section_id === sectionId)
               .map(async (item: any) => ({
                 id: item.id,
                 url: item.url,
@@ -64,9 +78,10 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
                 descriptionFull: item.preview_description || '',
                 image: item.preview_image || '',
                 favicon: item.favicon || item.preview_favicon || '',
-                domain: item.preview_domain || ''
+                domain: item.domain || item.preview_domain || ''
               }))
           );
+          console.log('Filtered resources for section:', sectionResources);
           setResources(sectionResources);
         } else {
           // Для главной страницы: группируем по section_id
@@ -88,7 +103,7 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
               descriptionFull: item.preview_description || '',
               image: item.preview_image || '',
               favicon: item.favicon || item.preview_favicon || '',
-              domain: item.preview_domain || ''
+              domain: item.domain || item.preview_domain || ''
             });
           }
           setResources(grouped);
