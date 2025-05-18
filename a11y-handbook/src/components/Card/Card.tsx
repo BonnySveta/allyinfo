@@ -220,4 +220,28 @@ function ResourceIconWithFallback({ resource }: { resource: Resource }) {
       onError={() => setShowFavicon(false)}
     />
   );
-} 
+}
+
+// Скелетон для карточки
+export const SkeletonCard = () => (
+  <CardContainer style={{ opacity: 0.7 }}>
+    <CardHeader>
+      <div style={{ width: '40%', height: 24, background: '#e9eef6', borderRadius: 6, marginBottom: 8 }} />
+    </CardHeader>
+    <CardContent>
+      <ResourcesList>
+        {[1, 2, 3].map(i => (
+          <ResourceListItem key={i}>
+            <ResourceLink style={{ pointerEvents: 'none' }}>
+              <div style={{ width: 20, height: 20, background: '#e9eef6', borderRadius: 4, marginRight: 12 }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ width: '70%', height: 14, background: '#e9eef6', borderRadius: 4, marginBottom: 6 }} />
+                <div style={{ width: '40%', height: 10, background: '#e9eef6', borderRadius: 4 }} />
+              </div>
+            </ResourceLink>
+          </ResourceListItem>
+        ))}
+      </ResourcesList>
+    </CardContent>
+  </CardContainer>
+); 

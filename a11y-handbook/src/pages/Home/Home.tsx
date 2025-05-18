@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import { StartBanner } from '../../components/StartBanner/StartBanner';
 import { FilterChipsPanel } from '../../components/FilterChips';
-import { Card } from '../../components/Card/Card';
+import { Card, SkeletonCard } from '../../components/Card/Card';
 import { CardsGrid } from '../../components/CardsGrid/CardsGrid';
 import { navigationConfig } from '../../config/navigation';
 import { CategoryId } from '../../types/category';
@@ -152,7 +152,13 @@ export const Home: FC<HomeProps> = ({
         onChange={setSelectedCategories}
       />
       {loading || sectionsLoading ? (
-        <LoadingSpinner />
+        <CardsContainer>
+          <CardsGrid>
+            {[...Array(6)].map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </CardsGrid>
+        </CardsContainer>
       ) : error ? (
         <ErrorMessage>{error}</ErrorMessage>
       ) : (
