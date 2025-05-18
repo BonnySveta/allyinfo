@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { Resource } from '../../types/resource';
 import { NewBadge } from '../NewBadge/NewBadge';
+import { useState, useEffect } from 'react';
 
 interface CardProps {
   title: string;
@@ -70,7 +71,7 @@ const ResourceLink = styled.a`
   display: flex;
   align-items: flex-start;
   padding: 0.75rem;
-  background: var(--nav-background);
+  background: var(--resource-link-background, #e9eef6);
   border-radius: 8px;
   transition: all 0.2s ease;
   text-decoration: none;
@@ -98,6 +99,20 @@ const ResourceIcon = styled.img`
   object-fit: cover;
   margin-right: 12px;
   background: var(--background-color);
+`;
+
+const FallbackIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: var(--background-color);
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-right: 12px;
+  flex-shrink: 0;
 `;
 
 const EmptyState = styled.div`
@@ -158,17 +173,9 @@ export function Card({ title, path, resources = [] }: CardProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {resource.preview && (
-                    <ResourceIcon 
-                      src={resource.preview.favicon}
-                      alt=""
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  )}
+                  <ResourceIconWithFallback resource={resource} />
                   <ResourceContent>
-                    {resource.preview?.title}
+                    {resource.title}
                   </ResourceContent>
                 </ResourceLink>
               </ResourceListItem>
@@ -179,5 +186,38 @@ export function Card({ title, path, resources = [] }: CardProps) {
         )}
       </CardContent>
     </CardContainer>
+  );
+}
+
+function ResourceIconWithFallback({ resource }: { resource: Resource }) {
+  const [showFavicon, setShowFavicon] = useState(true);
+  const favicon = resource.favicon;
+
+  // Дебаг-вывод
+  console.log('ResourceIconWithFallback:', {
+    favicon,
+    showFavicon,
+    domain: resource.domain,
+    title: resource.title,
+    resource,
+  });
+
+  const getDomainInitial = () => {
+    const domain = resource.domain || '';
+    return domain.charAt(0).toUpperCase();
+  };
+
+  if (!favicon || !showFavicon) {
+    console.log('Render fallback:', getDomainInitial());
+    return <FallbackIcon>{getDomainInitial()}</FallbackIcon>;
+  }
+
+  console.log('Render favicon:', favicon);
+  return (
+    <ResourceIcon 
+      src={favicon}
+      alt=""
+      onError={() => setShowFavicon(false)}
+    />
   );
 } 

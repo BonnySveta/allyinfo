@@ -210,13 +210,13 @@ export function SuggestionsList() {
             <ButtonGroup>
               <Button
                 $variant="success"
-                onClick={() => handleUpdateStatus(suggestion.id, 'approved')}
+                onClick={() => handleUpdateStatus(Number(suggestion.id), 'approved')}
               >
                 Одобрить
               </Button>
               <Button
                 $variant="danger"
-                onClick={() => handleUpdateStatus(suggestion.id, 'rejected')}
+                onClick={() => handleUpdateStatus(Number(suggestion.id), 'rejected')}
               >
                 Отклонить
               </Button>

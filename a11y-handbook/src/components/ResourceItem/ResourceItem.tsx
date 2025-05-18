@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { Resource } from '../../types/resource';
+import React, { useState, useEffect } from 'react';
 
 interface ResourceItemProps {
   resource: Resource;
@@ -33,6 +34,21 @@ const ResourceIcon = styled.img`
   border-radius: 4px;
   object-fit: cover;
   flex-shrink: 0;
+  background: var(--background-color);
+`;
+
+const FallbackIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: var(--background-color);
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin-right: 8px;
+  vertical-align: middle;
 `;
 
 const DomainInfo = styled.div`
@@ -80,6 +96,15 @@ const ResourceDescription = styled.p`
 `;
 
 export function ResourceItem({ resource }: ResourceItemProps) {
+  const [showFavicon, setShowFavicon] = useState(true);
+  const favicon = resource.favicon;
+
+  // Получаем первую букву домена для fallback
+  const getDomainInitial = () => {
+    const domain = resource.domain || '';
+    return domain.charAt(0).toUpperCase();
+  };
+
   return (
     <ResourceCard 
       href={resource.url}
@@ -87,23 +112,28 @@ export function ResourceItem({ resource }: ResourceItemProps) {
       rel="noopener noreferrer"
     >
       <ResourceContent>
-        <ResourceTitle>{resource.preview?.title}</ResourceTitle>
-        {resource.preview?.description && (
+        <ResourceTitle>
+          {favicon && showFavicon ? (
+            <ResourceIcon 
+              src={favicon}
+              alt=""
+              style={{ marginRight: 8, verticalAlign: 'middle' }}
+              onError={() => setShowFavicon(false)}
+            />
+          ) : (
+            <FallbackIcon>
+              {getDomainInitial()}
+            </FallbackIcon>
+          )}
+          {resource.title}
+        </ResourceTitle>
+        {resource.descriptionFull && (
           <ResourceDescription>
-            {resource.preview.description}
+            {resource.descriptionFull}
           </ResourceDescription>
         )}
         <DomainInfo>
-          {resource.preview?.favicon && (
-            <ResourceIcon 
-              src={resource.preview.favicon}
-              alt=""
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-          )}
-          {resource.preview?.domain}
+          {resource.domain}
         </DomainInfo>
       </ResourceContent>
     </ResourceCard>

@@ -1,21 +1,19 @@
 import { CategoryId } from './category';
 
 export interface Resource {
-  id: number;
+  id: number | string;
   url: string;
   section: string;
   section_id?: string;
   sectionLabel?: string;
   description: string | null;
   categories: CategoryId[];
-  preview: {
-    title: string;
-    description: string;
-    image: string;
-    favicon: string;
-    domain: string;
-  };
   createdAt: string;
+  title: string;
+  descriptionFull: string;
+  image: string;
+  favicon: string;
+  domain: string;
 }
 
 export interface ResourcesBySection {

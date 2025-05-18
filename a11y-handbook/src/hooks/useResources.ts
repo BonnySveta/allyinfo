@@ -60,13 +60,11 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
                 description: item.description || '',
                 createdAt: item.created_at,
                 categories: await fetchResourceCategories(item.id),
-                preview: {
-                  title: item.title || '',
-                  description: item.preview_description || '',
-                  image: item.preview_image || '',
-                  favicon: item.preview_favicon || '',
-                  domain: item.preview_domain || ''
-                }
+                title: item.title || '',
+                descriptionFull: item.preview_description || '',
+                image: item.preview_image || '',
+                favicon: item.favicon || item.preview_favicon || '',
+                domain: item.preview_domain || ''
               }))
           );
           setResources(sectionResources);
@@ -86,13 +84,11 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
               description: item.description || '',
               createdAt: item.created_at,
               categories,
-              preview: {
-                title: item.title || '',
-                description: item.preview_description || '',
-                image: item.preview_image || '',
-                favicon: item.preview_favicon || '',
-                domain: item.preview_domain || ''
-              }
+              title: item.title || '',
+              descriptionFull: item.preview_description || '',
+              image: item.preview_image || '',
+              favicon: item.favicon || item.preview_favicon || '',
+              domain: item.preview_domain || ''
             });
           }
           setResources(grouped);

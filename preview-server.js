@@ -1,11 +1,18 @@
+require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const cors = require('cors');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+// Инициализация Supabase клиента
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 function absolutizeUrl(base, url) {
   if (!url) return '';
@@ -13,6 +20,48 @@ function absolutizeUrl(base, url) {
     return new URL(url, base).href;
   } catch {
     return url;
+  }
+}
+
+async function downloadAndUploadFavicon(faviconUrl, domain) {
+  try {
+    // Скачиваем фавикон
+    const response = await axios.get(faviconUrl, {
+      responseType: 'arraybuffer',
+      timeout: 5000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0'
+      }
+    });
+
+    // Определяем тип файла
+    const contentType = response.headers['content-type'];
+    const extension = contentType.includes('png') ? 'png' : 
+                     contentType.includes('jpg') || contentType.includes('jpeg') ? 'jpg' : 
+                     'ico';
+
+    // Генерируем уникальное имя файла
+    const fileName = `${domain}-${Date.now()}.${extension}`;
+
+    // Загружаем в Supabase Storage (в бакет favicons!)
+    const { data, error } = await supabase.storage
+      .from('favicons')
+      .upload(fileName, response.data, {
+        contentType: contentType,
+        upsert: true
+      });
+
+    if (error) throw error;
+
+    // Получаем публичный URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('favicons')
+      .getPublicUrl(fileName);
+
+    return publicUrl;
+  } catch (error) {
+    console.error('Error downloading/uploading favicon:', error);
+    return null;
   }
 }
 
@@ -56,11 +105,14 @@ app.post('/api/preview', async (req, res) => {
     // Domain
     const domain = new URL(url).hostname;
 
+    // Скачиваем и сохраняем фавикон
+    const faviconUrl = await downloadAndUploadFavicon(favicon, domain);
+
     res.json({
       title: title.trim(),
       description: description.trim(),
       image: absolutizeUrl(url, image),
-      favicon,
+      favicon: faviconUrl || favicon, // Используем сохраненный URL или оригинальный как fallback
       domain,
     });
   } catch (e) {

@@ -219,7 +219,7 @@ export default function MaterialsAdmin() {
 
   const handleEditSave = async (id: string | number) => {
     try {
-      await updateSuggestion(String(id), {
+      const payload = {
         url: editFields.url,
         section_id: editFields.section_id,
         description: editFields.description,
@@ -228,7 +228,9 @@ export default function MaterialsAdmin() {
         favicon: editFields.favicon,
         domain: editFields.domain,
         status: editFields.status,
-      });
+      };
+      console.log('PATCH payload:', payload);
+      await updateSuggestion(String(id), payload);
       // Обновляем связи категорий
       // 1. Удаляем старые
       await supabase.from('resource_categories').delete().eq('resource_id', id);

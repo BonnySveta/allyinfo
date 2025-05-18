@@ -263,7 +263,7 @@ export function ApprovedList() {
   }, [search, section, sortBy, order, page]);
 
   const handleEdit = (item: Resource) => {
-    setEditingId(item.id);
+    setEditingId(Number(item.id));
     setEditForm(item);
   };
 
@@ -409,10 +409,10 @@ export function ApprovedList() {
                   <Td>{item.section}</Td>
                   <Td>
                     <Link href={item.url} target="_blank" rel="noopener noreferrer">
-                      {item.preview.title}
+                      {item.title}
                     </Link>
                   </Td>
-                  <Td>{item.preview.domain}</Td>
+                  <Td>{item.domain}</Td>
                   <Td>
                     {item.categories?.map(catId => 
                       CATEGORIES.find(c => c.id === catId)?.label
@@ -422,7 +422,7 @@ export function ApprovedList() {
                   <Td>{new Date(item.createdAt).toLocaleDateString('ru-RU')}</Td>
                   <Td>
                     <ActionButton onClick={() => handleEdit(item)}>Редактировать</ActionButton>
-                    <ActionButton onClick={() => handleDelete(item.id)}>Удалить</ActionButton>
+                    <ActionButton onClick={() => handleDelete(Number(item.id))}>Удалить</ActionButton>
                   </Td>
                 </tr>
               ))}
