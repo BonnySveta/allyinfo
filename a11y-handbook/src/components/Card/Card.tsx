@@ -71,7 +71,7 @@ const ResourceLink = styled.a`
   display: flex;
   align-items: flex-start;
   padding: 0.75rem;
-  background: var(--resource-link-background, #e9eef6);
+  background: var(--resource-link-background,rgb(255, 255, 255));
   border-radius: 8px;
   transition: all 0.2s ease;
   text-decoration: none;
