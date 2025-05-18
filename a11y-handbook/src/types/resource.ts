@@ -4,6 +4,8 @@ export interface Resource {
   id: number;
   url: string;
   section: string;
+  section_id?: string;
+  sectionLabel?: string;
   description: string | null;
   categories: CategoryId[];
   preview: {

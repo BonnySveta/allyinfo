@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Resource, ResourcesBySection } from '../types/resource';
 import { CategoryId } from '../types/category';
 import { ResourceSection } from '../pages/ResourcePage/config';
-import { fetchSuggestions, fetchCategories } from '../services/supabase';
+import { fetchSuggestions, fetchCategories, fetchSections } from '../services/supabase';
 
 interface UseResourcesBaseResult {
   loading: boolean;
@@ -39,21 +39,25 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
         const suggestions = await fetchSuggestions('approved');
         // Получаем все категории (для сопоставления)
         const categories = await fetchCategories();
+        // Получаем все секции (для сопоставления)
+        const sections = await fetchSections();
 
         // Преобразуем данные в нужный формат
         if (section) {
           // Для страницы конкретной секции
+          const sectionObj = sections.find((s: any) => s.id === section);
           const sectionResources = suggestions
-            .filter((item: any) => item.section.replace('/', '') === section)
+            .filter((item: any) => item.section_id === section)
             .map((item: any) => ({
               id: item.id,
               url: item.url,
-              section: item.section.replace('/', ''),
+              section_id: item.section_id,
+              section: sectionObj?.label || '',
               description: item.description || '',
               createdAt: item.created_at,
               categories: item.categories || [],
               preview: {
-                title: item.preview_title || '',
+                title: item.title || '',
                 description: item.preview_description || '',
                 image: item.preview_image || '',
                 favicon: item.preview_favicon || '',
@@ -62,21 +66,23 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
             }));
           setResources(sectionResources);
         } else {
-          // Для главной страницы: группируем по секциям
+          // Для главной страницы: группируем по section_id
           const grouped = suggestions.reduce((acc: ResourcesBySection, item: any) => {
-            const sectionKey = item.section.replace('/', '');
+            const sectionKey = item.section_id;
+            const sectionObj = sections.find((s: any) => s.id === sectionKey);
             if (!acc[sectionKey]) {
               acc[sectionKey] = [];
             }
             acc[sectionKey].push({
               id: item.id,
               url: item.url,
-              section: sectionKey,
+              section_id: sectionKey,
+              section: sectionObj?.label || '',
               description: item.description || '',
               createdAt: item.created_at,
               categories: item.categories || [],
               preview: {
-                title: item.preview_title || '',
+                title: item.title || '',
                 description: item.preview_description || '',
                 image: item.preview_image || '',
                 favicon: item.preview_favicon || '',

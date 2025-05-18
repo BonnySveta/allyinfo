@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Resource } from '../../types/resource';
-import { fetchSuggestions, updateSuggestion, deleteSuggestion, fetchCategories } from '../../services/supabase';
+import { fetchSuggestions, updateSuggestion, deleteSuggestion, fetchCategories, fetchSections } from '../../services/supabase';
 import { FilterChipsPanel } from '../FilterChips';
 
 // interface AdminResource extends Resource {
@@ -11,9 +11,14 @@ import { FilterChipsPanel } from '../FilterChips';
 interface AdminResource {
   id: string | number;
   url: string;
-  section: string;
+  section_id: string;
+  category_id: string;
   description: string | null;
   categories: any[];
+  title: string;
+  image: string;
+  favicon: string;
+  domain: string;
   preview: {
     title: string;
     description: string;
@@ -100,25 +105,27 @@ export default function MaterialsAdmin() {
     title: string;
     url: string;
     description: string;
-    section: string;
-    preview_description: string;
-    preview_image: string;
-    preview_favicon: string;
-    preview_domain: string;
+    section_id: string;
+    category_id: string;
+    image: string;
+    favicon: string;
+    domain: string;
     status: string;
   }>({
     title: '',
     url: '',
     description: '',
-    section: '',
-    preview_description: '',
-    preview_image: '',
-    preview_favicon: '',
-    preview_domain: '',
+    section_id: '',
+    category_id: '',
+    image: '',
+    favicon: '',
+    domain: '',
     status: 'pending',
   });
   const [categories, setCategories] = useState<any[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [sections, setSections] = useState<any[]>([]);
+  const [sectionsLoading, setSectionsLoading] = useState(true);
 
   useEffect(() => {
     loadMaterials();
@@ -133,7 +140,19 @@ export default function MaterialsAdmin() {
         setCategoriesLoading(false);
       }
     }
+    async function loadSections() {
+      setSectionsLoading(true);
+      try {
+        const secs = await fetchSections();
+        setSections(secs);
+      } catch (e) {
+        setSections([]);
+      } finally {
+        setSectionsLoading(false);
+      }
+    }
     loadCategories();
+    loadSections();
   }, [statusFilter]);
 
   const loadMaterials = async () => {
@@ -176,14 +195,14 @@ export default function MaterialsAdmin() {
   const handleEdit = (m: AdminResource) => {
     setEditId(m.id);
     setEditFields({
-      title: m.preview?.title || '',
+      title: m.title || '',
       url: m.url,
       description: m.description || '',
-      section: m.section || '',
-      preview_description: m.preview?.description || '',
-      preview_image: m.preview?.image || '',
-      preview_favicon: m.preview?.favicon || '',
-      preview_domain: m.preview?.domain || '',
+      section_id: m.section_id || '',
+      category_id: m.category_id || '',
+      image: m.image || '',
+      favicon: m.favicon || '',
+      domain: m.domain || '',
       status: m.status || 'pending',
     });
   };
@@ -196,29 +215,26 @@ export default function MaterialsAdmin() {
     try {
       await updateSuggestion(String(id), {
         url: editFields.url,
-        section: editFields.section,
+        category_id: editFields.category_id,
+        section_id: editFields.section_id,
         description: editFields.description,
-        preview_title: editFields.title,
-        preview_description: editFields.preview_description,
-        preview_image: editFields.preview_image,
-        preview_favicon: editFields.preview_favicon,
-        preview_domain: editFields.preview_domain,
+        title: editFields.title,
+        image: editFields.image,
+        favicon: editFields.favicon,
+        domain: editFields.domain,
         status: editFields.status,
       });
       setMaterials(prev => prev.map(m => String(m.id) === String(id) ? {
         ...m,
         url: editFields.url,
-        section: editFields.section,
+        category_id: editFields.category_id,
+        section_id: editFields.section_id,
         description: editFields.description,
+        title: editFields.title,
+        image: editFields.image,
+        favicon: editFields.favicon,
+        domain: editFields.domain,
         status: editFields.status,
-        preview: {
-          ...m.preview,
-          title: editFields.title,
-          description: editFields.preview_description,
-          image: editFields.preview_image,
-          favicon: editFields.preview_favicon,
-          domain: editFields.preview_domain,
-        }
       } : m));
       setEditId(null);
     } catch (e) {
@@ -275,9 +291,9 @@ export default function MaterialsAdmin() {
               <tr key={m.id}>
                 {editId === m.id ? null : (
                   <>
-                    <Td>{m.preview?.title || 'Без названия'}</Td>
+                    <Td>{m.title || 'Без названия'}</Td>
                     <Td><a href={m.url} target="_blank" rel="noopener noreferrer">{m.url}</a></Td>
-                    <Td>{m.section}</Td>
+                    <Td>{sections.find(sec => sec.id === m.section_id)?.label || '—'}</Td>
                     <Td><StatusBadge $status={m.status || 'pending'}>{m.status === 'approved' ? 'Опубликован' : m.status === 'pending' ? 'На модерации' : 'Отклонён'}</StatusBadge></Td>
                     <Td>
                       <div style={{display:'flex', flexDirection:'column', gap:8}}>
@@ -341,16 +357,16 @@ export default function MaterialsAdmin() {
               <label>
                 Раздел
                 <select
-                  name="section"
-                  value={editFields.section}
+                  name="section_id"
+                  value={editFields.section_id}
                   onChange={handleEditFieldChange}
                   style={{width:'100%',marginTop:4}}
                   required
-                  disabled={categoriesLoading}
+                  disabled={sectionsLoading}
                 >
                   <option value="">Выберите раздел</option>
-                  {categories.map((cat:any) => (
-                    <option key={cat.id} value={cat.id}>{cat.label}</option>
+                  {sections.map((sec:any) => (
+                    <option key={sec.id} value={sec.id}>{sec.label}</option>
                   ))}
                 </select>
               </label>
@@ -359,24 +375,16 @@ export default function MaterialsAdmin() {
                 <textarea name="description" value={editFields.description} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} rows={3} />
               </label>
               <label>
-                Preview Title
-                <input name="preview_title" value={editFields.title} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
-              </label>
-              <label>
-                Preview Desc
-                <textarea name="preview_description" value={editFields.preview_description} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} rows={2} />
-              </label>
-              <label>
-                Preview Image
-                <input name="preview_image" value={editFields.preview_image} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
+                Картинка (image)
+                <input name="image" value={editFields.image || ''} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
               </label>
               <label>
                 Favicon
-                <input name="preview_favicon" value={editFields.preview_favicon} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
+                <input name="favicon" value={editFields.favicon || ''} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
               </label>
               <label>
                 Domain
-                <input name="preview_domain" value={editFields.preview_domain} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
+                <input name="domain" value={editFields.domain || ''} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
               </label>
               <label>
                 Статус

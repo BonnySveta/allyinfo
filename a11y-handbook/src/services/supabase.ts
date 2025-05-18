@@ -206,4 +206,14 @@ export async function deleteAdmin(id: string) {
   return true;
 }
 
+// --- Работа с таблицей sections ---
+export async function fetchSections() {
+  const { data, error } = await supabase
+    .from('sections')
+    .select('*')
+    .order('label', { ascending: true });
+  if (error) throw error;
+  return data;
+}
+
 // --- Здесь можно добавлять функции для работы с другими таблицами Supabase --- 

@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import { StartBanner } from '../../components/StartBanner/StartBanner';
@@ -10,6 +10,7 @@ import { CategoryId } from '../../types/category';
 import { ResourcesBySection } from '../../types/resource';
 import { speechService } from '../../services/speech';
 import { useFocusOverlay } from '../../context/FocusOverlayContext';
+import { fetchSections } from '../../services/supabase';
 
 const TitleSection = styled.div`
   display: flex;
@@ -94,6 +95,23 @@ export const Home: FC<HomeProps> = ({
   filteredResources
 }) => {
   const { announceUpdate } = useFocusOverlay();
+  const [sections, setSections] = useState<any[]>([]);
+  const [sectionsLoading, setSectionsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadSections() {
+      setSectionsLoading(true);
+      try {
+        const secs = await fetchSections();
+        setSections(secs);
+      } catch (e) {
+        setSections([]);
+      } finally {
+        setSectionsLoading(false);
+      }
+    }
+    loadSections();
+  }, []);
 
   useEffect(() => {
     if (!loading && !error) {
@@ -121,7 +139,7 @@ export const Home: FC<HomeProps> = ({
     <>
       <TitleSection>
         <TitleContainer>
-          <Title>ALLY.RU</Title>
+          <Title>ALLYINFO</Title>
           <Subtitle>каталог материалов по цифровой доступности</Subtitle>
         </TitleContainer>
         <StartBanner />
@@ -130,24 +148,21 @@ export const Home: FC<HomeProps> = ({
         selectedCategories={selectedCategories}
         onChange={setSelectedCategories}
       />
-      {loading ? (
+      {loading || sectionsLoading ? (
         <LoadingSpinner />
       ) : error ? (
         <ErrorMessage>{error}</ErrorMessage>
       ) : (
         <CardsContainer>
           <CardsGrid>
-            {navigationConfig.map((item) => {
-              const sectionKey = item.path.replace('/', '');
-              return (
-                <Card
-                  key={item.path}
-                  title={item.title}
-                  path={item.path}
-                  resources={filteredResources[sectionKey] || []}
-                />
-              );
-            })}
+            {sections.map(section => (
+              <Card
+                key={section.id}
+                title={section.label}
+                path={"/" + section.label.toLowerCase()}
+                resources={filteredResources[section.id] || []}
+              />
+            ))}
           </CardsGrid>
         </CardsContainer>
       )}
