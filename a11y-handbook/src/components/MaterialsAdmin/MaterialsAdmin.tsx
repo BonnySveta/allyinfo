@@ -4,6 +4,7 @@ import { Resource } from '../../types/resource';
 import { fetchSuggestions as fetchResources, updateSuggestion, deleteSuggestion, fetchCategories, fetchSections, fetchResourceCategories } from '../../services/supabase';
 import { FilterChipsPanel } from '../FilterChips';
 import { supabase } from '../../services/supabase';
+import { LinkPreview } from '../LinkPreview/LinkPreview';
 
 // interface AdminResource extends Resource {
 //   status: string;
@@ -258,6 +259,17 @@ export default function MaterialsAdmin() {
     setEditId(null);
   };
 
+  const handlePreviewLoad = (data: any) => {
+    setEditFields(prev => ({
+      ...prev,
+      title: data.title || prev.title,
+      description: data.description || prev.description,
+      image: data.image || prev.image,
+      favicon: data.favicon || prev.favicon,
+      domain: data.domain || prev.domain,
+    }));
+  };
+
   const filtered = materials.filter(m =>
     (statusFilter === 'all' || m.status === statusFilter) &&
     (search === '' || m.preview.title.toLowerCase().includes(search.toLowerCase()) || m.url.toLowerCase().includes(search.toLowerCase()))
@@ -350,6 +362,8 @@ export default function MaterialsAdmin() {
               maxWidth: '90vw',
               boxShadow: '0 4px 32px rgba(0,0,0,0.15)',
               position: 'relative',
+              maxHeight: '90vh',
+              overflowY: 'auto',
             }}
             onClick={e => e.stopPropagation()}
             role="dialog"
@@ -366,6 +380,11 @@ export default function MaterialsAdmin() {
                 Ссылка
                 <input name="url" value={editFields.url} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
               </label>
+              {editFields.url && (
+                <div style={{margin: '12px 0'}}>
+                  <LinkPreview url={editFields.url} onLoad={handlePreviewLoad} />
+                </div>
+              )}
               <label>
                 Раздел
                 <select

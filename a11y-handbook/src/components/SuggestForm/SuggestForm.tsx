@@ -1,6 +1,5 @@
 import { useState, FormEvent, ChangeEvent, useEffect } from 'react';
 import styled from 'styled-components';
-import { navigationConfig } from '../../config/navigation';
 import { Toast } from '../Toast/Toast';
 import { LinkPreview } from '../LinkPreview/LinkPreview';
 import { PreviewData } from '../../types/preview';
@@ -20,7 +19,9 @@ import {
   RequiredFieldsHint,
   LoadingSpinner
 } from '../Form/FormComponents';
-import { addSuggestion, fetchCategories } from '../../services/supabase';
+import { addSuggestion, fetchCategories, addResourceCategory } from '../../services/supabase';
+import { FilterChipsPanel } from '../FilterChips/FilterChipsPanel';
+import { CategoryId } from '../../types/category';
 
 interface FormData {
   section: string;
@@ -35,7 +36,6 @@ interface SuggestFormProps {
 }
 
 export function SuggestForm({ getPreview }: SuggestFormProps) {
-  const [section, setSection] = useState('');
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
@@ -51,8 +51,7 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
   }>({ show: false, message: '', type: 'success' });
   const [categories, setCategories] = useState<any[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
-
-  const sections = navigationConfig;
+  const [selectedCategories, setSelectedCategories] = useState<CategoryId[]>([]);
 
   useEffect(() => {
     async function loadCategories() {
@@ -78,8 +77,8 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
   };
 
   const handlePreviewLoad = (data: PreviewData) => {
-    console.log('Preview loaded:', data);
     setIsPreviewLoading(false);
+    setPreviewData(data);
     if (data.description) {
       setPreviewDescription(data.description);
       setDescription(data.description);
@@ -95,43 +94,56 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
-    
-    if (!section || !url) {
+
+    if (isPreviewLoading) {
+      setError('Дождитесь загрузки предпросмотра');
+      return;
+    }
+    if (!url) {
       setError('Пожалуйста, заполните все обязательные поля');
       return;
     }
-
     if (!validateUrl(url)) {
       return;
     }
-
+    if (selectedCategories.length === 0) {
+      setError('Пожалуйста, выберите хотя бы одну категорию');
+      return;
+    }
     setIsLoading(true);
-
     try {
-      await addSuggestion({
+      // Подробные логи для дебага
+      console.log('=== DEBUG SUBMIT ===');
+      console.log('previewData перед отправкой:', previewData);
+      console.log('description:', description);
+      const submitObj = {
         url,
-        section,
+        title: previewData?.title || '',
         description: previewData?.description || description || null,
-        preview_title: previewData?.title || '',
-        preview_description: previewData?.description || '',
-        preview_image: previewData?.image || '',
-        preview_favicon: previewData?.favicon || '',
-        preview_domain: previewData?.domain || '',
+        image: previewData?.image || '',
+        favicon: previewData?.favicon || '',
+        domain: previewData?.domain || '',
         status: 'pending'
-      });
-
+      };
+      console.log('Отправляемый объект:', submitObj);
+      // Сохраняем материал
+      const resource = await addSuggestion(submitObj);
+      // Сохраняем связи с категориями
+      if (resource && resource.id) {
+        for (const category_id of selectedCategories) {
+          await addResourceCategory(resource.id, category_id);
+        }
+      }
       clearDraft();
-      setSection('');
       setUrl('');
       setDescription('');
       setPreviewData(null);
-      
+      setSelectedCategories([]);
       setToast({
         show: true,
         message: 'Материал успешно предложен!',
         type: 'success'
       });
-
     } catch (err) {
       console.error('Error submitting suggestion:', err);
       setToast({
@@ -168,27 +180,18 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
     <FormContainer>      
       <StyledForm onSubmit={handleSubmit} noValidate>
         <FormGroup>
-          <Label htmlFor="section">
+          <Label>
             <LabelText>
-              Раздел
+              Категория
               <RequiredMark>*</RequiredMark>
             </LabelText>
           </Label>
-          <select
-            id="section"
-            value={section}
-            onChange={(e) => setSection(e.target.value)}
-            required
-            aria-invalid={error && !section ? "true" : "false"}
-            style={{ width: '100%', minHeight: 40, fontSize: 16 }}
-          >
-            <option value="">Выберите раздел</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.label}
-              </option>
-            ))}
-          </select>
+          <FilterChipsPanel
+            categories={categories}
+            selectedCategories={selectedCategories}
+            onChange={setSelectedCategories}
+            showCount={false}
+          />
         </FormGroup>
 
         <FormGroup>
@@ -212,7 +215,7 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
               url={url} 
               onLoad={handlePreviewLoad}
               getPreview={getPreview}
-              section={section}
+              section={''}
             />
           )}
           {urlError && (
@@ -228,7 +231,7 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
           </ErrorMessage>
         )}
 
-        <SubmitButton type="submit" disabled={isLoading}>
+        <SubmitButton type="submit" disabled={isLoading || isPreviewLoading}>
           {isLoading ? (
             <>
               Отправка

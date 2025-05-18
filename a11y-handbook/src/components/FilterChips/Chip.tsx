@@ -36,10 +36,30 @@ const ChipButton = styled.button<{ $isSelected: boolean; $color?: string }>`
   }
 `;
 
-export function Chip({ children, ...props }: ChipProps) {
+export function Chip({ $isSelected, $color, onClick, children, ...props }: ChipProps) {
+  const { ['aria-pressed']: _removed, ...restProps } = props;
   return (
-    <ChipButton {...props}>
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        background: $isSelected ? $color || '#eee' : 'transparent',
+        border: `1.5px solid ${$color || '#ccc'}`,
+        color: $isSelected ? '#fff' : $color || '#333',
+        borderRadius: 20,
+        padding: '6px 16px',
+        margin: 2,
+        cursor: 'pointer',
+        outline: 'none',
+        fontWeight: 500,
+        fontSize: 15,
+        transition: 'all 0.15s',
+        opacity: $isSelected ? 1 : 0.85,
+      }}
+      aria-pressed={$isSelected}
+      {...restProps}
+    >
       {children}
-    </ChipButton>
+    </button>
   );
 } 
