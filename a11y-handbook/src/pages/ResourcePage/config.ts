@@ -2,7 +2,7 @@ export const pageConfig = {
   articles: { 
     path: '/articles', 
     title: 'Статьи',
-    description: 'Полезные статьи о веб-доступности',
+    description: 'Полезные статьи о доступности',
     section_id: 'articles'
   },
   telegram: { 
@@ -20,25 +20,25 @@ export const pageConfig = {
   courses: { 
     path: '/courses', 
     title: 'Курсы',
-    description: 'Обучающие курсы по веб-доступности',
+    description: 'Обучающие курсы по доступности',
     section_id: 'courses'
   },
   youtube: { 
     path: '/youtube', 
     title: 'YouTube-каналы',
-    description: 'YouTube-каналы о доступности',
+    description: 'YouTube-каналы и выпуски о доступности',
     section_id: 'youtube'
   },
   books: { 
     path: '/books', 
     title: 'Книги',
-    description: 'Книги о веб-доступности',
+    description: 'Книги о цифровой доступности',
     section_id: 'books'
   },
   resources: { 
     path: '/resources', 
     title: 'Ресурсы',
-    description: 'Полезные ресурсы и инструменты для работы с веб-доступностью',
+    description: 'Полезные ресурсы и инструменты для работы с доступностью',
     section_id: 'resources'
   }
 } as const;

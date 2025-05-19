@@ -19,7 +19,7 @@ import {
   RequiredFieldsHint,
   LoadingSpinner
 } from '../Form/FormComponents';
-import { addSuggestion, fetchCategories, addResourceCategory } from '../../services/supabase';
+import { addSuggestion, fetchCategories, addResourceCategory, fetchSections } from '../../services/supabase';
 import { FilterChipsPanel } from '../FilterChips/FilterChipsPanel';
 import { CategoryId } from '../../types/category';
 
@@ -52,6 +52,8 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
   const [categories, setCategories] = useState<any[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [selectedCategories, setSelectedCategories] = useState<CategoryId[]>([]);
+  const [autoSection, setAutoSection] = useState<string | null>(null);
+  const [sections, setSections] = useState<any[]>([]);
 
   useEffect(() => {
     async function loadCategories() {
@@ -68,12 +70,33 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
     loadCategories();
   }, []);
 
+  useEffect(() => {
+    async function loadSections() {
+      try {
+        const secs = await fetchSections();
+        setSections(secs);
+      } catch (e) {
+        setSections([]);
+      }
+    }
+    loadSections();
+  }, []);
+
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     console.log('URL changed:', value);
     setUrl(value);
     setPreviewDescription(null);
     setIsPreviewLoading(true);
+
+    // Автоматическая подстановка секции по домену
+    if (/t\.me|telegram\.me/.test(value)) {
+      setAutoSection('telegram');
+    } else if (/youtube\.com|youtu\.be/.test(value)) {
+      setAutoSection('youtube');
+    } else {
+      setAutoSection(null);
+    }
   };
 
   const handlePreviewLoad = (data: PreviewData) => {
@@ -112,19 +135,30 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
     }
     setIsLoading(true);
     try {
+      // Определяем section_id для Telegram/YouTube
+      let section_id = undefined;
+      if (autoSection && sections.length > 0) {
+        const sec = sections.find(s => s.slug === autoSection);
+        if (sec) section_id = sec.id;
+      }
+      // Определяем favicon для сохранения
+      let faviconToSave = previewData?.favicon || '';
+      if ((autoSection === 'telegram' || autoSection === 'youtube') && previewData?.image) {
+        faviconToSave = previewData.image;
+      }
       // Подробные логи для дебага
       console.log('=== DEBUG SUBMIT ===');
       console.log('previewData перед отправкой:', previewData);
       console.log('description:', description);
-      const submitObj = {
+      const submitObj: any = {
         url,
         title: previewData?.title || '',
         description: previewData?.description || description || null,
-        image: previewData?.image || '',
-        favicon: previewData?.favicon || '',
+        favicon: faviconToSave,
         domain: previewData?.domain || '',
         status: 'pending'
       };
+      if (section_id) submitObj.section_id = section_id;
       console.log('Отправляемый объект:', submitObj);
       // Сохраняем материал
       const resource = await addSuggestion(submitObj);

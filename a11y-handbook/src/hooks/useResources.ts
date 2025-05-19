@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Resource, ResourcesBySection } from '../types/resource';
+import { Resource, ResourcesBySection, ResourceWithSectionSlug } from '../types/resource';
 import { CategoryId } from '../types/category';
 import { ResourceSection } from '../pages/ResourcePage/config';
 import { fetchSuggestions as fetchResources, fetchCategories, fetchSections, fetchResourceCategories } from '../services/supabase';
@@ -27,7 +27,7 @@ type UseResourcesReturn<T> = T extends ResourceSection
 export function useResources<T extends ResourceSection | undefined = undefined>(
   section?: T
 ): UseResourcesReturn<T> {
-  const [resources, setResources] = useState<ResourcesBySection | Resource[]>(section ? [] : {});
+  const [resources, setResources] = useState<ResourcesBySection | ResourceWithSectionSlug[]>(section ? [] : {});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<CategoryId[]>([]);
@@ -71,6 +71,7 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
                 url: item.url,
                 section_id: item.section_id,
                 section: sectionObj?.label || '',
+                section_slug: sectionObj?.slug || '',
                 description: item.description || '',
                 createdAt: item.created_at,
                 categories: await fetchResourceCategories(item.id),
@@ -82,7 +83,7 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
               }))
           );
           console.log('Filtered resources for section:', sectionResources);
-          setResources(sectionResources);
+          setResources(sectionResources as ResourceWithSectionSlug[]);
         } else {
           // Для главной страницы: группируем по section_id
           const grouped = {} as ResourcesBySection;
@@ -96,6 +97,7 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
               url: item.url,
               section_id: sectionKey,
               section: sectionObj?.label || '',
+              section_slug: sectionObj?.slug || '',
               description: item.description || '',
               createdAt: item.created_at,
               categories,
@@ -104,7 +106,7 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
               image: item.preview_image || '',
               favicon: item.favicon || item.preview_favicon || '',
               domain: item.domain || item.preview_domain || ''
-            });
+            } as ResourceWithSectionSlug);
           }
           setResources(grouped);
         }

@@ -1,16 +1,16 @@
 import styled from 'styled-components';
-import { Resource } from '../../types/resource';
+import { ResourceWithSectionSlug } from '../../types/resource';
 import React, { useState, useEffect } from 'react';
 
 interface ResourceItemProps {
-  resource: Resource;
+  resource: ResourceWithSectionSlug;
 }
 
 const ResourceCard = styled.a`
   display: flex;
   gap: 1rem;
   padding: 1.5rem;
-  background: var(--nav-background);
+  background: var(--card-background);
   border-radius: 12px;
   text-decoration: none;
   color: var(--text-color);

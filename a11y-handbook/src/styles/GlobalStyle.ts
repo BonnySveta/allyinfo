@@ -3,6 +3,7 @@ import { createGlobalStyle } from 'styled-components';
 export const GlobalStyle = createGlobalStyle`
   :root[data-theme="light"] {
     --background-color: #ffffff;
+    --resource-link-background: #ffffff;
     --text-color: #333333;
     --link-color: #007bff;
     --link-hover-color: #0056b3;
@@ -35,6 +36,7 @@ export const GlobalStyle = createGlobalStyle`
 
   :root[data-theme="dark"] {
     --background-color: #1a1a1a;
+    --resource-link-background: #2d2d2d;
     --text-color: #e2dddd;
     --link-color: #4dabf7;
     --link-hover-color: #74c0fc;

@@ -18,4 +18,8 @@ export interface Resource {
 
 export interface ResourcesBySection {
   [key: string]: Resource[];
+}
+
+export interface ResourceWithSectionSlug extends Resource {
+  section_slug?: string;
 } 
