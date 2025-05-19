@@ -27,28 +27,32 @@ const HeartContainer = styled.span<HeartContainerProps>`
   position: absolute;
   inset: -100px;
   pointer-events: none;
-  opacity: 0;
+  opacity: ${props => props.$isVisible ? 1 : 0};
   transition: opacity 0.2s;
-
-  ${props => props.$isVisible && `
-    opacity: 1;
-  `}
 `;
 
 interface HeartProps {
   $isVisible: boolean;
 }
 
+const HEART_SIZE_MIN = 0.8;
+const HEART_SIZE_MAX = 1.5;
+const HEART_POSITION = 100;
+const HEART_CHANGE = 140;
+const HEART_ROTATION = 180;
+const HEART_DURATION_MIN = 2;
+const HEART_DURATION_MAX = 4;
+
 const Heart = styled.span<HeartProps>`
   position: absolute;
-  font-size: ${props => 0.8 + Math.random() * 0.7}rem;
-  left: ${props => Math.random() * 100}%;
-  top: ${props => Math.random() * 100}%;
-  --tx: ${props => -70 + Math.random() * 140}px;
-  --ty: ${props => -70 + Math.random() * 140}px;
-  --rotate: ${props => Math.random() * 180}deg;
+  font-size: ${props => Math.random() * (HEART_SIZE_MAX - HEART_SIZE_MIN) + HEART_SIZE_MIN }rem;
+  left: ${props => Math.random() * HEART_POSITION}%;
+  top: ${props => Math.random() * HEART_POSITION}%;
+  --tx: ${props => Math.random() * HEART_CHANGE - HEART_CHANGE / 2}px;
+  --ty: ${props => Math.random() * HEART_CHANGE - HEART_CHANGE / 2}px;
+  --rotate: ${props => Math.random() * HEART_ROTATION}deg;
   opacity: 0;
-  animation: ${floatingHearts} ${props => 2 + Math.random() * 2}s ease-in-out ${props => Math.random() * 1}s infinite;
+  animation: ${floatingHearts} ${props => Math.random() * (HEART_DURATION_MAX - HEART_DURATION_MIN) + HEART_DURATION_MIN}s ease-in-out ${props => Math.random()}s infinite;
   animation-play-state: ${props => props.$isVisible ? 'running' : 'paused'};
   z-index: 1;
 `;
