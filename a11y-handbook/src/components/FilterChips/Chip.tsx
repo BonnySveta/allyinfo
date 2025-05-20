@@ -50,7 +50,6 @@ export function Chip({ $isSelected, $color, onClick, children, ...props }: ChipP
         padding: '6px 16px',
         margin: 2,
         cursor: 'pointer',
-        outline: 'none',
         fontWeight: 500,
         fontSize: 15,
         transition: 'all 0.15s',
