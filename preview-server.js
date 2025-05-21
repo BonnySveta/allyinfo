@@ -25,7 +25,7 @@ function absolutizeUrl(base, url) {
 
 async function downloadAndUploadFavicon(faviconUrl, domain) {
   try {
-    // Скачиваем фавикон
+    console.log('Пробую скачать:', faviconUrl);
     const response = await axios.get(faviconUrl, {
       responseType: 'arraybuffer',
       timeout: 5000,
@@ -33,6 +33,7 @@ async function downloadAndUploadFavicon(faviconUrl, domain) {
         'User-Agent': 'Mozilla/5.0'
       }
     });
+    console.log('Статус:', response.status, 'Content-Type:', response.headers['content-type']);
 
     // Определяем тип файла
     const contentType = response.headers['content-type'];
@@ -42,6 +43,7 @@ async function downloadAndUploadFavicon(faviconUrl, domain) {
 
     // Генерируем уникальное имя файла
     const fileName = `${domain}-${Date.now()}.${extension}`;
+    console.log('Загружаю в bucket:', fileName);
 
     // Загружаем в Supabase Storage (в бакет favicons!)
     const { data, error } = await supabase.storage
@@ -51,16 +53,20 @@ async function downloadAndUploadFavicon(faviconUrl, domain) {
         upsert: true
       });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Ошибка загрузки в bucket:', error);
+      return null;
+    }
 
     // Получаем публичный URL
     const { data: { publicUrl } } = supabase.storage
       .from('favicons')
       .getPublicUrl(fileName);
+    console.log('Публичный URL:', publicUrl);
 
     return publicUrl;
   } catch (error) {
-    console.error('Error downloading/uploading favicon:', error);
+    console.error('Ошибка при скачивании/загрузке фавикона:', error);
     return null;
   }
 }
@@ -105,8 +111,18 @@ app.post('/api/preview', async (req, res) => {
     // Domain
     const domain = new URL(url).hostname;
 
-    // Скачиваем и сохраняем фавикон
-    const faviconUrl = await downloadAndUploadFavicon(favicon, domain);
+    // --- ДОРАБОТКА: если Telegram/YouTube и есть image, сохраняем image ---
+    let faviconUrl = null;
+    const isTelegram = domain.includes('t.me') || domain.includes('telegram.me');
+    const isYouTube = domain.includes('youtube.com') || domain.includes('youtu.be');
+    if ((isTelegram || isYouTube) && image) {
+      console.log('Downloading and uploading favicon for Telegram/YouTube');  
+      faviconUrl = await downloadAndUploadFavicon(absolutizeUrl(url, image), domain + '-preview');
+    } else {
+      console.log('Downloading and uploading favicon for other domains');
+      faviconUrl = await downloadAndUploadFavicon(favicon, domain);
+    }
+    console.log('faviconUrl для ответа:', faviconUrl);
 
     res.json({
       title: title.trim(),

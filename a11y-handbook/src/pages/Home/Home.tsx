@@ -143,7 +143,7 @@ export const Home: FC<HomeProps> = ({
       <TitleSection>
         <TitleContainer>
           <Title>ALLYINFO</Title>
-          <Subtitle>каталог материалов по цифровой доступности</Subtitle>
+          <Subtitle>каталог материалов цифровой доступности</Subtitle>
         </TitleContainer>
         <StartBanner />
       </TitleSection>

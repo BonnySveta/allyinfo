@@ -141,25 +141,16 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
         const sec = sections.find(s => s.slug === autoSection);
         if (sec) section_id = sec.id;
       }
-      // Определяем favicon для сохранения
-      let faviconToSave = previewData?.favicon || '';
-      if ((autoSection === 'telegram' || autoSection === 'youtube') && previewData?.image) {
-        faviconToSave = previewData.image;
-      }
-      // Подробные логи для дебага
-      console.log('=== DEBUG SUBMIT ===');
-      console.log('previewData перед отправкой:', previewData);
-      console.log('description:', description);
+      // Используем favicon напрямую из previewData, так как он уже обработан на сервере
       const submitObj: any = {
         url,
         title: previewData?.title || '',
         description: previewData?.description || description || null,
-        favicon: faviconToSave,
+        favicon: previewData?.favicon || '',
         domain: previewData?.domain || '',
         status: 'pending'
       };
       if (section_id) submitObj.section_id = section_id;
-      console.log('Отправляемый объект:', submitObj);
       // Сохраняем материал
       const resource = await addSuggestion(submitObj);
       // Сохраняем связи с категориями
