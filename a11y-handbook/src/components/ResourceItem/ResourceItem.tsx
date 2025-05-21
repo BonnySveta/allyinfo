@@ -34,7 +34,6 @@ const ResourceIcon = styled.img`
   border-radius: 4px;
   object-fit: cover;
   flex-shrink: 0;
-  background: var(--background-color);
 `;
 
 const FallbackIcon = styled.span`

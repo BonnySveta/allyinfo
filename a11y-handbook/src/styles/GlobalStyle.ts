@@ -1,6 +1,15 @@
 import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyle = createGlobalStyle`
+  @keyframes skeletonPulse {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
   :root[data-theme="light"] {
     --background-color: #ffffff;
     --resource-link-background: #ffffff;
