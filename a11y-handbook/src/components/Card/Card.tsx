@@ -8,6 +8,7 @@ interface CardProps {
   title: string;
   path: string;
   resources?: Resource[];
+  viewAllText?: string;
 }
 
 const CardContainer = styled.div`
@@ -146,12 +147,14 @@ const ViewAllLink = styled(Link)`
   }
 `;
 
-export function Card({ title, path, resources = [] }: CardProps) {
+export function Card({ title, path, resources = [], viewAllText }: CardProps) {
   const sortedResources = [...resources].sort((a, b) => 
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
   const hasMoreResources = resources.length > 3;
+  const defaultViewAllText = `Все материалы (${resources.length})`;
+  const customViewAllText = viewAllText ? `${viewAllText} (${resources.length})` : defaultViewAllText;
 
   return (
     <CardContainer>
@@ -159,7 +162,7 @@ export function Card({ title, path, resources = [] }: CardProps) {
         <CardTitle>{title}</CardTitle>
         {hasMoreResources && (
           <ViewAllLink to={path}>
-            Все материалы ({resources.length})
+            {customViewAllText}
           </ViewAllLink>
         )}
       </CardHeader>

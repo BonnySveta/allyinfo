@@ -168,12 +168,23 @@ export const Home: FC<HomeProps> = ({
             {sections.map(section => {
               const config = pageConfig[section.slug as keyof typeof pageConfig];
               const path = config ? config.path : `/${section.slug}`;
+              
+              // Определяем текст для ссылки "Все материалы" в зависимости от типа секции
+              const viewAllText = section.slug === 'books' ? 'Все книги' :
+                                section.slug === 'articles' ? 'Все статьи' :
+                                section.slug === 'telegram' ? 'Все каналы' :
+                                section.slug === 'podcasts' ? 'Все подкасты' :
+                                section.slug === 'courses' ? 'Все курсы' :
+                                section.slug === 'youtube' ? 'Все видео' :
+                                'Все материалы';
+
               return (
                 <Card
                   key={section.id}
                   title={section.label}
                   path={path}
                   resources={filteredResources[section.id] || []}
+                  viewAllText={viewAllText}
                 />
               );
             })}
