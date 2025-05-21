@@ -89,7 +89,6 @@ export const ResourceIcon = styled.img`
   border-radius: 4px;
   object-fit: cover;
   margin-right: 12px;
-  background: var(--background-color);
 `;
 
 export const FallbackIcon = styled.span`
