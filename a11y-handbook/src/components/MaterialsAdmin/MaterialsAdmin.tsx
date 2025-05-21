@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Resource } from '../../types/resource';
 import { fetchSuggestions as fetchResources, updateSuggestion, deleteSuggestion, fetchCategories, fetchSections, fetchResourceCategories } from '../../services/supabase';
@@ -97,6 +97,7 @@ const ActionButton = styled.button`
 `;
 
 export default function MaterialsAdmin() {
+  const titleField = useRef<HTMLInputElement>(null!);  
   const [materials, setMaterials] = useState<AdminResource[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
@@ -211,6 +212,7 @@ export default function MaterialsAdmin() {
       domain: m.domain || '',
       status: m.status || 'pending',
     });
+    titleField.current.focus();
   };
 
   const handleEditFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -376,7 +378,7 @@ export default function MaterialsAdmin() {
             <div style={{display:'flex', flexDirection:'column', gap:16}}>
               <label>
                 Название
-                <input name="title" value={editFields.title} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
+                <input name="title" value={editFields.title} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} ref={titleField}/>
               </label>
               <label>
                 Ссылка
@@ -438,7 +440,7 @@ export default function MaterialsAdmin() {
               </label>
               <div style={{display:'flex',gap:12,marginTop:16,justifyContent:'flex-end'}}>
                 <ActionButton onClick={() => handleEditSave(editId)}>Сохранить</ActionButton>
-                <ActionButton className="secondary" onClick={handleEditCancel}>Отмена</ActionButton>
+                <ActionButton className="secondary" onClick={handleEditCancel} onBlur={() => titleField.current.focus()}>Отмена</ActionButton>
               </div>
             </div>
           </div>
