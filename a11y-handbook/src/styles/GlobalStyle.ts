@@ -82,6 +82,10 @@ export const GlobalStyle = createGlobalStyle`
     transition: background-color 0.3s, color 0.3s;
   }
 
+  body:has(dialog[open]) {
+    overflow: hidden;
+  }
+
   a {
     color: var(--link-color);
     text-decoration: none;

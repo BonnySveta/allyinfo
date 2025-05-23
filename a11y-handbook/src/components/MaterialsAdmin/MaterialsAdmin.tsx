@@ -97,7 +97,6 @@ const ActionButton = styled.button`
 `;
 
 export default function MaterialsAdmin() {
-  const titleField = useRef<HTMLInputElement>(null!);  
   const [materials, setMaterials] = useState<AdminResource[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
@@ -129,6 +128,7 @@ export default function MaterialsAdmin() {
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [sections, setSections] = useState<any[]>([]);
   const [sectionsLoading, setSectionsLoading] = useState(true);
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     loadMaterials();
@@ -212,7 +212,10 @@ export default function MaterialsAdmin() {
       domain: m.domain || '',
       status: m.status || 'pending',
     });
-    titleField.current.focus();
+    if (dialogRef.current) {
+      dialogRef.current.showModal();
+      dialogRef.current.scrollTop = 0;
+    }
   };
 
   const handleEditFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -257,10 +260,12 @@ export default function MaterialsAdmin() {
     } catch (e) {
       alert('Ошибка при сохранении изменений');
     }
+    dialogRef.current?.close();
   };
 
   const handleEditCancel = () => {
     setEditId(null);
+    dialogRef.current?.close();
   };
 
   const handlePreviewLoad = (data: any) => {
@@ -282,6 +287,7 @@ export default function MaterialsAdmin() {
   return (
     <Container>
       <h1>Материалы</h1>
+
       <FilterBar>
         <label>
           Статус:
@@ -299,6 +305,7 @@ export default function MaterialsAdmin() {
           onChange={e => setSearch(e.target.value)}
         />
       </FilterBar>
+
       {loading ? (
         <div>Загрузка...</div>
       ) : error ? (
@@ -317,135 +324,116 @@ export default function MaterialsAdmin() {
           <tbody>
             {filtered.map(m => (
               <tr key={m.id}>
-                {editId === m.id ? null : (
-                  <>
-                    <Td>{m.title || 'Без названия'}</Td>
-                    <Td><a href={m.url} target="_blank" rel="noopener noreferrer">{m.url}</a></Td>
-                    <Td>{sections.find(sec => sec.id === m.section_id)?.label || '—'}</Td>
-                    <Td><StatusBadge $status={m.status || 'pending'}>{m.status === 'approved' ? 'Опубликован' : m.status === 'pending' ? 'На модерации' : 'Отклонён'}</StatusBadge></Td>
-                    <Td>
-                      <div style={{display:'flex', flexDirection:'column', gap:8}}>
-                        <ActionButton onClick={() => handleEdit(m)}>Редактировать</ActionButton>
-                        {m.status !== 'approved' && (
-                          <ActionButton onClick={handleStatusChange(m.id, 'approved')}>Опубликовать</ActionButton>
-                        )}
-                        {m.status !== 'rejected' && (
-                          <ActionButton onClick={handleStatusChange(m.id, 'rejected')}>Отклонить</ActionButton>
-                        )}
-                        <ActionButton onClick={handleDelete(m.id)}>Удалить</ActionButton>
-                      </div>
-                    </Td>
-                  </>
-                )}
+                <Td>{m.title || 'Без названия'}</Td>
+                <Td><a href={m.url} target="_blank" rel="noopener noreferrer">{m.url}</a></Td>
+                <Td>{sections.find(sec => sec.id === m.section_id)?.label || '—'}</Td>
+                <Td><StatusBadge $status={m.status || 'pending'}>{m.status === 'approved' ? 'Опубликован' : m.status === 'pending' ? 'На модерации' : 'Отклонён'}</StatusBadge></Td>
+                <Td>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <ActionButton onClick={() => handleEdit(m)}>Редактировать</ActionButton>
+                    {m.status !== 'approved' && (
+                      <ActionButton onClick={handleStatusChange(m.id, 'approved')}>Опубликовать</ActionButton>
+                    )}
+                    {m.status !== 'rejected' && (
+                      <ActionButton onClick={handleStatusChange(m.id, 'rejected')}>Отклонить</ActionButton>
+                    )}
+                    <ActionButton onClick={handleDelete(m.id)}>Удалить</ActionButton>
+                  </div>
+                </Td>
               </tr>
             ))}
           </tbody>
         </Table>
       )}
-      {editId && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          background: 'rgba(0,0,0,0.4)',
-          zIndex: 1000,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+
+      <dialog
+        ref={dialogRef}
+        style={{
+          background: '#fff',
+          borderRadius: 12,
+          padding: 32,
+          minWidth: 400,
+          maxWidth: '90vw',
+          boxShadow: '0 4px 32px rgba(0,0,0,0.15)',
+          position: 'relative',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          border: 'none',
         }}
-          onClick={handleEditCancel}
-        >
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: 12,
-              padding: 32,
-              minWidth: 400,
-              maxWidth: '90vw',
-              boxShadow: '0 4px 32px rgba(0,0,0,0.15)',
-              position: 'relative',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-            }}
-            onClick={e => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Редактирование материала"
-          >
-            <h2 style={{marginTop:0}}>Редактировать материал</h2>
-            <div style={{display:'flex', flexDirection:'column', gap:16}}>
-              <label>
-                Название
-                <input name="title" value={editFields.title} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} ref={titleField}/>
-              </label>
-              <label>
-                Ссылка
-                <input name="url" value={editFields.url} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
-              </label>
-              {editFields.url && (
-                <div style={{margin: '12px 0'}}>
-                  <LinkPreview url={editFields.url} onLoad={handlePreviewLoad} />
-                </div>
-              )}
-              <label>
-                Раздел
-                <select
-                  name="section_id"
-                  value={editFields.section_id}
-                  onChange={handleEditFieldChange}
-                  style={{width:'100%',marginTop:4}}
-                  required
-                  disabled={sectionsLoading}
-                >
-                  <option value="">Выберите раздел</option>
-                  {sections.map((sec:any) => (
-                    <option key={sec.id} value={sec.id}>{sec.label}</option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Описание
-                <textarea name="description" value={editFields.description} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} rows={3} />
-              </label>
-              <label>
-                Картинка (image)
-                <input name="image" value={editFields.image || ''} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
-              </label>
-              <label>
-                Favicon
-                <input name="favicon" value={editFields.favicon || ''} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
-              </label>
-              <label>
-                Domain
-                <input name="domain" value={editFields.domain || ''} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}} />
-              </label>
-              <label>
-                Категории
-                <FilterChipsPanel
-                  categories={categories}
-                  selectedCategories={editFields.categories as any}
-                  onChange={(newCategories) => setEditFields(prev => ({ ...prev, categories: newCategories }))}
-                  showCount={false}
-                />
-              </label>
-              <label>
-                Статус
-                <select name="status" value={editFields.status} onChange={handleEditFieldChange} style={{width:'100%',marginTop:4}}>
-                  <option value="pending">На модерации</option>
-                  <option value="approved">Опубликован</option>
-                  <option value="rejected">Отклонён</option>
-                </select>
-              </label>
-              <div style={{display:'flex',gap:12,marginTop:16,justifyContent:'flex-end'}}>
-                <ActionButton onClick={() => handleEditSave(editId)}>Сохранить</ActionButton>
-                <ActionButton className="secondary" onClick={handleEditCancel} onBlur={() => titleField.current.focus()}>Отмена</ActionButton>
-              </div>
+        aria-labelledby="dialog-name"
+      >
+        <h2 style={{ marginTop: 0 }} id="dialog-name">Редактировать материал</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <label>
+            Название
+            <input name="title" value={editFields.title} onChange={handleEditFieldChange} style={{ width: '100%', marginTop: 4 }} />
+          </label>
+          <label>
+            Ссылка
+            <input name="url" value={editFields.url} onChange={handleEditFieldChange} style={{ width: '100%', marginTop: 4 }} />
+          </label>
+          {editFields.url && (
+            <div style={{ margin: '12px 0' }}>
+              <LinkPreview url={editFields.url} onLoad={handlePreviewLoad} />
             </div>
+          )}
+          <label>
+            Раздел
+            <select
+              name="section_id"
+              value={editFields.section_id}
+              onChange={handleEditFieldChange}
+              style={{ width: '100%', marginTop: 4 }}
+              required
+              disabled={sectionsLoading}
+            >
+              <option value="">Выберите раздел</option>
+              {sections.map((sec: any) => (
+                <option key={sec.id} value={sec.id}>{sec.label}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Описание
+            <textarea name="description" value={editFields.description} onChange={handleEditFieldChange} style={{ width: '100%', marginTop: 4 }} rows={3} />
+          </label>
+          <label>
+            Картинка (image)
+            <input name="image" value={editFields.image || ''} onChange={handleEditFieldChange} style={{ width: '100%', marginTop: 4 }} />
+          </label>
+          <label>
+            Favicon
+            <input name="favicon" value={editFields.favicon || ''} onChange={handleEditFieldChange} style={{ width: '100%', marginTop: 4 }} />
+          </label>
+          <label>
+            Domain
+            <input name="domain" value={editFields.domain || ''} onChange={handleEditFieldChange} style={{ width: '100%', marginTop: 4 }} />
+          </label>
+          <label>
+            Категории
+            <FilterChipsPanel
+              categories={categories}
+              selectedCategories={editFields.categories as any}
+              onChange={(newCategories) => setEditFields(prev => ({ ...prev, categories: newCategories }))}
+              showCount={false}
+            />
+          </label>
+          <label>
+            Статус
+            <select name="status" value={editFields.status} onChange={handleEditFieldChange} style={{ width: '100%', marginTop: 4 }}>
+              <option value="pending">На модерации</option>
+              <option value="approved">Опубликован</option>
+              <option value="rejected">Отклонён</option>
+            </select>
+          </label>
+          <div style={{ display: 'flex', gap: 12, marginTop: 16, justifyContent: 'flex-end' }}>
+            <ActionButton onClick={() => {
+              if (editId) handleEditSave(editId);
+            }}>Сохранить</ActionButton>
+            <ActionButton className="secondary" onClick={handleEditCancel}>Отмена</ActionButton>
           </div>
         </div>
-      )}
+      </dialog>
     </Container>
   );
 } 
