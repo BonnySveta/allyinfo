@@ -71,11 +71,12 @@ const SupportLink = styled(BaseFooterLink)`
 `;
 
 export function Footer() {
+  const year = new Date().getFullYear();
   return (
     <FooterWrapper>
       <FooterContent>
         <Copyright>
-          ©  2024 A11Y Wiki. Все материалы распространяются по лицензии MIT.
+          ©  {year} A11Y Wiki. Все материалы распространяются по лицензии MIT.
         </Copyright>
         <FooterLinks>
           <FooterLink to="/feedback">
