@@ -171,13 +171,13 @@ export const Home: FC<HomeProps> = ({
               const path = config ? config.path : `/${section.slug}`;
               
               // Определяем текст для ссылки "Все материалы" в зависимости от типа секции
-              const viewAllText = section.slug === 'books' ? 'Все книги' :
-                                section.slug === 'articles' ? 'Все статьи' :
-                                section.slug === 'telegram' ? 'Все каналы' :
-                                section.slug === 'podcasts' ? 'Все подкасты' :
-                                section.slug === 'courses' ? 'Все курсы' :
-                                section.slug === 'youtube' ? 'Все видео' :
-                                'Все материалы';
+              const viewAllText = section.slug === 'books' ? 'книги' :
+                                section.slug === 'articles' ? 'статьи' :
+                                section.slug === 'telegram' ? 'каналы' :
+                                section.slug === 'podcasts' ? 'подкасты' :
+                                section.slug === 'courses' ? 'курсы' :
+                                section.slug === 'youtube' ? 'видео' :
+                                'материалы';
 
               return (
                 <Card
