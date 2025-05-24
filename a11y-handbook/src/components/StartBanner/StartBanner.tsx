@@ -52,7 +52,7 @@ export const StartBanner = () => {
         <span>С чего начать?</span>
         <span role="img" aria-hidden="true">💡</span>
       </BannerTitle>
-      <BannerLink href="/getting-started">
+      <BannerLink href="/getting-started" aria-label="С чего начать">
         WCAG и другие материалы для тех, кто начинает изучать цифровую доступность
       </BannerLink>
     </BannerContainer>
