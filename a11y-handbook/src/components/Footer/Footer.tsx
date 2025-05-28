@@ -1,44 +1,47 @@
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { FaHeart } from 'react-icons/fa';
+import { FaHeart, FaTelegram } from 'react-icons/fa';
 import { useContext } from 'react';
 import { FocusContext } from '../../context/FocusContext';
 
 const FooterWrapper = styled.footer`
   flex-shrink: 0;
-  background: var(--nav-background);
-  padding: 1.5rem;
   margin-top: auto;
 `;
 
 const FooterContent = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 2rem;
+  padding: 2rem;
 
   @media (max-width: 768px) {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     text-align: center;
+    gap: 1.5rem;
+    padding: 1rem;
   }
 `;
 
-const Copyright = styled.div`
-  color: var(--text-secondary);
-  font-size: 0.9rem;
+const FooterSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+const SectionTitle = styled.h3`
+  color: var(--text-color);
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 500;
 `;
 
 const FooterLinks = styled.div`
   display: flex;
-  align-items: center;
-  gap: 1.5rem;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    gap: 1rem;
-  }
+  flex-direction: column;
+  gap: 0.75rem;
 `;
 
 const BaseFooterLink = styled(Link)`
@@ -57,8 +60,33 @@ const BaseFooterLink = styled(Link)`
   }
 `;
 
-const FooterLink = styled(BaseFooterLink)`
-  // Специфичные стили для FooterLink, если нужны
+const ExternalLink = styled.a`
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-decoration-style: solid;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+  text-decoration-color: rgba(102, 102, 102, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &:hover {
+    color: var(--link-hover-color);
+    text-decoration-color: var(--link-hover-color);
+  }
+`;
+
+const Copyright = styled.div`
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: 2rem;
+  text-align: center;
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--nav-hover-background);
+  padding-top: 1.5rem;
 `;
 
 const SupportLink = styled(BaseFooterLink)`
@@ -68,8 +96,23 @@ const SupportLink = styled(BaseFooterLink)`
   color: var(--text-color);
 
   svg {
-    color: var(--accent-color);
+    color: #a259ff;
   }
+`;
+
+const LogoPlaceholder = styled.div`
+  width: 200px;
+  height: 48px;
+  background: #bbb;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  user-select: none;
 `;
 
 export function Footer() {
@@ -79,17 +122,36 @@ export function Footer() {
   return (
     <FooterWrapper>
       <FooterContent>
-        <Copyright>
-          ©  {year} A11Y Wiki. Все материалы распространяются по лицензии MIT.
-        </Copyright>
-        <FooterLinks>
-          <FooterLink to="/feedback">
-            Обратная связь
-          </FooterLink>
-          <SupportLink to="/support" onClick={() => focusRef && focusRef.focus()}>
-            Поддержать проект <FaHeart />
-          </SupportLink>
-        </FooterLinks>
+        <FooterSection>
+          <LogoPlaceholder>LOGO</LogoPlaceholder>
+          © {year} ALLYINFO.RU Материалы распространяются по лицензии MIT.
+        </FooterSection>
+
+        <FooterSection>
+          <SectionTitle>О проекте</SectionTitle>
+          <FooterLinks>
+            <BaseFooterLink to="/feedback">
+              Обратная связь
+            </BaseFooterLink>
+            <SupportLink to="/support" onClick={() => focusRef && focusRef.focus()}>
+              Поддержать проект <FaHeart />
+            </SupportLink>
+          </FooterLinks>
+        </FooterSection>
+
+        <FooterSection>
+          <SectionTitle>Сотрудничество</SectionTitle>
+          <FooterLinks>
+            <ExternalLink href="https://t.me/bonnysveta" target="_blank" rel="noopener noreferrer">
+              <FaTelegram /> Написать в Telegram
+            </ExternalLink>
+            <ExternalLink href="https://t.me/allyinforu" target="_blank" rel="noopener noreferrer">
+              <FaTelegram /> Наш канал
+            </ExternalLink>
+          </FooterLinks>
+        </FooterSection>
+
+        
       </FooterContent>
     </FooterWrapper>
   );

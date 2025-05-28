@@ -115,7 +115,7 @@ export const EmptyState = styled.div`
 `;
 
 export const ViewAllLink = styled(Link)`
-  color: var(--link-color);
+  color: var(--link-hover-color);
   font-size: 0.9rem;
   text-decoration: none;
   display: flex;

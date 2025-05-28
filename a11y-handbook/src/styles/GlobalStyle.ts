@@ -15,7 +15,7 @@ export const GlobalStyle = createGlobalStyle`
     --resource-link-background: #ffffff;
     --text-color: #333333;
     --link-color: #007bff;
-    --link-hover-color: #0056b3;
+    --link-hover-color: #a259ff;
     --nav-background: #f8f9fa;
     --nav-hover-background: rgba(0, 0, 0, 0.05);
     --accent-color: #0070f3;
@@ -48,7 +48,7 @@ export const GlobalStyle = createGlobalStyle`
     --resource-link-background: #2d2d2d;
     --text-color: #e2dddd;
     --link-color: #4dabf7;
-    --link-hover-color: #74c0fc;
+    --link-hover-color: #b98aff;
     --nav-background: #2d2d2d;
     --nav-hover-background: rgba(255, 255, 255, 0.1);
     --accent-color: #66b3ff;

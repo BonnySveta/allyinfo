@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { FocusOverlay } from '../FocusOverlay/FocusOverlay';
 import { useFocusOverlay } from '../../context/FocusOverlayContext';
 import { FocusContext } from '../../context/FocusContext';
+import { FaHeart } from 'react-icons/fa';
 
 const HeaderWrapper = styled.header<{ $isScrolled: boolean }>`
   width: 100%;
@@ -30,7 +31,7 @@ const HeaderContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
   color: var(--text-color);
@@ -76,7 +77,7 @@ const NavLink = styled(RouterNavLink)`
       right: 0.5rem;
       bottom: 0;
       height: 2px;
-      background-color: var(--accent-color);
+      background-color: var(--link-hover-color);
       border-radius: 2px;
     }
   }
@@ -166,6 +167,10 @@ const SupportLink = styled(NavLink)`
   align-items: center;
   gap: 0.5rem;
   
+  svg {
+    color: #a259ff;
+    font-size: 1.1rem;
+  }
   &:hover {
     opacity: 0.9;
   }
@@ -390,8 +395,8 @@ export function Header() {
             </NavItem>
             <NavItem>
               <SupportLink to="/support" onClick={closeMenu}>
-                <span role="img" aria-hidden="true">❤️</span>
                 Поддержать проект
+                <FaHeart />
               </SupportLink>
             </NavItem>
           </NavList>
