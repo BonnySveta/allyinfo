@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useContext } from 'react';
 import { NavLink as RouterNavLink } from 'react-router-dom';
 import { ThemeToggle } from '../ThemeToggle/ThemeToggle';
 import styled from 'styled-components';
 import { useAuth } from '../../context/AuthContext';
 import { FocusOverlay } from '../FocusOverlay/FocusOverlay';
 import { useFocusOverlay } from '../../context/FocusOverlayContext';
+import { FocusContext } from '../../context/FocusContext';
 
 const HeaderWrapper = styled.header<{ $isScrolled: boolean }>`
   width: 100%;
@@ -354,6 +355,13 @@ export function Header() {
     }
   }, [isMenuOpen]);
 
+  const navMainRef = useRef<HTMLAnchorElement>(null);
+  const { setFocusRef } = useContext(FocusContext);
+
+  useEffect(() => {
+    setFocusRef(navMainRef.current || undefined);
+  }, [setFocusRef]);
+
   return (
     <HeaderWrapper $isScrolled={isScrolled}>
       <HeaderContainer ref={headerRef}>
@@ -372,7 +380,7 @@ export function Header() {
         <Nav id="main-nav" $isOpen={isMenuOpen}>
           <NavList>
             <NavItem>
-              <NavLink to="/" end onClick={closeMenu}>Главная</NavLink>
+              <NavLink to="/" end onClick={closeMenu} ref={navMainRef}>Главная</NavLink>
             </NavItem>
             <NavItem>
               <NavLink to="/getting-started" onClick={closeMenu}>Начинающим</NavLink>
@@ -394,13 +402,13 @@ export function Header() {
                 Админка
               </AdminLink>
             )}
-            <ScreenReaderButton 
+            {/* <ScreenReaderButton 
               className="screen-reader-toggle"
               onClick={() => setIsActive(!isActive)}
               aria-pressed={isActive}
             >
               Имитация скринридера
-            </ScreenReaderButton>
+            </ScreenReaderButton> */}
             <ThemeToggle />
           </Controls>
         </Nav>

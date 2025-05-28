@@ -38,8 +38,8 @@ export function Card({ title, path, resources = [], viewAllText }: CardProps) {
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         {hasMoreResources && (
-          <ViewAllLink to={path}>
-            {customViewAllText}
+          <ViewAllLink to={path} aria-label={`Показать все ${resources.length} ${viewAllText}`}>
+            Все {customViewAllText}
           </ViewAllLink>
         )}
       </CardHeader>
