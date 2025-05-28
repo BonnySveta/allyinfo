@@ -3,6 +3,7 @@ import { ResourceSection, pageConfig } from '../../pages/ResourcePage/config';
 import { useResources } from '../../hooks/useResources';
 import { ResourceItem } from '../ResourceItem/ResourceItem';
 import { Resource } from '../../types/resource';
+import { Breadcrumbs } from '../Breadcrumbs';
 
 interface ResourcePageProps {
   section: ResourceSection;
@@ -55,10 +56,15 @@ const LoadingText = styled.div`
 
 export const ResourcePage: React.FC<ResourcePageProps> = ({ section }) => {
   const { resources, loading, error } = useResources(pageConfig[section].section_id);
+  const crumbs = [
+    { label: 'Главная', to: '/' },
+    { label: pageConfig[section].title }
+  ];
 
   if (loading) {
     return (
       <PageContainer>
+        <Breadcrumbs items={crumbs} />
         <Title>{pageConfig[section].title}</Title>
         <Description>{pageConfig[section].description}</Description>
         <LoadingText>Загрузка материалов...</LoadingText>
@@ -69,6 +75,7 @@ export const ResourcePage: React.FC<ResourcePageProps> = ({ section }) => {
   if (error) {
     return (
       <PageContainer>
+        <Breadcrumbs items={crumbs} />
         <Title>{pageConfig[section].title}</Title>
         <Description>{pageConfig[section].description}</Description>
         <LoadingText>Произошла ошибка при загрузке материалов</LoadingText>
@@ -78,6 +85,7 @@ export const ResourcePage: React.FC<ResourcePageProps> = ({ section }) => {
 
   return (
     <PageContainer>
+      <Breadcrumbs items={crumbs} />
       <Title>{pageConfig[section].title}</Title>
       <Description>{pageConfig[section].description}</Description>
       <ResourcesList>
