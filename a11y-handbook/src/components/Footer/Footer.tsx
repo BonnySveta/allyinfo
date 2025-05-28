@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { FaHeart } from 'react-icons/fa';
+import { useContext } from 'react';
+import { FocusContext } from '../../context/FocusContext';
 
 const FooterWrapper = styled.footer`
   flex-shrink: 0;
@@ -72,6 +74,8 @@ const SupportLink = styled(BaseFooterLink)`
 
 export function Footer() {
   const year = new Date().getFullYear();
+  const { focusRef } = useContext(FocusContext);
+
   return (
     <FooterWrapper>
       <FooterContent>
@@ -82,7 +86,7 @@ export function Footer() {
           <FooterLink to="/feedback">
             Обратная связь
           </FooterLink>
-          <SupportLink to="/support">
+          <SupportLink to="/support" onClick={() => focusRef && focusRef.focus()}>
             Поддержать проект <FaHeart />
           </SupportLink>
         </FooterLinks>
