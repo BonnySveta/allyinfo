@@ -402,13 +402,13 @@ export function Header() {
                 Админка
               </AdminLink>
             )}
-            <ScreenReaderButton 
+            {/* <ScreenReaderButton 
               className="screen-reader-toggle"
               onClick={() => setIsActive(!isActive)}
               aria-pressed={isActive}
             >
               Имитация скринридера
-            </ScreenReaderButton>
+            </ScreenReaderButton> */}
             <ThemeToggle />
           </Controls>
         </Nav>
