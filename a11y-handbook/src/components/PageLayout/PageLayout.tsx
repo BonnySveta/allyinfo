@@ -27,14 +27,12 @@ const Section = styled.section`
 `;
 
 interface PageLayoutProps {
-  title: string;
   children: React.ReactNode;
 }
 
-export function PageLayout({ title, children }: PageLayoutProps) {
+export function PageLayout({ children }: PageLayoutProps) {
   return (
     <Container>
-      <Title>{title}</Title>
       {children}
     </Container>
   );

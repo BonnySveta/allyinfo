@@ -45,16 +45,29 @@ const BannerLink = styled.a`
   }
 `;
 
-export const StartBanner = () => {
+interface BannerProps {
+  title?: React.ReactNode;
+  text?: React.ReactNode;
+  link?: string;
+  linkLabel?: React.ReactNode;
+  emoji?: React.ReactNode;
+}
+
+export const Banner = ({ title, text, link, linkLabel, emoji }: BannerProps) => {
   return (
     <BannerContainer>
-      <BannerTitle>
-        <span>С чего начать?</span>
-        <span role="img" aria-hidden="true">💡</span>
-      </BannerTitle>
-      <BannerLink href="/getting-started" aria-label="С чего начать">
-        WCAG и другие материалы для тех, кто начинает изучать цифровую доступность
-      </BannerLink>
+      {title && (
+        <BannerTitle>
+          <span>{title}</span>
+          {emoji && <span role="img" aria-hidden="true">{emoji}</span>}
+        </BannerTitle>
+      )}
+      {text && <div>{text}</div>}
+      {link && linkLabel && (
+        <BannerLink href={link} aria-label={typeof linkLabel === 'string' ? linkLabel : undefined}>
+          {linkLabel}
+        </BannerLink>
+      )}
     </BannerContainer>
   );
 }; 

@@ -1,7 +1,7 @@
 import { FC, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
-import { StartBanner } from '../../components/StartBanner/StartBanner';
+import { Banner } from '../../components/Banner/Banner';
 import { FilterChipsPanel } from '../../components/FilterChips';
 import { Card } from '../../components/Card/Card';
 import { CardSkeleton } from '../../components/Skeleton/CardSkeleton';
@@ -146,7 +146,13 @@ export const Home: FC<HomeProps> = ({
           <Title>ALLYINFO</Title>
           <Subtitle>каталог материалов цифровой доступности</Subtitle>
         </TitleContainer>
-        <StartBanner />
+        <Banner
+          title="С чего начать?"
+          text={null}
+          link="/getting-started"
+          linkLabel="WCAG и другие материалы для тех, кто начинает изучать цифровую доступность"
+          emoji="💡"
+        />
       </TitleSection>
       <FilterChipsPanel
         categories={categories}
