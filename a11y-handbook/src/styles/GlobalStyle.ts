@@ -18,7 +18,7 @@ export const GlobalStyle = createGlobalStyle`
     --link-hover-color: #a259ff;
     --nav-background: #f8f9fa;
     --nav-hover-background: rgba(0, 0, 0, 0.05);
-    --accent-color: #0070f3;
+    --accent-color: #a259ff;
     --screen-reader-button-color: #0070f3;
     --hint-color: #252526;
     --button-hover-background: rgba(0, 0, 0, 0.05);
@@ -51,7 +51,7 @@ export const GlobalStyle = createGlobalStyle`
     --link-hover-color: #b98aff;
     --nav-background: #2d2d2d;
     --nav-hover-background: rgba(255, 255, 255, 0.1);
-    --accent-color: #66b3ff;
+    --accent-color: #b98aff;
     --screen-reader-button-color: #2671ba;
     --hint-color: rgb(38 38 38 / 85%);
     --button-hover-background: rgba(255, 255, 255, 0.1);

@@ -35,14 +35,14 @@ export function PaymentMethod({
       <AnimatedHearts count={heartsCount} isVisible={isHovered} />
       <PaymentMethodTitle>{title}</PaymentMethodTitle>
       <PaymentSection>
+        <QRCode src={qrCode} alt={qrAlt} />
         <PaymentLink 
           href={link}
           target="_blank"
           rel="noopener noreferrer"
         >
-          {linkText}
+          Поддержать
         </PaymentLink>
-        <QRCode src={qrCode} alt={qrAlt} />
       </PaymentSection>
     </PaymentMethodContainer>
   );
