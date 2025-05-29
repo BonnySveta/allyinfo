@@ -117,28 +117,6 @@ export const Home: FC<HomeProps> = ({
     loadSections();
   }, []);
 
-  useEffect(() => {
-    if (!loading && !error) {
-      const totalResources = Object.values(filteredResources)
-        .reduce((sum, resources) => sum + resources.length, 0);
-
-      let announcement = '';
-      if (selectedCategories.length > 0) {
-        if (totalResources === 0) {
-          announcement = 'По выбранным фильтрам ничего не найдено';
-        } else {
-          announcement = `Найдено ${totalResources} материалов`;
-        }
-      } else if (totalResources > 0) {
-        announcement = `Показаны все ${totalResources} материалов`;
-      }
-
-      if (announcement) {
-        announceUpdate(announcement);
-      }
-    }
-  }, [filteredResources, selectedCategories, loading, error, announceUpdate]);
-
   return (
     <>
       <TitleSection>
