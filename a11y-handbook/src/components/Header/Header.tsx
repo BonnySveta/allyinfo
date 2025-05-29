@@ -175,10 +175,6 @@ const SupportLink = styled(NavLink)`
     opacity: 0.9;
   }
 
-  &.active::after {
-    display: none;
-  }
-
   span {
     font-size: 1.1rem;
   }
