@@ -4,6 +4,12 @@ import yMoneyQR from '../../assets/y-money.svg';
 import vtbQR from '../../assets/vtb.svg';
 import { FaTelegram } from 'react-icons/fa';
 import styled from 'styled-components';
+import BondarenkoS from '../../assets/avatars/svetlana_bondarenko.jpg';
+import ZhilkinD from '../../assets/avatars/denis_zhilkin.jpg';
+import KochegarovaE from '../../assets/avatars/elena_kochegarova.jpg';
+import ChigarevA from '../../assets/avatars/anton_chigarev.jpg';
+import BondarenkoE from '../../assets/avatars/evgeniy_bondarenko.jpg';
+import GermanA from '../../assets/avatars/angelica_german.jpg';
 
 const TeamGrid = styled.div`
   display: grid;
@@ -37,6 +43,11 @@ const Avatar = styled.div`
   font-weight: bold;
   user-select: none;
   flex-shrink: 0;
+  overflow: hidden;
+`;
+
+const AvatarImg = styled.img`
+  width: 100%;
 `;
 
 const Info = styled.div`
@@ -71,40 +82,46 @@ const TelegramLink = styled.a`
 
 const team = [
   {
-    name: 'Светлана',
+    name: 'Светлана Бондаренко',
     initials: 'СВ',
     role: 'Создатель проекта',
     telegram: 'bonnysveta',
+    avatar: BondarenkoS,
   },
   {
     name: 'Денис Жилкин',
     initials: 'ДЖ',
     role: 'DevOps-инженер',
-    telegram: '',
+    telegram: 'dezorden',
+    avatar: ZhilkinD,
   },
   {
-    name: 'Лена Кочегарова',
-    initials: 'ЛК',
+    name: 'Елена Кочегарова',
+    initials: 'ЕК',
     role: 'Фронтенд-разработчик',
-    telegram: '',
+    telegram: 'elenakoch122',
+    avatar: KochegarovaE,
   },
   {
     name: 'Антон Чигарёв',
     initials: 'АЧ',
     role: 'Тестировщик невизуальной доступности',
-    telegram: '',
+    telegram: 'Ant0n_56',
+    avatar: ChigarevA,
   },
   {
     name: 'Евгений Бондаренко',
     initials: 'ЕБ',
     role: 'Художник, автор маскота Элли',
-    telegram: '',
+    telegram: 'Opename',
+    avatar: BondarenkoE,
   },
   {
     name: 'Анжелика Герман',
     initials: 'АГ',
     role: 'Веб-дизайнер',
-    telegram: '',
+    telegram: 'AnzhelikaGerman',
+    avatar: GermanA,
   },
   // Добавьте ещё участников по мере необходимости
 ];
@@ -165,7 +182,7 @@ export function Support() {
         <TeamGrid>
           {team.map((member, idx) => (
             <TeamCard key={idx}>
-              <Avatar>{member.initials}</Avatar>
+              <Avatar>{member.avatar ? <AvatarImg src={member.avatar} alt="" /> : member.initials}</Avatar>
               <Info>
                 <Name>{member.name}</Name>
                 <Role>{member.role}</Role>
