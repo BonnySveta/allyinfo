@@ -47,6 +47,12 @@ export const navigationConfig: NavigationItem[] = [
     path: '/books',
     section: '/books',
     isNew: false
+  },
+  {
+    title: 'Инструменты',
+    path: '/tools',
+    section: '/tools',
+    isNew: false
   }
 ]; 
 
