@@ -7,6 +7,8 @@ import { FocusContext } from '../../context/FocusContext';
 const FooterWrapper = styled.footer`
   flex-shrink: 0;
   margin-top: auto;
+  font-size: 0.9rem;
+  background: var(--nav-background);
 `;
 
 const FooterContent = styled.div`
@@ -28,7 +30,12 @@ const FooterContent = styled.div`
 const FooterSection = styled.div`
   display: flex;
   flex-direction: column;
+  justify-content: end;
   gap: 1rem;
+
+  @media (max-width: 768px) {
+    align-items: center;
+  }
 `;
 
 const SectionTitle = styled.h3`
@@ -72,10 +79,14 @@ const ExternalLink = styled.a`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-
+  
   &:hover {
     color: var(--link-hover-color);
     text-decoration-color: var(--link-hover-color);
+  }
+  
+  @media (max-width: 768px) {
+    justify-content: center;
   }
 `;
 
@@ -102,7 +113,7 @@ const SupportLink = styled(BaseFooterLink)`
 
 const LogoPlaceholder = styled.div`
   width: 200px;
-  height: 48px;
+  height: 38px;
   background: #bbb;
   color: #fff;
   display: flex;
@@ -111,7 +122,6 @@ const LogoPlaceholder = styled.div`
   font-weight: bold;
   font-size: 1.2rem;
   border-radius: 8px;
-  margin-bottom: 1rem;
   user-select: none;
 `;
 
@@ -124,7 +134,7 @@ export function Footer() {
       <FooterContent>
         <FooterSection>
           <LogoPlaceholder>LOGO</LogoPlaceholder>
-          © {year} ALLYINFO.RU Материалы распространяются по лицензии MIT.
+          © {year} ALLYINFO.RU<br/>Материалы распространяются по лицензии MIT.
         </FooterSection>
 
         <FooterSection>
