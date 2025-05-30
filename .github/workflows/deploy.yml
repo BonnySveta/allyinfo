@@ -30,7 +30,9 @@ jobs:
       - name: Deploy to Server
         run: |
           ssh -p 1617 hacker@62.60.248.172 '
+            cd /var/www/a11y-handbook/allyinfo &&
+            git pull &&
             pm2 restart all &&
-            cd /var/www/a11y-handbook/allyinfo/a11y-handbook/ &&
+            cd /a11y-handbook/ &&
             npm run build 
           '
