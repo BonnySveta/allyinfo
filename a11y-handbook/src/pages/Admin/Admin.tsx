@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import { scrollToTop } from '../../utils/scrollOnTop';
 
 const AdminContainer = styled.div`
   max-width: 800px;
@@ -49,13 +50,13 @@ export function Admin() {
     <AdminContainer>
       <Title>Админ-панель</Title>
       <AdminGrid>
-        <AdminCard to="/admin/materials">
+        <AdminCard to="/admin/materials" onClick={scrollToTop}>
           <CardTitle>Материалы</CardTitle>
           <CardDescription>
             Управление всеми материалами: модерация, публикация, фильтры по статусу и категориям
           </CardDescription>
         </AdminCard>
-        <AdminCard to="/admin/feedback-list">
+        <AdminCard to="/admin/feedback-list" onClick={scrollToTop}>
           <CardTitle>Обратная связь</CardTitle>
           <CardDescription>
             Просмотр полученной обратной связи от пользователей

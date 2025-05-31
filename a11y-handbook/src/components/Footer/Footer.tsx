@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FaHeart, FaTelegram } from 'react-icons/fa';
 import { useContext } from 'react';
 import { FocusContext } from '../../context/FocusContext';
+import { scrollToTop } from '../../utils/scrollOnTop';
 
 const FooterWrapper = styled.footer`
   flex-shrink: 0;
@@ -140,10 +141,13 @@ export function Footer() {
         <FooterSection>
           <SectionTitle>О проекте</SectionTitle>
           <FooterLinks>
-            <BaseFooterLink to="/feedback">
+            <BaseFooterLink to="/feedback" onClick={scrollToTop}>
               Обратная связь
             </BaseFooterLink>
-            <SupportLink to="/support" onClick={() => focusRef && focusRef.focus()}>
+            <SupportLink to="/support" onClick={() => {
+              scrollToTop();
+              focusRef && focusRef.focus();
+            }}>
               Поддержать проект <FaHeart />
             </SupportLink>
           </FooterLinks>
