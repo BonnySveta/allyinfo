@@ -115,8 +115,8 @@ const SupportLink = styled(BaseFooterLink)`
 const LogoPlaceholder = styled.div`
   width: 200px;
   height: 38px;
-  background: #bbb;
-  color: #fff;
+  background: #a259ff;
+  color: #fbbb1c;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -134,7 +134,7 @@ export function Footer() {
     <FooterWrapper>
       <FooterContent>
         <FooterSection>
-          <LogoPlaceholder>LOGO</LogoPlaceholder>
+          <LogoPlaceholder>ALLYINFO</LogoPlaceholder>
           © {year} ALLYINFO.RU<br/>Материалы распространяются по лицензии MIT.
         </FooterSection>
 
