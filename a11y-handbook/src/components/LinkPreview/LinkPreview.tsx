@@ -206,9 +206,9 @@ export function LinkPreview({ url, onLoad, getPreview, section }: LinkPreviewPro
         onLoad(data);
       }
     } catch (err) {
-      if (mountedRef.current) {
-        setError('Не удалось загрузить предпросмотр');
-      }
+      // if (mountedRef.current) {
+      //   setError('Не удалось загрузить предпросмотр');
+      // }
     } finally {
       if (mountedRef.current) {
         setLoading(false);

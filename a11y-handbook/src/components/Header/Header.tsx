@@ -7,6 +7,7 @@ import { FocusOverlay } from '../FocusOverlay/FocusOverlay';
 import { useFocusOverlay } from '../../context/FocusOverlayContext';
 import { FocusContext } from '../../context/FocusContext';
 import { FaHeart } from 'react-icons/fa';
+import { scrollToTop } from '../../utils/scrollOnTop';
 
 const HeaderWrapper = styled.header<{ $isScrolled: boolean }>`
   width: 100%;
@@ -295,6 +296,7 @@ export function Header() {
 
   const closeMenu = () => {
     setIsMenuOpen(false);
+    scrollToTop();
   };
 
   const toggleOverlay = () => {

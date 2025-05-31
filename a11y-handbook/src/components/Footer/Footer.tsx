@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FaHeart, FaTelegram } from 'react-icons/fa';
 import { useContext } from 'react';
 import { FocusContext } from '../../context/FocusContext';
+import { scrollToTop } from '../../utils/scrollOnTop';
 
 const FooterWrapper = styled.footer`
   flex-shrink: 0;
@@ -114,8 +115,8 @@ const SupportLink = styled(BaseFooterLink)`
 const LogoPlaceholder = styled.div`
   width: 200px;
   height: 38px;
-  background: #bbb;
-  color: #fff;
+  background: #a259ff;
+  color: #fbbb1c;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -133,17 +134,20 @@ export function Footer() {
     <FooterWrapper>
       <FooterContent>
         <FooterSection>
-          <LogoPlaceholder>LOGO</LogoPlaceholder>
+          <LogoPlaceholder>ALLYINFO</LogoPlaceholder>
           © {year} ALLYINFO.RU<br/>Материалы распространяются по лицензии MIT.
         </FooterSection>
 
         <FooterSection>
           <SectionTitle>О проекте</SectionTitle>
           <FooterLinks>
-            <BaseFooterLink to="/feedback">
+            <BaseFooterLink to="/feedback" onClick={scrollToTop}>
               Обратная связь
             </BaseFooterLink>
-            <SupportLink to="/support" onClick={() => focusRef && focusRef.focus()}>
+            <SupportLink to="/support" onClick={() => {
+              scrollToTop();
+              focusRef && focusRef.focus();
+            }}>
               Поддержать проект <FaHeart />
             </SupportLink>
           </FooterLinks>

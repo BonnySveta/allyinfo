@@ -16,6 +16,7 @@ import {
   EmptyState,
   ViewAllLink
 } from './styles';
+import { scrollToTop } from '../../utils/scrollOnTop';
 
 interface CardProps {
   title: string;
@@ -30,16 +31,14 @@ export function Card({ title, path, resources = [], viewAllText }: CardProps) {
   );
 
   const hasMoreResources = resources.length > 3;
-  const defaultViewAllText = `Все материалы (${resources.length})`;
-  const customViewAllText = viewAllText ? `${viewAllText} (${resources.length})` : defaultViewAllText;
 
   return (
     <CardContainer>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         {hasMoreResources && (
-          <ViewAllLink to={path} aria-label={`Показать все ${resources.length} ${viewAllText}`}>
-            Все {customViewAllText}
+          <ViewAllLink to={path} aria-label={`Все ${resources.length} ${viewAllText}`} onClick={scrollToTop}>
+            Все ({resources.length})
           </ViewAllLink>
         )}
       </CardHeader>

@@ -38,9 +38,15 @@ export const pageConfig = {
   resources: { 
     path: '/resources', 
     title: 'Ресурсы',
-    description: 'Полезные ресурсы и инструменты для работы с доступностью',
+    description: 'Полезные ресурсы для работы с доступностью',
     section_id: 'resources'
-  }
+  },
+  tools: {
+    path: '/tools',
+    title: 'Инструменты',
+    description: 'Полезные инструменты для работы с доступностью',
+    section_id: 'tools'
+  },
 } as const;
 
 export type ResourceSection = keyof typeof pageConfig; 

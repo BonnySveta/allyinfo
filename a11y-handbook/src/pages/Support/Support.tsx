@@ -10,6 +10,7 @@ import KochegarovaE from '../../assets/avatars/elena_kochegarova.jpg';
 import ChigarevA from '../../assets/avatars/anton_chigarev.jpg';
 import BondarenkoE from '../../assets/avatars/evgeniy_bondarenko.jpg';
 import GermanA from '../../assets/avatars/angelica_german.jpg';
+import { scrollToTop } from '../../utils/scrollOnTop';
 
 const TeamGrid = styled.div`
   display: grid;
@@ -200,7 +201,7 @@ export function Support() {
       <Section>
         <SectionTitle>Как ещё вы можете помочь</SectionTitle>
         <Text>
-          • Предложить полезный материал через <StyledLink to="/suggest">форму на сайте</StyledLink><br />
+          • Предложить полезный материал через <StyledLink to="/suggest" onClick={scrollToTop}>форму на сайте</StyledLink><br />
           • Рассказать о проекте коллегам и друзьям<br />
           • Поддержать проект финансово
         </Text>

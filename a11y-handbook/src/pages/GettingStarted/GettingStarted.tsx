@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import { PageLayout } from '../../components/PageLayout/PageLayout';
 import { Link } from 'react-router-dom';
 import { Banner } from '../../components/Banner/Banner';
+import { scrollToTop } from '../../utils/scrollOnTop';
 
 const Section = styled.section`
   margin-bottom: 3rem;
@@ -137,7 +138,7 @@ export function GettingStarted() {
             </ListItem>
           </List>
           <Text>
-            Если у вас есть предложения по материалам для начинающих — напишите нам через страницу <Link to="/feedback">Обратная связь</Link>!
+            Если у вас есть предложения по материалам для начинающих — напишите нам через страницу <Link to="/feedback" onClick={scrollToTop}>Обратная связь</Link>!
           </Text>
         </Section>
       </PageLayout>

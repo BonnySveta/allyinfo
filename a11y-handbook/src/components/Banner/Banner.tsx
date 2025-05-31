@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { scrollToTop } from '../../utils/scrollOnTop';
 
 const BannerContainer = styled.div`
   background: var(--banner-background);
@@ -64,7 +65,7 @@ export const Banner = ({ title, text, link, linkLabel, emoji }: BannerProps) => 
       )}
       {text && <div>{text}</div>}
       {link && linkLabel && (
-        <BannerLink href={link} aria-label={typeof linkLabel === 'string' ? linkLabel : undefined}>
+        <BannerLink href={link} aria-label={typeof linkLabel === 'string' ? linkLabel : undefined} onClick={scrollToTop}>
           {linkLabel}
         </BannerLink>
       )}
