@@ -110,13 +110,13 @@ const team = [
     telegram: 'Ant0n_56',
     avatar: ChigarevA,
   },
-  {
-    name: 'Евгений Бондаренко',
-    initials: 'ЕБ',
-    role: 'Художник, автор маскота Элли',
-    telegram: 'Opename',
-    avatar: BondarenkoE,
-  },
+  // {
+  //   name: 'Евгений Бондаренко',
+  //   initials: 'ЕБ',
+  //   role: 'Художник, автор маскота Элли',
+  //   telegram: 'Opename',
+  //   avatar: BondarenkoE,
+  // },
   {
     name: 'Анжелика Герман',
     initials: 'АГ',
@@ -164,6 +164,7 @@ export function Support() {
             linkText="Перевести через ВТБ"
             heartsCount={6}
           />
+          {/*
           <PaymentMethod 
             title="Перевод с карты"
             qrCode={yMoneyQR}
@@ -172,6 +173,7 @@ export function Support() {
             linkText="Перевести через ЮMoney"
             heartsCount={4}
           />
+          */}
         </PaymentMethods>
       </Section>
 
