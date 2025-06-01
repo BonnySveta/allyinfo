@@ -118,10 +118,10 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
     e.preventDefault();
     setError('');
 
-    if (isPreviewLoading) {
-      setError('Дождитесь загрузки предпросмотра');
-      return;
-    }
+    // if (isPreviewLoading) {
+    //   setError('Дождитесь загрузки предпросмотра');
+    //   return;
+    // }
     if (!url) {
       setError('Пожалуйста, заполните все обязательные поля');
       return;
@@ -256,7 +256,7 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
           </ErrorMessage>
         )}
 
-        <SubmitButton type="submit" disabled={isLoading || isPreviewLoading}>
+        <SubmitButton type="submit" disabled={isLoading}>
           {isLoading ? (
             <>
               Отправка

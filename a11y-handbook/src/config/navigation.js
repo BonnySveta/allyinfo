@@ -43,6 +43,12 @@ exports.navigationConfig = [
         path: '/books',
         section: '/books',
         isNew: false
+    },
+    {
+        title: 'Инструменты',
+        path: '/tools',
+        section: '/tools',
+        isNew: false
     }
 ];
 console.log('Navigation sections:', exports.navigationConfig.map(item => item.section));
