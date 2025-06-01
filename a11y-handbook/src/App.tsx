@@ -42,7 +42,6 @@ const pageConfig = {
   youtube: { path: '/youtube', title: 'YouTube-каналы' },
   books: { path: '/books', title: 'Книги' },
   resources: { path: '/resources', title: 'Ресурсы' },
-  tools: { path: '/tools', title: 'Инструменты' },
 };
 
 function App() {
