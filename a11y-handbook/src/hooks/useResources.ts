@@ -1,8 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Resource, ResourcesBySection, ResourceWithSectionSlug } from '../types/resource';
+import {
+  Resource,
+  ResourcesBySection,
+  ResourceWithSectionSlug,
+} from '../types/resource';
 import { CategoryId } from '../types/category';
 import { ResourceSection } from '../pages/ResourcePage/config';
-import { fetchSuggestions as fetchResources, fetchCategories, fetchSections, fetchResourceCategories } from '../services/supabase';
+import {
+  fetchSectionsWithResourcesAndCategories,
+  fetchCategories,
+} from '../services/supabase';
 
 interface UseResourcesBaseResult {
   loading: boolean;
@@ -20,132 +27,185 @@ export interface UseResourcesSectionResult extends UseResourcesBaseResult {
   resources: Resource[];
 }
 
-type UseResourcesReturn<T> = T extends ResourceSection 
-  ? UseResourcesSectionResult 
+type UseResourcesReturn<T> = T extends ResourceSection
+  ? UseResourcesSectionResult
   : UseResourcesHomeResult;
 
+/**
+ * Хук для получения ресурсов.
+ *
+ * - Если `section` не указан, возвращаем структуру вида:
+ *     {
+ *       [sectionId: string]: ResourceWithSectionSlug[]
+ *     }
+ *   (все секции и вложенные в них approved‐ресурсы, сгруппированные по sectionId).
+ *
+ * - Если `section` указан (slug секции), возвращаем простой массив `Resource[]`
+ *   для заданной секции.
+ */
 export function useResources<T extends ResourceSection | undefined = undefined>(
   section?: T
 ): UseResourcesReturn<T> {
-  const [resources, setResources] = useState<ResourcesBySection | ResourceWithSectionSlug[]>(section ? [] : {});
+  // Для home: resources — объект ResourcesBySection ({} по умолчанию).
+  // Для конкретной секции: resources — массив ResourceWithSectionSlug[] ([] по умолчанию).
+  const [resources, setResources] = useState<
+    ResourcesBySection | ResourceWithSectionSlug[]
+  >(section ? [] : {});
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState<CategoryId[]>([]);
+
+  // Список всех категорий (для панели фильтров на home).
   const [categories, setCategories] = useState<any[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<CategoryId[]>(
+    []
+  );
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        console.log('Fetching resources for section:', section);
-        
-        // Получаем все материалы со статусом approved
-        const resourcesRaw = await fetchResources('approved');
-        console.log('Raw resources:', resourcesRaw);
-        
-        // Получаем все категории (для сопоставления)
+
+        // 1. Загружаем сразу все секции с вложенными ресурсами и категориями:
+        const sectionsWithData = await fetchSectionsWithResourcesAndCategories();
+
+        // 2. Одновременно можем загрузить общий список категорий (для фильтрации на home):
         const cats = await fetchCategories();
         setCategories(cats);
-        
-        // Получаем все секции (для сопоставления)
-        const sections = await fetchSections();
-        console.log('Available sections:', sections);
 
-        // Преобразуем данные в нужный формат
+        // Если пользователь указал конкретную секцию (по slug) – показываем только её ресурсы.
         if (section) {
-          // Для страницы конкретной секции
-          const sectionObj = sections.find((s: any) => s.slug === section);
-          console.log('Found section object:', sectionObj);
+          // Найдём объект нужной секции по slug:
+          const sectionObj = sectionsWithData.find(
+            (s: any) => s.slug === section
+          );
+
           if (!sectionObj) {
+            // Если такого slug нет – возвращаем ошибку
             setResources([]);
             setError('Секция не найдена');
             setLoading(false);
             return;
           }
-          const sectionId = sectionObj.id;
-          const sectionResources = await Promise.all(
-            resourcesRaw
-              .filter((item: any) => item.section_id === sectionId)
-              .map(async (item: any) => ({
-                id: item.id,
-                url: item.url,
-                section_id: item.section_id,
-                section: sectionObj?.label || '',
-                section_slug: sectionObj?.slug || '',
-                description: item.description || '',
-                createdAt: item.created_at,
-                categories: await fetchResourceCategories(item.id),
-                title: item.title || '',
-                descriptionFull: item.preview_description || '',
-                image: item.preview_image || '',
-                favicon: item.favicon || item.preview_favicon || '',
-                domain: item.domain || item.preview_domain || ''
-              }))
-          );
-          console.log('Filtered resources for section:', sectionResources);
-          setResources(sectionResources as ResourceWithSectionSlug[]);
+
+          // В sectionObj.resources уже лежит массив “approved” ресурсов с вложенными resource_categories → categories.
+          // Преобразуем каждый ресурс в нужный формат ResourceWithSectionSlug:
+          const sectionResources: ResourceWithSectionSlug[] =
+            sectionObj.resources.map((r: any) => {
+              // r.resource_categories: [{ category_id, categories: { id, label, color } }, …]
+              // Для удобства мы выпишем массив category_id:
+              const categoryIds: CategoryId[] = r.resource_categories.map(
+                (rc: any) => rc.category_id
+              );
+
+              return {
+                id: r.id,
+                url: r.url,
+                section_id: sectionObj.id,
+                section: sectionObj.label,
+                section_slug: sectionObj.slug,
+                // Возможно, у вас есть поля description / preview_description / preview_image
+                // Если они нужны, их тоже следует включить в fetchSectionsWithResourcesAndCategories
+                description: r.description || '',
+                createdAt: r.created_at,
+                categories: categoryIds,
+                title: r.title || '',
+                // Здесь place‐holders – замените на реальные поля, если добавите их в select:
+                descriptionFull: r.preview_description || '',
+                image: r.preview_image || '',
+                favicon: r.favicon || r.preview_favicon || '',
+                domain: r.domain || r.preview_domain || '',
+              };
+            });
+
+          setResources(sectionResources);
         } else {
-          // Для главной страницы: группируем по section_id
-          const grouped = {} as ResourcesBySection;
-          for (const item of resourcesRaw) {
-            const sectionKey = item.section_id;
-            const sectionObj = sections.find((s: any) => s.id === sectionKey);
-            const categories = await fetchResourceCategories(item.id);
-            if (!grouped[sectionKey]) grouped[sectionKey] = [];
-            grouped[sectionKey].push({
-              id: item.id,
-              url: item.url,
-              section_id: sectionKey,
-              section: sectionObj?.label || '',
-              section_slug: sectionObj?.slug || '',
-              description: item.description || '',
-              createdAt: item.created_at,
-              categories,
-              title: item.title || '',
-              descriptionFull: item.preview_description || '',
-              image: item.preview_image || '',
-              favicon: item.favicon || item.preview_favicon || '',
-              domain: item.domain || item.preview_domain || ''
-            } as ResourceWithSectionSlug);
+          // Home (главная): группируем по section_id
+          const grouped: ResourcesBySection = {};
+
+          // У нас теперь sectionsWithData = [ { id, label, slug, resources: [ … ] }, … ]
+          for (const sec of sectionsWithData) {
+            if (!sec.resources || sec.resources.length === 0) {
+              // Если в секции нет approved ресурсов, можно пропустить или положить пустой массив:
+              continue;
+            }
+
+            // Преобразуем каждый ресурс в ResourceWithSectionSlug
+            const mappedResources: ResourceWithSectionSlug[] =
+              sec.resources.map((r: any) => {
+                const categoryIds: CategoryId[] = r.resource_categories.map(
+                  (rc: any) => rc.category_id
+                );
+
+                return {
+                  id: r.id,
+                  url: r.url,
+                  section_id: sec.id,
+                  section: sec.label,
+                  section_slug: sec.slug,
+                  description: r.description || '',
+                  createdAt: r.created_at,
+                  categories: categoryIds,
+                  title: r.title || '',
+                  descriptionFull: r.preview_description || '',
+                  image: r.preview_image || '',
+                  favicon: r.favicon || r.preview_favicon || '',
+                  domain: r.domain || r.preview_domain || '',
+                };
+              });
+
+            // Ключем для grouped используем именно numeric ID секции (как раньше).
+            grouped[sec.id] = mappedResources;
           }
+
           setResources(grouped);
         }
+
         setError('');
-      } catch (error) {
-        console.error('Error fetching resources:', error);
+      } catch (err) {
+        console.error('Error fetching resources:', err);
         setError('Не удалось загрузить ресурсы');
       } finally {
         setLoading(false);
       }
     };
+
     fetchData();
   }, [section]);
 
+  /**
+   * Фильтрация по выбранным категориям:
+   * Если мы на home и выбраны какие-то категории → фильтруем grouped‐объект,
+   * оставляя только ресурсы, у которых есть хотя бы одна выбранная категория.
+   */
   const filteredResources = useMemo(() => {
     if (!section && selectedCategories.length > 0) {
       const grouped = resources as ResourcesBySection;
       return Object.fromEntries(
-        Object.entries(grouped).map(([section, items]) => [
-          section,
-          items.filter(item =>
-            item.categories?.some(cat => selectedCategories.includes(cat))
-          )
+        Object.entries(grouped).map(([secId, items]) => [
+          secId,
+          items.filter((item) =>
+            item.categories?.some((cat) => selectedCategories.includes(cat))
+          ),
         ])
       );
     }
     return resources;
   }, [resources, selectedCategories, section]);
 
-  return (section ? {
-    resources: resources as Resource[],
-    loading,
-    error
-  } : {
-    loading,
-    error,
-    selectedCategories,
-    setSelectedCategories,
-    filteredResources: filteredResources as ResourcesBySection,
-    categories
-  }) as UseResourcesReturn<T>;
-} 
+  // Возвращаем результат, тип возвращаемого значения зависит от того, указана ли секция:
+  return (section
+    ? {
+        resources: resources as Resource[],
+        loading,
+        error,
+      }
+    : {
+        loading,
+        error,
+        selectedCategories,
+        setSelectedCategories,
+        filteredResources: filteredResources as ResourcesBySection,
+        categories,
+      }) as UseResourcesReturn<T>;
+}

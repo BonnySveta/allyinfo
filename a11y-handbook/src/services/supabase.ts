@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL = "https://vcqyrubozjcocexvlvcy.supabase.co";
 // Ключ берём из переменной окружения REACT_APP_SUPABASE_KEY
 const supabase = createClient(SUPABASE_URL, process.env.REACT_APP_SUPABASE_KEY!);
-console.log('SUPABASE_KEY:', process.env.REACT_APP_SUPABASE_KEY);
+//console.log('SUPABASE_KEY:', process.env.REACT_APP_SUPABASE_KEY);
 
 export { supabase };
 
@@ -21,6 +21,40 @@ export function getImageUrl(path: string) {
 }
 
 // --- Работа с таблицей resources (материалы) ---
+
+// Получить все материалы c данными (например, только approved)
+export async function fetchSectionsWithResourcesAndCategories() {
+  const { data, error } = await supabase
+    .from('sections')
+    .select(`
+      id,
+      label,
+      slug,
+      resources (
+        id,
+        url,
+        title,
+        created_at,
+        status,
+        domain,
+        favicon,
+        description,
+        resource_categories (
+          category_id,
+          categories (
+            id,
+            label,
+            color
+          )
+        )
+      )
+    `)
+    .eq('resources.status', 'approved')
+    .order('created_at', { ascending: false, foreignTable: 'resources' })
+  if (error) throw error;
+  return data; 
+}
+
 
 // Получить все материалы (например, только approved)
 export async function fetchSuggestions(status: string = 'approved') {
