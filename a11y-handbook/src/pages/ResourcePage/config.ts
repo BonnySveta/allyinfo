@@ -5,6 +5,18 @@ export const pageConfig = {
     description: 'Полезные статьи о доступности',
     section_id: 'articles'
   },
+  blogs: { 
+    path: '/blogs', 
+    title: 'Блоги',
+    description: 'Блоги о цифровой доступности',
+    section_id: 'blogs'
+  },
+  wcag: { 
+    path: '/wcag', 
+    title: 'WCAG',
+    description: 'Материалы по WCAG и стандартам доступности',
+    section_id: 'wcag'
+  },
   telegram: { 
     path: '/telegram', 
     title: 'Telegram-каналы',
@@ -23,23 +35,17 @@ export const pageConfig = {
     description: 'Обучающие курсы по доступности',
     section_id: 'courses'
   },
-  youtube: { 
-    path: '/youtube', 
-    title: 'YouTube-каналы',
-    description: 'YouTube-каналы и выпуски о доступности',
-    section_id: 'youtube'
+  video: { 
+    path: '/video', 
+    title: 'Видео',
+    description: 'Видео и выпуски о доступности',
+    section_id: 'video'
   },
   books: { 
     path: '/books', 
     title: 'Книги',
     description: 'Книги о цифровой доступности',
     section_id: 'books'
-  },
-  resources: { 
-    path: '/resources', 
-    title: 'Ресурсы',
-    description: 'Полезные ресурсы для работы с доступностью',
-    section_id: 'resources'
   },
   tools: {
     path: '/tools',

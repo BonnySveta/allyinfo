@@ -36,12 +36,13 @@ const MainContainer = styled.main`
 
 const pageConfig = {
   articles: { path: '/articles', title: 'Статьи' },
+  blogs: { path: '/blogs', title: 'Блоги' },
+  wcag: { path: '/wcag', title: 'WCAG' },
   telegram: { path: '/telegram', title: 'Telegram-каналы' },
   podcasts: { path: '/podcasts', title: 'Подкасты' },
   courses: { path: '/courses', title: 'Курсы' },
-  youtube: { path: '/youtube', title: 'YouTube-каналы' },
+  video: { path: '/video', title: 'Видео' },
   books: { path: '/books', title: 'Книги' },
-  resources: { path: '/resources', title: 'Ресурсы' },
   tools: { path: '/tools', title: 'Инструменты' },
 };
 

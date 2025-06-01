@@ -13,9 +13,15 @@ export const navigationConfig: NavigationItem[] = [
     isNew: false
   },
   {
-    title: 'Ресурсы',
-    path: '/resources',
-    section: '/resources',
+    title: 'Блоги',
+    path: '/blogs',
+    section: '/blogs',
+    isNew: false
+  },
+  {
+    title: 'WCAG',
+    path: '/wcag',
+    section: '/wcag',
     isNew: false
   },
   {
@@ -31,9 +37,9 @@ export const navigationConfig: NavigationItem[] = [
     isNew: false
   },
   {
-    title: 'YouTube',
-    path: '/youtube',
-    section: '/youtube',
+    title: 'Видео',
+    path: '/video',
+    section: '/video',
     isNew: false
   },
   {

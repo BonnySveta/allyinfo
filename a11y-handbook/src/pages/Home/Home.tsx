@@ -157,10 +157,12 @@ export const Home: FC<HomeProps> = ({
               // Определяем текст для ссылки "Все материалы" в зависимости от типа секции
               const viewAllText = section.slug === 'books' ? 'книги' :
                                 section.slug === 'articles' ? 'статьи' :
+                                section.slug === 'blogs' ? 'блоги' :
+                                section.slug === 'wcag' ? 'материалы WCAG' :
                                 section.slug === 'telegram' ? 'каналы' :
                                 section.slug === 'podcasts' ? 'подкасты' :
                                 section.slug === 'courses' ? 'курсы' :
-                                section.slug === 'youtube' ? 'видео' :
+                                section.slug === 'video' ? 'видео' :
                                 section.slug === 'tools' ? 'инструменты' :
                                 'материалы';
 
