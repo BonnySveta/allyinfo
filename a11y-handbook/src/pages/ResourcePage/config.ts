@@ -11,11 +11,11 @@ export const pageConfig = {
     description: 'Блоги о цифровой доступности',
     section_id: 'blogs'
   },
-  wcag: { 
-    path: '/wcag', 
-    title: 'WCAG',
-    description: 'Материалы по WCAG и стандартам доступности',
-    section_id: 'wcag'
+  guides: { 
+    path: '/guides', 
+    title: 'Руководства',
+    description: 'Руководства по WCAG и другим стандартам доступности',
+    section_id: 'guides'
   },
   telegram: { 
     path: '/telegram', 

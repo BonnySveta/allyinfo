@@ -37,7 +37,7 @@ const MainContainer = styled.main`
 const pageConfig = {
   articles: { path: '/articles', title: 'Статьи' },
   blogs: { path: '/blogs', title: 'Блоги' },
-  wcag: { path: '/wcag', title: 'WCAG' },
+  guides: { path: '/guides', title: 'Руководства' },
   telegram: { path: '/telegram', title: 'Telegram-каналы' },
   podcasts: { path: '/podcasts', title: 'Подкасты' },
   courses: { path: '/courses', title: 'Курсы' },

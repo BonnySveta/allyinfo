@@ -19,9 +19,9 @@ export const navigationConfig: NavigationItem[] = [
     isNew: false
   },
   {
-    title: 'WCAG',
-    path: '/wcag',
-    section: '/wcag',
+    title: 'Руководства',
+    path: '/guides',
+    section: '/guides',
     isNew: false
   },
   {

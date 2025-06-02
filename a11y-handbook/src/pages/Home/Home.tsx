@@ -158,7 +158,7 @@ export const Home: FC<HomeProps> = ({
               const viewAllText = section.slug === 'books' ? 'книги' :
                                 section.slug === 'articles' ? 'статьи' :
                                 section.slug === 'blogs' ? 'блоги' :
-                                section.slug === 'wcag' ? 'материалы WCAG' :
+                                section.slug === 'guides' ? 'руководства' :
                                 section.slug === 'telegram' ? 'каналы' :
                                 section.slug === 'podcasts' ? 'подкасты' :
                                 section.slug === 'courses' ? 'курсы' :
