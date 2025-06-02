@@ -21,6 +21,7 @@ import { GettingStarted } from './pages/GettingStarted/GettingStarted';
 import { ResourceSection } from './pages/ResourcePage/config';
 import { Support } from './pages/Support/Support';
 import { useResources, UseResourcesHomeResult } from './hooks/useResources';
+import { YandexMetrika } from './components/YandexMetrika';
 
 const MainContainer = styled.main`
   flex: 1 0 auto;
@@ -63,6 +64,7 @@ function App() {
         <ThemeProvider>
           <FocusProvider>
             <GlobalStyle />
+            <YandexMetrika />
             <BrowserRouter>
               <Suspense fallback={<LoadingSpinner />}>
                 <Header />
