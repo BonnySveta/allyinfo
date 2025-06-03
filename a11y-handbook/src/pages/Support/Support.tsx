@@ -1,7 +1,7 @@
 import { PaymentMethod } from '../../components/PaymentMethod/PaymentMethod';
 import { Container, Title, Section, SectionTitle, Text, PaymentMethods, StyledLink } from './styles';
 import yMoneyQR from '../../assets/y-money.svg';
-import vtbQR from '../../assets/vtb.svg';
+import vtbQR from '../../assets/VTB.jpg';
 import { FaTelegram } from 'react-icons/fa';
 import styled from 'styled-components';
 import BondarenkoS from '../../assets/avatars/svetlana_bondarenko.jpg';
@@ -160,7 +160,7 @@ export function Support() {
             title="Перевод ВТБ"
             qrCode={vtbQR}
             qrAlt="QR код для перевода через ВТБ"
-            link="https://vtb.paymo.ru/vtb/collect-money/?transaction=b43ec112-94f0-4e5c-a863-12ff6cd506cd"
+            link="https://vtb.paymo.ru/vtb/collect-money/?transaction=63c945d6-5b30-49bb-b7b0-61b1962de1f7"
             linkText="Перевести через ВТБ"
             heartsCount={6}
           />
