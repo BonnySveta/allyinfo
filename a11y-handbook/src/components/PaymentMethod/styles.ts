@@ -4,10 +4,9 @@ export const PaymentMethodContainer = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 0.75rem 1rem;
-  background: #fff;
+  background: var(--card-background);
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   overflow: visible;
 `;
