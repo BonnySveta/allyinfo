@@ -136,10 +136,10 @@ export const TextArea = styled.textarea`
 
 export const SubmitButton = styled.button`
   width: 100%;
-  padding: 12px;
+  padding: 10px;
   background-color: var(--primary-color, #0066cc);
   color: white;
-  border: none;
+  border: 2px solid transparent;
   border-radius: 8px;
   font-size: 16px;
   font-weight: 500;

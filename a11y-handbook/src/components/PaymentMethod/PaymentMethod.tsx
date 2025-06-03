@@ -11,7 +11,7 @@ import {
 interface PaymentMethodProps {
   title: string;
   qrCode: string;
-  qrAlt: string;
+  method: string;
   link: string;
   linkText: string;
   heartsCount?: number;
@@ -20,7 +20,7 @@ interface PaymentMethodProps {
 export function PaymentMethod({
   title,
   qrCode,
-  qrAlt,
+  method,
   link,
   linkText,
   heartsCount = 4
@@ -33,15 +33,16 @@ export function PaymentMethod({
       onMouseLeave={() => setIsHovered(false)}
     >
       <AnimatedHearts count={heartsCount} isVisible={isHovered} />
-      <PaymentMethodTitle>{title}</PaymentMethodTitle>
+      <PaymentMethodTitle aria-hidden="true">{title}</PaymentMethodTitle>
       <PaymentSection>
-        <QRCode src={qrCode} alt={qrAlt} />
+        <QRCode src={qrCode} alt="" />
         <PaymentLink 
           href={link}
           target="_blank"
           rel="noopener noreferrer"
         >
           Поддержать
+          <span className="visually-hidden" role="presentation">с помощью {method}</span>
         </PaymentLink>
       </PaymentSection>
     </PaymentMethodContainer>

@@ -31,11 +31,13 @@ export const Text = styled.p`
   margin-bottom: 1rem;
 `;
 
-export const PaymentMethods = styled.div`
+export const PaymentMethods = styled.ul`
+  list-style-type: none;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 0.5fr));
   gap: 1.2rem;
   margin-top: 1.5rem;
+  padding-inline-start: 0;
 `;
 
 export const StyledLink = styled(Link)`

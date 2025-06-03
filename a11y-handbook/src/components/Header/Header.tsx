@@ -77,8 +77,7 @@ const NavLink = styled(RouterNavLink)`
       left: 0.5rem;
       right: 0.5rem;
       bottom: 0;
-      height: 2px;
-      background-color: var(--link-hover-color);
+      border-top: 2px solid var(--link-hover-color);
       border-radius: 2px;
     }
   }

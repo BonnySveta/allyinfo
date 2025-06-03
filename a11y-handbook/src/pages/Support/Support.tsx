@@ -12,15 +12,18 @@ import BondarenkoE from '../../assets/avatars/evgeniy_bondarenko.jpg';
 import GermanA from '../../assets/avatars/angelica_german.jpg';
 import { scrollToTop } from '../../utils/scrollOnTop';
 
-const TeamGrid = styled.div`
+const TeamGrid = styled.ul`
+  list-style-type: none;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1.5rem;
   margin-top: 2rem;
+  margin-bottom: 0;
+  padding-inline-start: 0;
   justify-items: center;
 `;
 
-const TeamCard = styled.div`
+const TeamCard = styled.li`
   display: flex;
   align-items: center;
   background: var(--card-background);
@@ -51,24 +54,24 @@ const AvatarImg = styled.img`
   width: 100%;
 `;
 
-const Info = styled.div`
+const Info = styled.a`
   margin-left: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
 `;
 
-const Name = styled.div`
+const Name = styled.span`
   font-weight: 600;
   color: var(--text-color);
 `;
 
-const Role = styled.div`
-  color: var(--text-secondary);
+const Role = styled.span`
+  color: var(--text-secondary-color);
   font-size: 0.95rem;
 `;
 
-const TelegramLink = styled.a`
+const TelegramLink = styled.span`
   color: #229ed9;
   display: flex;
   align-items: center;
@@ -131,11 +134,11 @@ export function Support() {
   return (
     <Container>
       <Title>Поддержать проект</Title>
-      
+
       <Section>
         <Text>
-          ALLYINFO — это некоммерческий проект, 
-          который развивается силами сообщества. Мы собираем и систематизируем 
+          ALLYINFO — это некоммерческий проект,
+          который развивается силами сообщества. Мы собираем и систематизируем
           материалы, чтобы сделать веб доступнее для всех.
         </Text>
       </Section>
@@ -143,25 +146,23 @@ export function Support() {
       <Section>
         <SectionTitle>Финансовая поддержка</SectionTitle>
         <Text>
-          Ваша поддержка поможет нам развивать проект, добавлять новые 
+          Ваша поддержка поможет нам развивать проект, добавлять новые
           материалы и улучшать функциональность сайта.
         </Text>
-        
+
         <PaymentMethods>
-          {/*
-          <PaymentMethod 
-            title="Перевод с карты"
+          {/* <PaymentMethod
+            title="Перевод ЮMoney"
             qrCode={yMoneyQR}
-            qrAlt="QR код для перевода через ЮMoney"
+            method="ЮMoney"
             link="https://yoomoney.ru/quickpay/fundraise/button?billNumber=16T1MFGPCDV.241203"
             linkText="Перевести через ЮMoney"
             heartsCount={4}
-          />
-          */}
-          <PaymentMethod 
+          /> */}
+          <PaymentMethod
             title="Перевод ВТБ"
             qrCode={vtbQR}
-            qrAlt="QR код для перевода через ВТБ"
+            method="ВТБ"
             link="https://vtb.paymo.ru/vtb/collect-money/?transaction=63c945d6-5b30-49bb-b7b0-61b1962de1f7"
             linkText="Перевести через ВТБ"
             heartsCount={6}
@@ -178,11 +179,11 @@ export function Support() {
           {team.map((member, idx) => (
             <TeamCard key={idx}>
               <Avatar>{member.avatar ? <AvatarImg src={member.avatar} alt="" /> : member.initials}</Avatar>
-              <Info>
-                <Name>{member.name}</Name>
-                <Role>{member.role}</Role>
+              <Info href={`https://t.me/${member.telegram}`} target="_blank" rel="noopener noreferrer">
+                <Name role="presentation">{member.name}</Name>
+                <Role role="presentation">{member.role}</Role>
                 {member.telegram && (
-                  <TelegramLink href={`https://t.me/${member.telegram}`} target="_blank" rel="noopener noreferrer">
+                  <TelegramLink aria-hidden="true">
                     <FaTelegram />@{member.telegram}
                   </TelegramLink>
                 )}
@@ -191,7 +192,7 @@ export function Support() {
           ))}
         </TeamGrid>
       </Section>
-      
+
       <Section>
         <SectionTitle>Как ещё вы можете помочь</SectionTitle>
         <Text>

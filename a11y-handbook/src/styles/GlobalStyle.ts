@@ -110,4 +110,26 @@ export const GlobalStyle = createGlobalStyle`
   textarea {
     font-family: inherit;
   }
+
+  .visually-hidden {
+    position: absolute; 
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    white-space: nowrap;
+    clip-path: inset(100%);
+    clip: rect(0 0 0 0);
+    overflow: hidden;
+  }
+
+  .visually-hidden:not(:focus):not(:active):not(:focus-within) {
+    position: absolute;
+    width: 1px;  
+    height: 1px;
+    white-space: nowrap;
+    clip-path: inset(50%);
+    overflow: hidden;
+  }
 `; 
