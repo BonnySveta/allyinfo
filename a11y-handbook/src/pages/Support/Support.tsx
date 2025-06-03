@@ -148,22 +148,6 @@ export function Support() {
         </Text>
         
         <PaymentMethods>
-          <PaymentMethod 
-            title="Перевод с карты"
-            qrCode={yMoneyQR}
-            qrAlt="QR код для перевода через ЮMoney"
-            link="https://yoomoney.ru/quickpay/fundraise/button?billNumber=16T1MFGPCDV.241203"
-            linkText="Перевести через ЮMoney"
-            heartsCount={4}
-          />
-          <PaymentMethod 
-            title="Перевод ВТБ"
-            qrCode={vtbQR}
-            qrAlt="QR код для перевода через ВТБ"
-            link="https://vtb.paymo.ru/vtb/collect-money/?transaction=63c945d6-5b30-49bb-b7b0-61b1962de1f7"
-            linkText="Перевести через ВТБ"
-            heartsCount={6}
-          />
           {/*
           <PaymentMethod 
             title="Перевод с карты"
@@ -174,6 +158,14 @@ export function Support() {
             heartsCount={4}
           />
           */}
+          <PaymentMethod 
+            title="Перевод ВТБ"
+            qrCode={vtbQR}
+            qrAlt="QR код для перевода через ВТБ"
+            link="https://vtb.paymo.ru/vtb/collect-money/?transaction=63c945d6-5b30-49bb-b7b0-61b1962de1f7"
+            linkText="Перевести через ВТБ"
+            heartsCount={6}
+          />
         </PaymentMethods>
       </Section>
 
