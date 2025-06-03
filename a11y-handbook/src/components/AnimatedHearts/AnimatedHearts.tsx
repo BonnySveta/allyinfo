@@ -55,6 +55,10 @@ const Heart = styled.span<HeartProps>`
   animation: ${floatingHearts} ${props => Math.random() * (HEART_DURATION_MAX - HEART_DURATION_MIN) + HEART_DURATION_MIN}s ease-in-out ${props => Math.random()}s infinite;
   animation-play-state: ${props => props.$isVisible ? 'running' : 'paused'};
   z-index: 1;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `;
 
 interface AnimatedHeartsProps {
@@ -64,7 +68,7 @@ interface AnimatedHeartsProps {
 
 export function AnimatedHearts({ count = 4, isVisible = false }: AnimatedHeartsProps) {
   return (
-    <HeartContainer $isVisible={isVisible}>
+    <HeartContainer $isVisible={isVisible} aria-hidden="true">
       {[...Array(count)].map((_, i) => (
         <Heart key={i} $isVisible={isVisible}>❤️</Heart>
       ))}

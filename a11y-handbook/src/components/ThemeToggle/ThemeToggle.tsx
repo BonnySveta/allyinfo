@@ -14,8 +14,8 @@ const rotate = keyframes`
 const ThemeButton = styled.button`
   color: var(--text-color);
   background: var(--nav-hover-background);
-  border: none;
-  padding: 0.75rem 1.5rem;
+  border: 2px solid transparent;
+  padding: 0.625rem 1.375rem;
   border-radius: 100px;
   cursor: pointer;
   transition: all 0.2s ease;

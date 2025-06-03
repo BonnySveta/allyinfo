@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const PaymentMethodContainer = styled.div`
+export const PaymentMethodContainer = styled.li`
   position: relative;
   display: flex;
   flex-direction: column;
@@ -11,10 +11,12 @@ export const PaymentMethodContainer = styled.div`
   overflow: visible;
 `;
 
-export const PaymentMethodTitle = styled.h3`
+export const PaymentMethodTitle = styled.span`
   color: var(--text-color);
+  margin-top: 1em;
   margin-bottom: 0.75rem;
   font-size: 1.05rem;
+  font-weight: 700;
   text-align: center;
 `;
 
