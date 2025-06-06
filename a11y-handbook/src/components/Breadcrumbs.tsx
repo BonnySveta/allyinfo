@@ -5,6 +5,10 @@ const BreadcrumbsWrapper = styled.nav`
   font-size: 0.95rem;
   margin-bottom: 1.5rem;
   color: var(--text-secondary-color);
+
+  @media (max-width: 768px) {
+    margin-top: 1.5rem;
+  }
 `;
 
 const Crumb = styled.span`
