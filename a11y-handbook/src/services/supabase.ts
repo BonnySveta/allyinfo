@@ -55,9 +55,18 @@ export async function fetchSectionsWithResourcesAndCategories() {
   return data; 
 }
 
+// Получить все материалы
+export async function fetchAllSuggestions() {
+  const { data, error } = await supabase
+    .from('resources')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
 
-// Получить все материалы (например, только approved)
-export async function fetchSuggestions(status: string = 'approved') {
+// Получить материалы по статусу
+export async function fetchSuggestions(status: string) {
   const { data, error } = await supabase
     .from('resources')
     .select('*')

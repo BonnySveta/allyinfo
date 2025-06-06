@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Resource } from '../../types/resource';
-import { fetchSuggestions as fetchResources, updateSuggestion, deleteSuggestion, fetchCategories, fetchSections, fetchResourceCategories } from '../../services/supabase';
+import { fetchSuggestions as fetchResources, fetchAllSuggestions as fetchAllResources, updateSuggestion, deleteSuggestion, fetchCategories, fetchSections, fetchResourceCategories } from '../../services/supabase';
 import { FilterChipsPanel } from '../FilterChips';
 import { supabase } from '../../services/supabase';
 import { LinkPreview } from '../LinkPreview/LinkPreview';
@@ -73,6 +73,10 @@ const FilterBar = styled.div`
   gap: 1rem;
   align-items: center;
   margin-bottom: 1.5rem;
+
+  & select {
+    margin-left: 5px;
+  }
 `;
 
 const SearchInput = styled.input`
@@ -98,7 +102,7 @@ const ActionButton = styled.button`
 
 export default function MaterialsAdmin() {
   const [materials, setMaterials] = useState<AdminResource[]>([]);
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('pending');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -163,7 +167,7 @@ export default function MaterialsAdmin() {
     try {
       let all;
       if (statusFilter === 'all') {
-        all = await fetchResources();
+        all = await fetchAllResources();
       } else {
         all = await fetchResources(statusFilter);
       }
