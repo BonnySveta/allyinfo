@@ -1,15 +1,13 @@
-name: Deploy to Production
+
+name: Deploy to Test
 
 on:
-  pull_request:
+  push:
     branches:
-      - main
-    types:
-      - closed
+      - test
 
 jobs:
-  deploy:
-    if: github.event.pull_request.merged == true
+  deploy-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,12 +25,13 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
 
-      - name: Deploy to Server
+      - name: Deploy to test Server
         run: |
           ssh -p 1617 hacker@62.60.248.172 '
-            cd /var/www/a11y-handbook/allyinfo &&
+            cd /var/www/test-a11y-handbook/allyinfo &&
             git pull &&
-            pm2 restart preview-server &&
+            pm2 restart test-preview-server &&
             cd a11y-handbook/ &&
             npm run build 
           '
+        
