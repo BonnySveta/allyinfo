@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { TitleSection } from '../../components/TitleSection/TitleSection';
+import { Banner } from '../../components/Banner/Banner';
 
 const Container = styled.div`
-  padding: 2rem;
-  max-width: 800px;
+  padding: 0 2rem;
+  max-width: 1200px;
   margin: 0 auto;
 
   @media (max-width: 768px) {
-    padding: 0;
+    padding: 0 1rem;
   }
 `;
 
@@ -227,8 +229,19 @@ export default function ContrastCalculator() {
 
   return (
     <Container>
-      <Title>Калькулятор контрастности</Title>
-      <Subtitle>Проверьте контрастность ваших цветов по стандарту WCAG и APCA</Subtitle>
+      <TitleSection
+        title="Калькулятор контрастности"
+        subtitle="Проверьте контрастность ваших цветов по стандарту WCAG и APCA"
+        banner={
+          <Banner
+            title="WCAG 2.1"
+            text={null}
+            link="/wcag"
+            linkLabel="Узнайте больше о требованиях к контрастности в WCAG 2.1"
+            emoji="📚"
+          />
+        }
+      />
       <InputsRow>
         <ColorInputLabel>
           Цвет текста

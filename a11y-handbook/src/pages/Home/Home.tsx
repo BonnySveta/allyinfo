@@ -13,54 +13,7 @@ import { speechService } from '../../services/speech';
 import { useFocusOverlay } from '../../context/FocusOverlayContext';
 import { fetchSections } from '../../services/supabase';
 import { pageConfig } from '../ResourcePage/config';
-
-const TitleSection = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 0 2rem;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    margin: 1.5rem 0 2rem;
-    padding: 0;
-    align-items: flex-start;
-  }
-`;
-
-const TitleContainer = styled.div`
-  margin-top: -1rem;
-  margin: 2rem 0 3rem;
-  padding: 0 2rem 0 0;
-
-  @media (max-width: 768px) {
-    margin: 1.5rem 0 2rem;
-    padding: 0;
-  }
-`;
-
-const Title = styled.h1`
-  font-size: 2.5rem;
-  text-align: left;
-  margin-bottom: 0.5rem;
-  color: var(--text-color);
-
-  @media (max-width: 768px) {
-    font-size: 1.75rem;
-  }
-`;
-
-const Subtitle = styled.p`
-  font-size: 1.5rem;
-  text-align: left;
-  margin: 0;
-  color: var(--text-secondary-color);
-  font-weight: 400;
-
-  @media (max-width: 768px) {
-    font-size: 1.1rem;
-  }
-`;
+import { TitleSection } from '../../components/TitleSection/TitleSection';
 
 const ErrorMessage = styled.div`
   color: var(--error-color);
@@ -119,19 +72,19 @@ export const Home: FC<HomeProps> = ({
 
   return (
     <>
-      <TitleSection>
-        <TitleContainer>
-          <Title>ALLYINFO</Title>
-          <Subtitle>каталог материалов цифровой доступности</Subtitle>
-        </TitleContainer>
-        <Banner
-          title="С чего начать?"
-          text={null}
-          link="/getting-started"
-          linkLabel="WCAG и другие материалы для тех, кто начинает изучать цифровую доступность"
-          emoji="💡"
-        />
-      </TitleSection>
+      <TitleSection
+        title="ALLYINFO"
+        subtitle="каталог материалов цифровой доступности"
+        banner={
+          <Banner
+            title="С чего начать?"
+            text={null}
+            link="/getting-started"
+            linkLabel="WCAG и другие материалы для тех, кто начинает изучать цифровую доступность"
+            emoji="💡"
+          />
+        }
+      />
       <FilterChipsPanel
         categories={categories}
         selectedCategories={selectedCategories}
