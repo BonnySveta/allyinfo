@@ -110,6 +110,9 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
     }
   };
 
+  // функция для изменения состояния isPreviewLoading в компоненте LinkPreview
+  const handleIsPreviewLoadingChange = (value: boolean) => setIsPreviewLoading(value);
+
   const handleDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setDescription(e.target.value);
   };
@@ -118,10 +121,10 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
     e.preventDefault();
     setError('');
 
-    // if (isPreviewLoading) {
-    //   setError('Дождитесь загрузки предпросмотра');
-    //   return;
-    // }
+    if (isPreviewLoading) {
+      setError('Дождитесь загрузки предпросмотра');
+      return;
+    }
     if (!url) {
       setError('Пожалуйста, заполните все обязательные поля');
       return;
@@ -239,6 +242,7 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
             <LinkPreview 
               url={url} 
               onLoad={handlePreviewLoad}
+              onPreviewLoading={handleIsPreviewLoadingChange}
               getPreview={getPreview}
               section={''}
             />
@@ -256,7 +260,7 @@ export function SuggestForm({ getPreview }: SuggestFormProps) {
           </ErrorMessage>
         )}
 
-        <SubmitButton type="submit" disabled={isLoading}>
+        <SubmitButton type="submit" disabled={isLoading || isPreviewLoading}>
           {isLoading ? (
             <>
               Отправка
