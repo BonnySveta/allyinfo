@@ -13,22 +13,40 @@ const Container = styled.div`
   }
 `;
 
-const Title = styled.h1`
-  font-size: 2.5rem;
-  color: var(--text-color);
-  margin-bottom: 1rem;
+const MainContent = styled.div`
+  display: flex;
+  gap: 2.5rem;
+  align-items: flex-start;
+
+  @media (max-width: 900px) {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
 `;
 
-const Subtitle = styled.p`
-  font-size: 1.2rem;
-  color: var(--text-secondary-color);
-  margin-bottom: 2rem;
+const LeftCol = styled.div`
+  flex: 2 1 0;
+  max-width: 600px;
+  min-width: 0;
+`;
+
+const RightCol = styled.div`
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 `;
 
 const InputsRow = styled.div`
   display: flex;
   gap: 2rem;
   margin-bottom: 2rem;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 1rem;
+  }
 `;
 
 const ColorInputLabel = styled.label`
@@ -52,7 +70,7 @@ const ControlsRow = styled.div`
 `;
 
 const Preview = styled.div<{ fg: string; bg: string; fontSize: number; bold: boolean }>`
-  margin: 2rem 0;
+  margin: 2rem 0 0 0;
   padding: 2rem;
   border-radius: 8px;
   background: ${({ bg }) => bg};
@@ -70,7 +88,6 @@ const ResultCard = styled.div`
   border: 1px solid #ececec;
   padding: 1.5rem 2rem;
   min-width: 220px;
-  flex: 1 1 220px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -232,94 +249,97 @@ export default function ContrastCalculator() {
       <TitleSection
         title="Калькулятор контрастности"
         subtitle="Проверьте контрастность ваших цветов по стандарту WCAG и APCA"
-        banner={
-          <Banner
-            title="WCAG 2.1"
-            text={null}
-            link="/wcag"
-            linkLabel="Узнайте больше о требованиях к контрастности в WCAG 2.1"
-            emoji="📚"
-          />
-        }
+        // banner={
+        //   <Banner
+        //     title="WCAG 2.1"
+        //     text={null}
+        //     link="/wcag"
+        //     linkLabel="Узнайте больше о требованиях к контрастности в WCAG 2.1"
+        //     emoji="📚"
+        //   />
+        // }
       />
-      <InputsRow>
-        <ColorInputLabel>
-          Цвет текста
-          <ColorInputRow>
-            <input type="color" value={fg} onChange={e => setFg(e.target.value)} />
-            <input
-              type="text"
-              value={fg}
-              onChange={e => {
-                const val = e.target.value;
-                if (/^#([0-9a-fA-F]{0,6})$/.test(val)) setFg(val);
-              }}
-              maxLength={7}
-              style={{ width: 80, fontFamily: 'monospace', fontSize: '1rem' }}
-            />
-          </ColorInputRow>
-        </ColorInputLabel>
-        <ColorInputLabel>
-          Цвет фона
-          <ColorInputRow>
-            <input type="color" value={bg} onChange={e => setBg(e.target.value)} />
-            <input
-              type="text"
-              value={bg}
-              onChange={e => {
-                const val = e.target.value;
-                if (/^#([0-9a-fA-F]{0,6})$/.test(val)) setBg(val);
-              }}
-              maxLength={7}
-              style={{ width: 80, fontFamily: 'monospace', fontSize: '1rem' }}
-            />
-          </ColorInputRow>
-        </ColorInputLabel>
-      </InputsRow>
-      <ControlsRow>
-        <label>
-          Размер текста
-          <input
-            type="number"
-            min={10}
-            max={72}
-            value={fontSize}
-            onChange={e => setFontSize(Number(e.target.value))}
-            style={{ width: 60, marginLeft: 8 }}
-          /> px
-        </label>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <input
-            type="checkbox"
-            checked={bold}
-            onChange={e => setBold(e.target.checked)}
-            style={{ marginRight: 4 }}
-          />
-          Жирный
-        </label>
-        <span style={{ fontWeight: bold ? 'bold' : 'normal', fontSize: 16, marginLeft: 16 }}>
-          Категория: <b>{wcag.label}</b>
-        </span>
-      </ControlsRow>
-      <Preview fg={fg} bg={bg} fontSize={fontSize} bold={bold}>
-        Пример текста: Accessibility matters!
-      </Preview>
-      <ResultsRow>
-        <ResultCard>
-          <b>WCAG 2.x:</b><br />
-          Контрастное соотношение: {ratio.toFixed(2)}:1<br />
-          <div style={{margin: '0.5rem 0'}}>
-            <span style={{marginRight: 12}}>{wcag.aa} (порог: {wcag.aaThreshold}:1)</span>
-            <span>{wcag.aaa} (порог: {wcag.aaaThreshold}:1)</span>
+      <MainContent>
+        <LeftCol>
+          <InputsRow>
+            <ColorInputLabel>
+              Цвет текста
+              <ColorInputRow>
+                <input type="color" value={fg} onChange={e => setFg(e.target.value)} />
+                <input
+                  type="text"
+                  value={fg}
+                  onChange={e => {
+                    const val = e.target.value;
+                    if (/^#([0-9a-fA-F]{0,6})$/.test(val)) setFg(val);
+                  }}
+                  maxLength={7}
+                  style={{ width: 80, fontFamily: 'monospace', fontSize: '1rem' }}
+                />
+              </ColorInputRow>
+            </ColorInputLabel>
+            <ColorInputLabel>
+              Цвет фона
+              <ColorInputRow>
+                <input type="color" value={bg} onChange={e => setBg(e.target.value)} />
+                <input
+                  type="text"
+                  value={bg}
+                  onChange={e => {
+                    const val = e.target.value;
+                    if (/^#([0-9a-fA-F]{0,6})$/.test(val)) setBg(val);
+                  }}
+                  maxLength={7}
+                  style={{ width: 80, fontFamily: 'monospace', fontSize: '1rem' }}
+                />
+              </ColorInputRow>
+            </ColorInputLabel>
+          </InputsRow>
+          <ControlsRow>
+            <label>
+              Размер текста
+              <input
+                type="number"
+                min={10}
+                max={72}
+                value={fontSize}
+                onChange={e => setFontSize(Number(e.target.value))}
+                style={{ width: 60, marginLeft: 8 }}
+              /> px
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <input
+                type="checkbox"
+                checked={bold}
+                onChange={e => setBold(e.target.checked)}
+                style={{ marginRight: 4 }}
+              />
+              Жирный
+            </label>
+          </ControlsRow>
+          <div style={{ fontWeight: bold ? 'bold' : 'normal', fontSize: 16, marginBottom: 8 }}>
+            Категория: {wcag.label}
           </div>
-          <span style={{fontSize: '0.95em', color: 'var(--text-secondary-color)'}}>Категория: {wcag.label}</span>
-        </ResultCard>
-        <ResultCard>
-          <b>APCA:</b><br />
-          Контрастный индекс: {apcaLc.toFixed(0)} Lc<br />
-          {apca.status} (порог: {apca.threshold} Lc)
-        </ResultCard>
-      </ResultsRow>
+          <Preview fg={fg} bg={bg} fontSize={fontSize} bold={bold}>
+            Accessibility matters!
+          </Preview>
+        </LeftCol>
+        <RightCol>
+          <ResultCard>
+            <b>WCAG 2.x:</b><br />
+            Контрастное соотношение: {ratio.toFixed(2)}:1<br />
+            <div style={{margin: '0.5rem 0'}}>
+              <span style={{marginRight: 12}}>{wcag.aa} (порог: {wcag.aaThreshold}:1)</span>
+              <span>{wcag.aaa} (порог: {wcag.aaaThreshold}:1)</span>
+            </div>
+          </ResultCard>
+          <ResultCard>
+            <b>APCA:</b><br />
+            Контрастный индекс: {apcaLc.toFixed(0)} Lc<br />
+            {apca.status.replace(/\s*\(.*\)/, '')} (порог: {apca.threshold} Lc)
+          </ResultCard>
+        </RightCol>
+      </MainContent>
     </Container>
   );
 } 
