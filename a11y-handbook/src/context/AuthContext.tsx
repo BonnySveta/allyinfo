@@ -59,13 +59,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
     };
     getSession();
-    // Подписка на изменения сессии
-    const { data: listener } = supabase.auth.onAuthStateChange(() => {
-      getSession();
-    });
-    return () => {
-      listener?.subscription.unsubscribe();
-    };
+    // Подписка на изменения сессии  -  закомментирована, чтобы избежать перезагрузки страниц в Админке при смене вкладок в браузере
+    // const { data: listener } = supabase.auth.onAuthStateChange(() => {
+    //   getSession();
+    // });
+    // return () => {
+    //   listener?.subscription.unsubscribe();
+    // };
   }, []);
 
   return (

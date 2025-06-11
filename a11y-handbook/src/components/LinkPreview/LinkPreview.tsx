@@ -148,11 +148,12 @@ const ErrorContainer = styled.div`
 interface LinkPreviewProps {
   url: string;
   onLoad: (data: PreviewData) => void;
+  onPreviewLoading?: (value: boolean) => void;
   getPreview?: (url: string, section: string) => Promise<PreviewData>;
   section?: string;
 }
 
-export function LinkPreview({ url, onLoad, getPreview, section }: LinkPreviewProps) {
+export function LinkPreview({ url, onLoad, onPreviewLoading, getPreview, section }: LinkPreviewProps) {
   const [loading, setLoading] = useState(false);
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [error, setError] = useState('');
@@ -160,10 +161,10 @@ export function LinkPreview({ url, onLoad, getPreview, section }: LinkPreviewPro
   const mountedRef = useRef(true);
 
   // Сохраняем зависимости в ref
-  const propsRef = useRef({ url, onLoad, getPreview, section, previewCache });
+  const propsRef = useRef({ url, onLoad, onPreviewLoading, getPreview, section, previewCache });
   useEffect(() => {
-    propsRef.current = { url, onLoad, getPreview, section, previewCache };
-  }, [url, onLoad, getPreview, section, previewCache]);
+    propsRef.current = { url, onLoad, onPreviewLoading, getPreview, section, previewCache };
+  }, [url, onLoad, onPreviewLoading, getPreview, section, previewCache]);
 
   const fetchPreview = useCallback(async () => {
     const { url, onLoad, getPreview, section, previewCache } = propsRef.current;
@@ -192,7 +193,7 @@ export function LinkPreview({ url, onLoad, getPreview, section }: LinkPreviewPro
           },
           body: JSON.stringify({ url })
         });
-
+        
         if (!response.ok) {
           throw new Error('Failed to fetch preview');
         }
@@ -206,9 +207,9 @@ export function LinkPreview({ url, onLoad, getPreview, section }: LinkPreviewPro
         onLoad(data);
       }
     } catch (err) {
-      // if (mountedRef.current) {
-      //   setError('Не удалось загрузить предпросмотр');
-      // }
+      if (mountedRef.current) {
+        setError('Не удалось загрузить предпросмотр');
+      }
     } finally {
       if (mountedRef.current) {
         setLoading(false);
@@ -231,6 +232,7 @@ export function LinkPreview({ url, onLoad, getPreview, section }: LinkPreviewPro
   }
 
   if (error) {
+    onPreviewLoading && onPreviewLoading(false);
     return <ErrorContainer role="alert">{error}</ErrorContainer>;
   }
 

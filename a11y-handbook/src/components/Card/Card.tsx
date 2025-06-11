@@ -33,9 +33,9 @@ export function Card({ title, path, resources = [], viewAllText }: CardProps) {
   const hasMoreResources = resources.length > 3;
 
   return (
-    <CardContainer>
+    <CardContainer aria-labelledby={title}>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle id={title}>{title}</CardTitle>
         {hasMoreResources && (
           <ViewAllLink to={path} aria-label={`Все ${resources.length} ${viewAllText}`} onClick={scrollToTop}>
             Все ({resources.length})
