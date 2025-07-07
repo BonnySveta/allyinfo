@@ -38,6 +38,14 @@ export const PaymentMethods = styled.ul`
   gap: 1.2rem;
   margin-top: 1.5rem;
   padding-inline-start: 0;
+
+  @media (min-width: 577px) and (max-width: 768px) {
+    justify-content: center;
+  }
+
+  @media (max-width: 576px) {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
 `;
 
 export const StyledLink = styled(Link)`
