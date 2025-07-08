@@ -3,6 +3,7 @@ import { PageLayout } from '../../components/PageLayout/PageLayout';
 import { Link } from 'react-router-dom';
 import { Banner } from '../../components/Banner/Banner';
 import { scrollToTop } from '../../utils/scrollOnTop';
+import { CiShare1 } from "react-icons/ci";
 
 const Section = styled.section`
   margin-bottom: 3rem;
@@ -27,6 +28,12 @@ const List = styled.ul`
 
 const ListItem = styled.li`
   margin-bottom: 0.7em;
+
+  svg {
+    position: relative;
+    top: 2px;
+    color: var(--text-color);
+  }
 `;
 
 const TopGrid = styled.div`
@@ -118,22 +125,22 @@ export function GettingStarted() {
           <List>
             <ListItem>
               <a href="https://trends.rbc.ru/trends/social/63aa999c9a79471fb4e0c276" target="_blank" rel="noopener noreferrer">
-                Полный доступ: что такое цифровая доступность и почему она нужна всем
+                Полный доступ: что такое цифровая доступность и почему она нужна всем <CiShare1 aria-label="Переход на новую вкладку" />
               </a> — статья, краткое введение и зачем это нужно.
             </ListItem>
             <ListItem>
               <a href="https://guides.kontur.ru/principles/accessibility/accessibility/" target="_blank" rel="noopener noreferrer">
-                Принципы доступности
+                Принципы доступности <CiShare1 aria-label="Переход на новую вкладку" />
               </a> — статья, виды ограничений и основные принципы.
             </ListItem>
             <ListItem>
               <a href="https://vkvideo.ru/video-147415323_456239661?ref_domain=yastatic.net" target="_blank" rel="noopener noreferrer">
-                Как незрячие пользуются компьютером? Работа со скринридером
+                Как незрячие пользуются компьютером? Работа со скринридером <CiShare1 aria-label="Переход на новую вкладку" />
               </a> — видео (VK Видео).
             </ListItem>
             <ListItem>
               <a href="https://shepherd.org/ru/treatment/services-clinics/center-for-assistive-technologies/what-is-assistive-technology/" target="_blank" rel="noopener noreferrer">
-                Что такое вспомогательные технологии
+                Что такое вспомогательные технологии <CiShare1 aria-label="Переход на новую вкладку" />
               </a> — статья (Shepherd Center).
             </ListItem>
           </List>
