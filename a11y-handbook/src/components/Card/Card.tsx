@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Resource } from '../../types/resource';
 import { NewBadge } from '../NewBadge/NewBadge';
 import {
@@ -55,6 +54,7 @@ export function Card({ title, path, resources = [], viewAllText }: CardProps) {
                   <ResourceIconWithFallback resource={resource} />
                   <ResourceContent>
                     {resource.title}
+                    <NewBadge createdAt={resource.createdAt} approvedAt={resource.approvedAt} />
                   </ResourceContent>
                 </ResourceLink>
               </ResourceListItem>

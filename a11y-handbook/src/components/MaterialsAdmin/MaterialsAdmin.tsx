@@ -182,8 +182,16 @@ export default function MaterialsAdmin() {
 
   const handleStatusChange = (id: string | number, status: string) => async () => {
     try {
-      await updateSuggestion(String(id), { status });
-      setMaterials(prev => prev.map(m => String(m.id) === String(id) ? { ...m, status } : m));
+      const updates: any = { status };
+      if (status === 'approved') {
+        updates.approved_at = new Date().toISOString();
+      }
+      await updateSuggestion(String(id), updates);
+      setMaterials(prev => prev.map(m =>
+        String(m.id) === String(id)
+          ? { ...m, status, approved_at: updates.approved_at }
+          : m
+      ));
     } catch (e) {
       alert('Ошибка при обновлении статуса');
     }

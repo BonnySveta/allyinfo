@@ -88,7 +88,7 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
             return;
           }
 
-          // В sectionObj.resources уже лежит массив “approved” ресурсов с вложенными resource_categories → categories.
+          // В sectionObj.resources уже лежит массив "approved" ресурсов с вложенными resource_categories → categories.
           // Преобразуем каждый ресурс в нужный формат ResourceWithSectionSlug:
           const sectionResources: ResourceWithSectionSlug[] =
             sectionObj.resources.map((r: any) => {
@@ -104,13 +104,11 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
                 section_id: sectionObj.id,
                 section: sectionObj.label,
                 section_slug: sectionObj.slug,
-                // Возможно, у вас есть поля description / preview_description / preview_image
-                // Если они нужны, их тоже следует включить в fetchSectionsWithResourcesAndCategories
                 description: r.description || '',
                 createdAt: r.created_at,
+                approvedAt: r.approved_at,
                 categories: categoryIds,
                 title: r.title || '',
-                // Здесь place‐holders – замените на реальные поля, если добавите их в select:
                 descriptionFull: r.preview_description || '',
                 image: r.preview_image || '',
                 favicon: r.favicon || r.preview_favicon || '',
@@ -145,6 +143,7 @@ export function useResources<T extends ResourceSection | undefined = undefined>(
                   section_slug: sec.slug,
                   description: r.description || '',
                   createdAt: r.created_at,
+                  approvedAt: r.approved_at,
                   categories: categoryIds,
                   title: r.title || '',
                   descriptionFull: r.preview_description || '',

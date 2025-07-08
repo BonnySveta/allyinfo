@@ -35,6 +35,7 @@ export async function fetchSectionsWithResourcesAndCategories() {
         url,
         title,
         created_at,
+        approved_at,
         status,
         domain,
         favicon,

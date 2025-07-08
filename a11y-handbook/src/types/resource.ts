@@ -9,6 +9,7 @@ export interface Resource {
   description: string | null;
   categories: CategoryId[];
   createdAt: string;
+  approvedAt?: string;
   title: string;
   descriptionFull: string;
   image: string;
@@ -22,4 +23,5 @@ export interface ResourcesBySection {
 
 export interface ResourceWithSectionSlug extends Resource {
   section_slug?: string;
+  approvedAt?: string;
 } 

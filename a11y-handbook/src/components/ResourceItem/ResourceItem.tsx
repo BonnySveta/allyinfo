@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { ResourceWithSectionSlug } from '../../types/resource';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { NewBadge } from '../NewBadge/NewBadge';
 
 interface ResourceItemProps {
   resource: ResourceWithSectionSlug;
@@ -98,6 +99,13 @@ export function ResourceItem({ resource }: ResourceItemProps) {
   const [showFavicon, setShowFavicon] = useState(true);
   const favicon = resource.favicon;
 
+  // Отладочная информация
+  console.log('ResourceItem debug:', {
+    title: resource.title,
+    createdAt: resource.createdAt,
+    hasCreatedAt: !!resource.createdAt
+  });
+
   // Получаем первую букву домена для fallback
   const getDomainInitial = () => {
     const domain = resource.domain || '';
@@ -113,6 +121,7 @@ export function ResourceItem({ resource }: ResourceItemProps) {
       <ResourceContent>
         <ResourceTitle>
           {resource.title}
+          <NewBadge createdAt={resource.createdAt} approvedAt={resource.approvedAt} />
         </ResourceTitle>
         {resource.description && (
           <ResourceDescription>
