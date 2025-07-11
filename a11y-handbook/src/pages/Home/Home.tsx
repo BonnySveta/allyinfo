@@ -159,7 +159,7 @@ export const Home: FC<HomeProps> = ({
                                 section.slug === 'articles' ? 'статьи' :
                                 section.slug === 'blogs' ? 'блоги' :
                                 section.slug === 'guides' ? 'руководства' :
-                                section.slug === 'telegram' ? 'каналы' :
+                                section.slug === 'telegram' ? 'телеграмм каналы' :
                                 section.slug === 'podcasts' ? 'подкасты' :
                                 section.slug === 'courses' ? 'курсы' :
                                 section.slug === 'video' ? 'видео' :

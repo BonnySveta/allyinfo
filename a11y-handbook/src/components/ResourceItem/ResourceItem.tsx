@@ -123,30 +123,32 @@ export function ResourceItem({ resource }: ResourceItemProps) {
           {resource.title}
           <NewBadge createdAt={resource.createdAt} approvedAt={resource.approvedAt} />
         </ResourceTitle>
-        {resource.description && (
-          <ResourceDescription>
-            {resource.description}
-          </ResourceDescription>
-        )}
-        {resource.descriptionFull && (
-          <ResourceDescription>
-            {resource.descriptionFull}
-          </ResourceDescription>
-        )}
-        <DomainInfo>
-          {favicon && showFavicon ? (
-            <ResourceIcon 
-              src={favicon}
-              alt=""
-              onError={() => setShowFavicon(false)}
-            />
-          ) : (
-            <FallbackIcon>
-              {getDomainInitial()}
-            </FallbackIcon>
+        <div aria-hidden>
+          {resource.description && (
+            <ResourceDescription>
+              {resource.description}
+            </ResourceDescription>
           )}
-          <span>{resource.domain}</span>
-        </DomainInfo>
+          {resource.descriptionFull && (
+            <ResourceDescription>
+              {resource.descriptionFull}
+            </ResourceDescription>
+          )}
+          <DomainInfo>
+            {favicon && showFavicon ? (
+              <ResourceIcon 
+                src={favicon}
+                alt=""
+                onError={() => setShowFavicon(false)}
+              />
+            ) : (
+              <FallbackIcon>
+                {getDomainInitial()}
+              </FallbackIcon>
+            )}
+            <span>{resource.domain}</span>
+          </DomainInfo>
+        </div>
       </ResourceContent>
     </ResourceCard>
   );
