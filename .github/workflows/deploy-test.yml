@@ -32,6 +32,7 @@ jobs:
             git pull &&
             pm2 restart test-preview-server &&
             cd a11y-handbook/ &&
+            npm install &&
             npm run build 
           '
         
