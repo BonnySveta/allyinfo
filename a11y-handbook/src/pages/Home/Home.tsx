@@ -2,6 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import { Banner } from '../../components/Banner/Banner';
+import { AccessibilityUnityBanner } from '../../components/AccessibilityUnityBanner/AccessibilityUnityBanner';
 import { FilterChipsPanel } from '../../components/FilterChips';
 import { Card } from '../../components/Card/Card';
 import { CardSkeleton } from '../../components/Skeleton/CardSkeleton';
@@ -119,6 +120,7 @@ export const Home: FC<HomeProps> = ({
 
   return (
     <>
+    <AccessibilityUnityBanner />
       <TitleSection>
         <TitleContainer>
           <Title>ALLYINFO</Title>
@@ -132,6 +134,7 @@ export const Home: FC<HomeProps> = ({
           emoji="💡"
         />
       </TitleSection>
+      
       <FilterChipsPanel
         categories={categories}
         selectedCategories={selectedCategories}
